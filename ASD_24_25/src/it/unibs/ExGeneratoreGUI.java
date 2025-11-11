@@ -1,24 +1,46 @@
 package it.unibs;
 
-/*
-GeneratoreGriglieObstacoliGUI.java
+/* PSEUDOCODICE
 
-Versione con interfaccia grafica (Swing) per configurare e generare griglie con ostacoli.
+INPUT: rows, cols, seed, config (percentuali/numeri per ogni ostacolo)
+CREA grid[rows][cols] inizializzata a 0 (libera)
+INIZIALIZZA Random con seed
+PER ogni tipologia di ostacolo in una lista configurata:
+    calcola quante istanze/probabilità usare in base a config e dimensione griglia
+    per i=1..numero_istanze:
+        prova a generare un'istanza valida (più tentativi)
+        --- per ogni tipo: costruisci la forma (lista di celle)
+        --- controlla che tutte le celle siano dentro griglia e libere
+        --- applica la forma (setta a 1)
+se richiesto, esegui postprocessing (es. assicurare connettività della area libera) -- opzionale
+STAMPA/SALVA grid
+
+STRATEGIE DI POSIZIONAMENTO:
+ - SingleCell: scegli cella libera a caso
+ - Agglomerato: scegli cella seed, espandi ortogonalmente fino alla dimensione scelta
+ - Diagonale: scegli direzione diagonale e lunghezza, piazza celle in (r+i, c+i) o (r+i, c-i)
+ - Barra: scegli lunghezza L e spessore S, scegli orientamento orizz/vert e posiziona rectangle
+ - Anello: scegli centro e raggio (o half-width), scrivi perimetro di un rettangolo/cerchio
+ - Blob (random walk): partire da seed e camminare aggiungendo nuove celle
+
+VERIFICHE:
+ - Controlla collisioni con celle già occupate
+ - Evita di posizionare anelli se nasconderebbero completamente la griglia o non lascerebbero spazio interno
+ - Limita tentativi -> se fallisce skip o riduci dimensione
 */
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
 
-public class GeneratoreGriglieObstacoliGUI extends JFrame {
+public class ExGeneratoreGUI extends JFrame {
+	private static final long serialVersionUID = 1L;
     private Generatore generatore;
     private JPanel gridPanel;
     private JTextField rowsField, colsField, seedField;
     private JButton generateButton;
     private Config cfg = new Config();
 
-    public GeneratoreGriglieObstacoliGUI() {
+    public ExGeneratoreGUI() {
         setTitle("Generatore Griglie con Ostacoli");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -74,7 +96,7 @@ public class GeneratoreGriglieObstacoliGUI extends JFrame {
             for (int j = 0; j < grid.cols; j++) {
                 JPanel cell = new JPanel();
                 if (grid.g[i][j] == 1) {
-                    cell.setBackground(Color.DARK_GRAY);
+                    cell.setBackground(Color.BLUE.darker());
                 } else {
                     cell.setBackground(Color.WHITE);
                 }
@@ -288,6 +310,6 @@ public class GeneratoreGriglieObstacoliGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(GeneratoreGriglieObstacoliGUI::new);
+        SwingUtilities.invokeLater(ExGeneratoreGUI::new);
     }
 }
