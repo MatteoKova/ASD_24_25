@@ -1,71 +1,37 @@
 package it.unibs;
 
-import java.io.FileWriter;
-import java.io.IOException;
+/* PSEUDOCODICE
+
+INPUT: rows, cols, seed, config (percentuali/numeri per ogni ostacolo)
+CREA grid[rows][cols] inizializzata a 0 (libera)
+INIZIALIZZA Random con seed
+PER ogni tipologia di ostacolo in una lista configurata:
+    calcola quante istanze/probabilità usare in base a config e dimensione griglia
+    per i=1..numero_istanze:
+        prova a generare un'istanza valida (più tentativi)
+        --- per ogni tipo: costruisci la forma (lista di celle)
+        --- controlla che tutte le celle siano dentro griglia e libere
+        --- applica la forma (setta a 1)
+se richiesto, esegui postprocessing (es. assicurare connettività della area libera) -- opzionale
+STAMPA/SALVA grid
+
+STRATEGIE DI POSIZIONAMENTO:
+ - SingleCell: scegli cella libera a caso
+ - Agglomerato: scegli cella seed, espandi ortogonalmente fino alla dimensione scelta
+ - Diagonale: scegli direzione diagonale e lunghezza, piazza celle in (r+i, c+i) o (r+i, c-i)
+ - Barra: scegli lunghezza L e spessore S, scegli orientamento orizz/vert e posiziona rectangle
+ - Anello: scegli centro e raggio (o half-width), scrivi perimetro di un rettangolo/cerchio
+ - Blob (random walk): partire da seed e camminare aggiungendo nuove celle
+
+VERIFICHE:
+ - Controlla collisioni con celle già occupate
+ - Evita di posizionare anelli se nasconderebbero completamente la griglia o non lascerebbero spazio interno
+ - Limita tentativi -> se fallisce skip o riduci dimensione
+*/
+
 import java.util.Random;
 
 public class GeneratoreGriglieOstacoli {
-    public static class Config {
-        public int rows = 20;
-        public int cols = 20;
-        public long seed = System.currentTimeMillis();
-        public int numSemplici = 15;
-        public int numAgglomerati = 10;
-        public int numDiagonali = 5;
-        public int numBarre = 5;
-        public int numAnelli = 3;
-    }
-
-    public static class Grid {
-        private final char[][] cells;
-        public final int rows, cols;
-
-        public Grid(int rows, int cols) {
-            this.rows = rows;
-            this.cols = cols;
-            this.cells = new char[rows][cols];
-            for (int r = 0; r < rows; r++)
-                for (int c = 0; c < cols; c++)
-                    cells[r][c] = '.'; // '.' = cella libera
-        }
-
-        public boolean inBounds(int r, int c) {
-            return r >= 0 && r < rows && c >= 0 && c < cols;
-        }
-
-        public boolean isFree(int r, int c) {
-            return inBounds(r, c) && cells[r][c] == '.';
-        }
-
-        public void setObstacle(int r, int c) {
-            if (inBounds(r, c)) cells[r][c] = '#';
-        }
-
-        public char get(int r, int c) {
-            return cells[r][c];
-        }
-
-        public void saveToFile(String path) {
-            try (FileWriter fw = new FileWriter(path)) {
-                for (int r = 0; r < rows; r++) {
-                    fw.write(cells[r]);
-                    fw.write("\n");
-                }
-            } catch (IOException e) {
-                System.err.println("Errore nel salvataggio griglia: " + e.getMessage());
-            }
-        }
-
-        public void printToConsole() {
-            for (int r = 0; r < rows; r++) {
-                for (int c = 0; c < cols; c++)
-                    System.out.print(cells[r][c]);
-                System.out.println();
-            }
-        }
-    }
-
-    // --- Classe Generatore ---
     private final Config cfg;
     private final Random rnd;
     public final Grid grid;

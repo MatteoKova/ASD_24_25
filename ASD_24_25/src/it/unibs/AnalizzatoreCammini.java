@@ -77,7 +77,7 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola se esiste un cammino libero di tipo 1 o 2
-    public static boolean camminoLibero(GeneratoreGriglieOstacoli.Grid g, Point O, Point D, int tipo) {
+    public static boolean camminoLibero(Grid g, Point O, Point D, int tipo) {
         int dx = D.x - O.x;
         int dy = D.y - O.y;
 
@@ -114,7 +114,7 @@ public class AnalizzatoreCammini {
     }
 
     // Percorre un certo numero di passi in una direzione
-    private static boolean percorri(GeneratoreGriglieOstacoli.Grid g, Point start, int dx, int dy, int passi) {
+    private static boolean percorri(Grid g, Point start, int dx, int dy, int passi) {
         int x = start.x;
         int y = start.y;
         for (int i = 0; i < passi; i++) {
@@ -126,7 +126,7 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola il contesto (celle raggiungibili con cammini tipo 1)
-    public static Set<Point> calcolaContesto(GeneratoreGriglieOstacoli.Grid g, Point O) {
+    public static Set<Point> calcolaContesto(Grid g, Point O) {
         Set<Point> contesto = new HashSet<>();
         for (int r = 0; r < g.rows; r++) {
             for (int c = 0; c < g.cols; c++) {
@@ -139,7 +139,7 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola il complemento (celle raggiungibili solo con cammini tipo 2)
-    public static Set<Point> calcolaComplemento(GeneratoreGriglieOstacoli.Grid g, Point O) {
+    public static Set<Point> calcolaComplemento(Grid g, Point O) {
         Set<Point> complemento = new HashSet<>();
         for (int r = 0; r < g.rows; r++) {
             for (int c = 0; c < g.cols; c++) {
