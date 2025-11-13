@@ -3,11 +3,12 @@ package it.unibs;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class Grid {
+public class Griglia {
     private final char[][] cells;
     public final int rows, cols;
 
-    public Grid(int rows, int cols) {
+    // Creazione griglia formato command line che verra' convertito in GUI
+    public Griglia(int rows, int cols) {
         this.rows = rows;
         this.cols = cols;
         this.cells = new char[rows][cols];
@@ -16,22 +17,27 @@ public class Grid {
                 cells[r][c] = '.'; // '.' = cella libera
     }
 
+    // 
     public boolean inBounds(int r, int c) {
         return r >= 0 && r < rows && c >= 0 && c < cols;
     }
 
+    // Riconosce le celle libere
     public boolean isFree(int r, int c) {
         return inBounds(r, c) && cells[r][c] == '.';
     }
 
+    // Riconosce gli ostacoli
     public void setObstacle(int r, int c) {
         if (inBounds(r, c)) cells[r][c] = '#';
     }
 
+    // Restituisce la cella usando le coordinate
     public char get(int r, int c) {
         return cells[r][c];
     }
-
+    /*
+    // Salvataggio della griglia su file esterno
     public void saveToFile(String path) {
         try (FileWriter fw = new FileWriter(path)) {
             for (int r = 0; r < rows; r++) {
@@ -41,13 +47,5 @@ public class Grid {
         } catch (IOException e) {
             System.err.println("Errore nel salvataggio griglia: " + e.getMessage());
         }
-    }
-
-    public void printToConsole() {
-        for (int r = 0; r < rows; r++) {
-            for (int c = 0; c < cols; c++)
-                System.out.print(cells[r][c]);
-            System.out.println();
-        }
-    }
+    }*/
 }

@@ -1,6 +1,6 @@
 package it.unibs;
 
-public class Config {
+public class Configurazione {
     public int rows = 20;
     public int cols = 20;
     public long seed = System.currentTimeMillis();

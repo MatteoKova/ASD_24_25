@@ -8,17 +8,17 @@ import java.util.Set;
 public class GrigliaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
-    private Grid grid;
+    private Griglia grid;
     private Point origine, destinazione;
     private Set<Point> contesto, complemento;
 
-    public GrigliaPanel(Grid grid) {
+    public GrigliaPanel(Griglia grid) {
         this.grid = grid;
-        // preferenze grafiche minime
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(Math.max(400, grid.cols * 20), Math.max(400, grid.rows * 20)));
     }
 
+    // Aggiornamento dati e repaint
     public void aggiornaDati(Point origine, Point destinazione, Set<Point> contesto, Set<Point> complemento) {
         this.origine = origine;
         this.destinazione = destinazione;
@@ -27,6 +27,7 @@ public class GrigliaPanel extends JPanel {
         repaint();
     }
 
+    // Restituisce le dimensioni di una cella
     public int getCellSize() {
         int w = getWidth();
         int h = getHeight();

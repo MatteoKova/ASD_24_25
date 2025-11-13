@@ -20,7 +20,7 @@ import javax.swing.SwingConstants;
 public class GrigliaFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
-    private Grid grid;
+    private Griglia grid;
     private Point origine = null;
     private Point destinazione = null;
     private Set<Point> contesto = null;
@@ -28,7 +28,7 @@ public class GrigliaFrame extends JFrame {
     private JLabel infoLabel;
     private GrigliaPanel panel;
 
-    public GrigliaFrame(Grid grid) {
+    public GrigliaFrame(Griglia grid) {
         this.grid = grid;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -50,6 +50,7 @@ public class GrigliaFrame extends JFrame {
 
         add(legendaPanel, BorderLayout.EAST);
 
+        // Etichetta sopra
         infoLabel = new JLabel("Clicca per selezionare Origine (O) e Destinazione (D)");
         infoLabel.setFont(new Font("Arial", Font.BOLD, 18));
         infoLabel.setForeground(Color.BLACK);
@@ -62,10 +63,11 @@ public class GrigliaFrame extends JFrame {
         setLocationRelativeTo(null);
         setVisible(true);
 
+        // Permette di registrare gli eventi del mouse
         panel.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int cellSize = panel.getCellSize();
-                if (cellSize <= 0) return; // difesa
+                if (cellSize <= 0) return;
                 int c = e.getX() / cellSize;
                 int r = e.getY() / cellSize;
                 if (!grid.inBounds(r, c) || !grid.isFree(r, c)) return;
@@ -81,7 +83,7 @@ public class GrigliaFrame extends JFrame {
                     double dist = AnalizzatoreCammini.dlib(origine, destinazione);
                     infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
                 } else {
-                    // reset: nuova origine
+                    // Reset: nuova origine
                     origine = new Point(c, r);
                     destinazione = null;
                     contesto = null;
@@ -95,6 +97,7 @@ public class GrigliaFrame extends JFrame {
         });
     }
 
+    // Definisce il formato della legenda
     private JPanel creaVoceLegenda(Color colore, String testo) {
         JPanel voce = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel box = new JLabel();

@@ -77,7 +77,7 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola se esiste un cammino libero di tipo 1 o 2
-    public static boolean camminoLibero(Grid g, Point O, Point D, int tipo) {
+    public static boolean camminoLibero(Griglia g, Point O, Point D, int tipo) {
         int dx = D.x - O.x;
         int dy = D.y - O.y;
 
@@ -92,7 +92,7 @@ public class AnalizzatoreCammini {
         int diagSteps = Math.min(absDx, absDy);
         int remSteps = Math.abs(absDx - absDy);
 
-        // tipo 1 → diagonale poi orizz/vert
+        // tipo 1: diagonale poi orizz/vert
         if (tipo == 1) {
             if (!percorri(g, O, stepX, stepY, diagSteps)) return false;
             Point mid = new Point(O.x + stepX * diagSteps, O.y + stepY * diagSteps);
@@ -100,7 +100,7 @@ public class AnalizzatoreCammini {
                 return percorri(g, mid, stepX, 0, remSteps);
             else
                 return percorri(g, mid, 0, stepY, remSteps);
-        } else { // tipo 2 → orizz/vert poi diagonale
+        } else { // tipo 2: orizz/vert poi diagonale
             Point mid;
             if (absDx > absDy) {
                 if (!percorri(g, O, stepX, 0, remSteps)) return false;
@@ -114,7 +114,7 @@ public class AnalizzatoreCammini {
     }
 
     // Percorre un certo numero di passi in una direzione
-    private static boolean percorri(Grid g, Point start, int dx, int dy, int passi) {
+    private static boolean percorri(Griglia g, Point start, int dx, int dy, int passi) {
         int x = start.x;
         int y = start.y;
         for (int i = 0; i < passi; i++) {
@@ -126,7 +126,7 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola il contesto (celle raggiungibili con cammini tipo 1)
-    public static Set<Point> calcolaContesto(Grid g, Point O) {
+    public static Set<Point> calcolaContesto(Griglia g, Point O) {
         Set<Point> contesto = new HashSet<>();
         for (int r = 0; r < g.rows; r++) {
             for (int c = 0; c < g.cols; c++) {
@@ -138,8 +138,8 @@ public class AnalizzatoreCammini {
         return contesto;
     }
 
-    // Calcola il complemento (celle raggiungibili solo con cammini tipo 2)
-    public static Set<Point> calcolaComplemento(Grid g, Point O) {
+    // Calcola il complemento (celle raggiungibili SOLO con cammini tipo 2)
+    public static Set<Point> calcolaComplemento(Griglia g, Point O) {
         Set<Point> complemento = new HashSet<>();
         for (int r = 0; r < g.rows; r++) {
             for (int c = 0; c < g.cols; c++) {

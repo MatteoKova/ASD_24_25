@@ -32,16 +32,17 @@ VERIFICHE:
 import java.util.Random;
 
 public class GeneratoreGriglieOstacoli {
-    private final Config cfg;
+    private final Configurazione cfg;
     private final Random rnd;
-    public final Grid grid;
+    public final Griglia grid;
 
-    public GeneratoreGriglieOstacoli(Config cfg) {
+    public GeneratoreGriglieOstacoli(Configurazione cfg) {
         this.cfg = cfg;
         this.rnd = new Random(cfg.seed);
-        this.grid = new Grid(cfg.rows, cfg.cols);
+        this.grid = new Griglia(cfg.rows, cfg.cols);
     }
 
+    // Genera tutte le tipologie di ostacoli
     public void generateAll() {
         generaSemplici(cfg.numSemplici);
         generaAgglomerati(cfg.numAgglomerati);
@@ -50,7 +51,9 @@ public class GeneratoreGriglieOstacoli {
         generaAnelli(cfg.numAnelli);
     }
 
-    // --- Tipi di ostacoli ---
+    // TIPOLOGIE DI OSTACOLI
+    
+    // Genera singole celle
     private void generaSemplici(int n) {
         for (int i = 0; i < n; i++) {
             int r = rnd.nextInt(grid.rows);
@@ -59,6 +62,7 @@ public class GeneratoreGriglieOstacoli {
         }
     }
 
+    // Genera insiemi con 2, 3 o 4 celle
     private void generaAgglomerati(int n) {
         for (int i = 0; i < n; i++) {
             int baseR = rnd.nextInt(grid.rows);
@@ -72,6 +76,7 @@ public class GeneratoreGriglieOstacoli {
         }
     }
 
+    // Genera insiemi con 2, 3 o 4 celle in diagonale
     private void generaDiagonali(int n) {
         for (int i = 0; i < n; i++) {
             int r = rnd.nextInt(grid.rows - 3);
@@ -86,6 +91,7 @@ public class GeneratoreGriglieOstacoli {
         }
     }
 
+    // Genera rettangoli con 3, 4, 5, 6 o 7 celle in lunghezza e con 1 o 2 celle in spessore
     private void generaBarre(int n) {
         for (int i = 0; i < n; i++) {
             boolean orizzontale = rnd.nextBoolean();
@@ -99,6 +105,7 @@ public class GeneratoreGriglieOstacoli {
         }
     }
 
+    // Genera anelli non attraversabili che delimitano celle attraversabili
     private void generaAnelli(int n) {
         for (int i = 0; i < n; i++) {
             int r = rnd.nextInt(grid.rows - 6);
