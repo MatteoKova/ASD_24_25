@@ -69,9 +69,9 @@ public class GeneratoreGriglieOstacoli {
             int baseC = rnd.nextInt(grid.getColonne());
             int dim = 2 + rnd.nextInt(3); // da 2 a 4 celle
             for (int j = 0; j < dim; j++) {
-                int r = baseR + rnd.nextInt(2) - 1;
-                int c = baseC + rnd.nextInt(2) - 1;
-                if (grid.inBounds(r, c)) grid.setObstacle(r, c);
+                int r = baseR + rnd.nextInt(2);
+                int c = baseC + rnd.nextInt(2);
+                grid.setObstacle(r, c); //se le coordinate non sono valide, non stampa cella
             }
         }
     }
@@ -79,14 +79,15 @@ public class GeneratoreGriglieOstacoli {
     // Genera insiemi con 2, 3 o 4 celle in diagonale
     private void generaDiagonali(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.getRighe() - 3);
-            int c = rnd.nextInt(grid.getColonne() - 3);
+            int r = rnd.nextInt(grid.getRighe());
+            int c = rnd.nextInt(grid.getColonne());
+            boolean verso = rnd.nextBoolean();
             int len = 2 + rnd.nextInt(3);
             for (int k = 0; k < len; k++) {
-                if (rnd.nextBoolean())
-                    grid.setObstacle(r + k, c + k);
-                else
-                    grid.setObstacle(r + k, c - k >= 0 ? c - k : c + k);
+                if (verso) //diagonale creata verso dx
+                    grid.setObstacle(r + k, c + k); //se supera i limiti, inBounds() evita che venga stampato
+                else //diagonale creata verso sx
+                    grid.setObstacle(r + len - k, c - k); //se supera i limiti, inBounds() evita che venga stampato
             }
         }
     }
@@ -97,8 +98,8 @@ public class GeneratoreGriglieOstacoli {
             boolean orizzontale = rnd.nextBoolean();
             int lung = 3 + rnd.nextInt(5);
             int spess = 1 + rnd.nextInt(2);
-            int r = rnd.nextInt(grid.getRighe() - (orizzontale ? spess : lung));
-            int c = rnd.nextInt(grid.getColonne() - (orizzontale ? lung : spess));
+            int r = rnd.nextInt(grid.getRighe());
+            int c = rnd.nextInt(grid.getColonne());
             for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
                 for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
                     grid.setObstacle(r + dr, c + dc);
@@ -108,8 +109,8 @@ public class GeneratoreGriglieOstacoli {
     // Genera anelli non attraversabili che delimitano celle attraversabili
     private void generaAnelli(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.getRighe() - 6);
-            int c = rnd.nextInt(grid.getColonne() - 6);
+            int r = rnd.nextInt(grid.getRighe());
+            int c = rnd.nextInt(grid.getColonne());
             int size = 3 + rnd.nextInt(4);
             for (int k = 0; k < size; k++) {
                 grid.setObstacle(r, c + k);
