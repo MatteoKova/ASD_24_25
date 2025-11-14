@@ -1,6 +1,7 @@
 package it.unibs;
 
 import javax.swing.*;
+import javax.swing.JOptionPane;
 
 public class Main {
 	public static void main(String[] args) {
@@ -17,27 +18,65 @@ public class Main {
 
             GeneratoreGriglieOstacoli gen = new GeneratoreGriglieOstacoli(cfg);
             gen.generateAll();
-            new GrigliaFrame(gen.grid);
+            new GrigliaFrame(gen.getGrid());
         });
     }
 
 	// Metodo per inserire le dimensioni della griglia
     private static int chiediIntero(String messaggio, int predefinito) {
-        String s = JOptionPane.showInputDialog(null, messaggio, predefinito);
-        try {
-            return Integer.parseInt(s);
-        } catch (Exception e) {
-            return predefinito;
+        int valore = predefinito;
+        boolean valido = false;
+
+        while (!valido) {
+            String s = JOptionPane.showInputDialog(null, messaggio, predefinito);
+            if (s == null) {
+                // Se l'utente chiude la finestra, esci con il valore predefinito
+                return predefinito;
+            }
+            try {
+                valore = Integer.parseInt(s);
+                if (valore >= 0 && valore <= 100) {
+                    valido = true; // input corretto
+                } else {
+                    JOptionPane.showMessageDialog(null,
+                            "Errore: inserisci un numero tra 0 e 100.",
+                            "Valore non valido",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Errore: inserisci un numero intero valido.",
+                        "Input non valido",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
+        return valore;
     }
 
     // Metodo per inserire il seed per generare la griglia
     private static long chiediLong(String messaggio, long predefinito) {
-        String s = JOptionPane.showInputDialog(null, messaggio, predefinito);
-        try {
-            return Long.parseLong(s);
-        } catch (Exception e) {
-            return predefinito;
+        long valore = predefinito;
+        boolean valido = false;
+
+        while (!valido) {
+            String s = JOptionPane.showInputDialog(null, messaggio, predefinito);
+            if (s == null) {
+                // Se l'utente chiude la finestra, ritorna il valore predefinito
+                return predefinito;
+            }
+            try {
+                valore = Long.parseLong(s);
+                // Se parseLong non lancia eccezione, significa che il numero è nel range di long
+                valido = true;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null,
+                        "Errore: inserisci un numero intero valido tra "
+                        + Long.MIN_VALUE + " e " + Long.MAX_VALUE + ".",
+                        "Input non valido",
+                        JOptionPane.ERROR_MESSAGE);
+            }
         }
+        return valore;
     }
+
 }

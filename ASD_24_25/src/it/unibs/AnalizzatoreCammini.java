@@ -62,18 +62,24 @@ dlib = sqrt(2)*delta_min + (delta_max - delta_min)
 */
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class AnalizzatoreCammini {
 
     // Calcolo della distanza libera dlib(O, D)
-    public static double dlib(Point O, Point D) {
-        int dx = Math.abs(D.x - O.x);
-        int dy = Math.abs(D.y - O.y);
-        int deltaMin = Math.min(dx, dy);
-        int deltaMax = Math.max(dx, dy);
-        return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
+    public static double dlib(Point O, Point D, Set<Point> contesto, Set<Point> complemento) {
+    	if (contesto.contains(D) || complemento.contains(D)) {
+    		int dx = Math.abs(D.x - O.x);
+            int dy = Math.abs(D.y - O.y);
+            int deltaMin = Math.min(dx, dy);
+            int deltaMax = Math.max(dx, dy);
+            return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
+    	}
+    	else return 0;
     }
 
     // Calcola se esiste un cammino libero di tipo 1 o 2
@@ -128,8 +134,8 @@ public class AnalizzatoreCammini {
     // Calcola il contesto (celle raggiungibili con cammini tipo 1)
     public static Set<Point> calcolaContesto(Griglia g, Point O) {
         Set<Point> contesto = new HashSet<>();
-        for (int r = 0; r < g.rows; r++) {
-            for (int c = 0; c < g.cols; c++) {
+        for (int r = 0; r < g.getRighe(); r++) {
+            for (int c = 0; c < g.getColonne(); c++) {
                 Point D = new Point(c, r);
                 if (camminoLibero(g, O, D, 1))
                     contesto.add(D);
@@ -141,8 +147,8 @@ public class AnalizzatoreCammini {
     // Calcola il complemento (celle raggiungibili SOLO con cammini tipo 2)
     public static Set<Point> calcolaComplemento(Griglia g, Point O) {
         Set<Point> complemento = new HashSet<>();
-        for (int r = 0; r < g.rows; r++) {
-            for (int c = 0; c < g.cols; c++) {
+        for (int r = 0; r < g.getRighe(); r++) {
+            for (int c = 0; c < g.getColonne(); c++) {
                 Point D = new Point(c, r);
                 if (!camminoLibero(g, O, D, 1) && camminoLibero(g, O, D, 2))
                     complemento.add(D);
@@ -150,4 +156,142 @@ public class AnalizzatoreCammini {
         }
         return complemento;
     }
+    
+    // Controlla che il punto appartenga alla frontiera
+    public static boolean controllaVicini(Point punto, Griglia griglia, Set<Point> chiusura) {
+    	// Ascissa vicini a sinistra
+    	int xsinistra = punto.x - 1;
+    	// Ascissa vicini a al centro
+    	int xcentro = punto.x;
+    	// Ascissa vicini a destra
+    	int xdestra = punto.x + 1;
+    	// Ordinata vicini sopra
+    	int ysopra = punto.y - 1;
+    	// Ordinata vicini al centro
+    	int ycentro = punto.y;
+    	// Ordinata vicini sotto
+    	int ysotto = punto.y + 1;
+    	
+    	
+    	// Punto sopra-sinistra
+    	// da aggiungere alla condizione if: && !chiusura.contains(Point(xsinistra, ysopra))
+    	if (griglia.isFree(xsinistra, ysopra)) {
+    		return true;
+    	}
+    	// Punto sopra-centro
+    	if (griglia.isFree(xcentro, ysopra)) {
+    		return true;
+    	}
+    	// Punto sopra-destra
+    	if (griglia.isFree(xdestra, ysopra)) {
+    		return true;
+    	}
+    	
+    	// Punto centro-sinistra
+    	if (griglia.isFree(xsinistra, ycentro)) {
+    		return true;
+    	}
+    	// Punto centro-centro
+    	if (griglia.isFree(xcentro, ycentro)) {
+    		return true;
+    	}
+    	// Punto sotto-destra
+    	if (griglia.isFree(xdestra, ycentro)) {
+    		return true;
+    	}
+    	
+    	// Punto sotto-sinistra
+    	if (griglia.isFree(xsinistra, ysotto)) {
+    		return true;
+    	}
+    	// Punto sotto-centro
+    	if (griglia.isFree(xcentro, ysotto)) {
+    		return true;
+    	}
+    	// Punto sotto-destra
+    	if (griglia.isFree(xdestra, ysotto)) {
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    // Calcola la frontiera
+    public static Set<Point> calcolaFrontiera(Set<Point> contesto, Set<Point> complemento, Griglia griglia) {
+    	Set<Point> frontiera = new HashSet<Point>();
+    	
+    	// Calcola la chiusura
+    	Set<Point> chiusura = new HashSet<>(contesto);
+    	chiusura.addAll(complemento);
+
+    	for (Point p : chiusura) {
+    		if (controllaVicini(p, griglia, chiusura)) {
+    			frontiera.add(p);
+    		}
+    	}
+    	return frontiera;
+    }
+
+    /*
+    // Calcola la lunghezza minima del cammino tra O e D, e la sequenza dei landmark lungo un cammino minimo.
+    public static RisultatoCammino camminoMin(Point O, Point D, Dimensioni dim, Set<Point> ostacoli, Griglia2 griglia) {
+
+        // Calcola il contesto (celle raggiungibili da O con cammini di tipo 1)
+        Set<Point> contesto = calcolaContesto(O, dim, ostacoli);
+        //Set<Point> contesto2 = calcolaContesto(griglia, O);
+        
+        // Calcola il complemento (celle raggiungibili solo con cammini di tipo 2)
+        Set<Point> complemento = calcolaComplemento(O, dim, ostacoli);
+
+        // Se D appartiene al contesto, è raggiungibile direttamente
+        if (contesto.contains(D)) {
+            return new RisultatoCammino(dlib(O, D, contesto, complemento), List.of(new Landmark(O, 0), new Landmark(D, 1)));
+        }
+
+        // Se D appartiene al complemento, anche in questo caso è direttamente raggiungibile
+        if (complemento.contains(D)) {
+            return new RisultatoCammino(dlib(O, D, contesto, complemento),List.of(new Landmark(O, 0), new Landmark(D, 2)));
+        }
+
+        // Calcola la "frontiera" tra contesto e complemento
+        Set<FrontieraElemento> frontiera = calcolaFrontiera(contesto, complemento, dim, ostacoli);
+
+        // Se non esiste frontiera, nessun cammino possibile
+        if (frontiera.isEmpty()) {
+            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of());
+        }
+
+        // Inizializza valori minimi
+        double lunghezzaMin = Double.POSITIVE_INFINITY;
+        List<Landmark> seqMin = new ArrayList<>();
+
+        // Analizza ciascun punto di frontiera
+        for (FrontieraElemento elem : frontiera) {
+            Point F = elem.punto;
+            int tipo = elem.tipo;
+
+            double lF = dlib(O, F, contesto, complemento);
+
+            // Se la distanza O-F è già troppo grande, salta
+            if (lF < lunghezzaMin) {
+
+                // Calcola ricorsivamente il cammino minimo da F a D
+                RisultatoCammino parziale = camminoMin(F, D, dim, unisci(ostacoli, contesto, complemento)
+                );
+
+                double lFD = parziale.lunghezza;
+                double lTot = lF + lFD;
+
+                // Se questo cammino è migliore, aggiornalo
+                if (lTot < lunghezzaMin) {
+                    lunghezzaMin = lTot;
+                    seqMin = compatta(List.of(new Landmark(O, 0), new Landmark(F, tipo)), parziale.seq);
+                }
+            }
+        }
+
+        // Ritorna lunghezza minima e sequenza di landmark
+        return new RisultatoCammino(lunghezzaMin, seqMin);
+    }
+    */
 }

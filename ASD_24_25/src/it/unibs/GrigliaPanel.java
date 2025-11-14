@@ -15,7 +15,7 @@ public class GrigliaPanel extends JPanel {
     public GrigliaPanel(Griglia grid) {
         this.grid = grid;
         setBackground(Color.WHITE);
-        setPreferredSize(new Dimension(Math.max(400, grid.cols * 20), Math.max(400, grid.rows * 20)));
+        setPreferredSize(new Dimension(Math.max(400, grid.getColonne() * 20), Math.max(400, grid.getRighe() * 20)));
     }
 
     // Aggiornamento dati e repaint
@@ -31,8 +31,8 @@ public class GrigliaPanel extends JPanel {
     public int getCellSize() {
         int w = getWidth();
         int h = getHeight();
-        if (grid.cols == 0 || grid.rows == 0) return 0;
-        return Math.max(4, Math.min(w / grid.cols, h / grid.rows));
+        if (grid.getColonne() == 0 || grid.getRighe() == 0) return 0;
+        return Math.max(4, Math.min(w / grid.getColonne(), h / grid.getRighe()));
     }
 
 	@Override
@@ -47,8 +47,8 @@ public class GrigliaPanel extends JPanel {
         g.setFont(cellFont);
         FontMetrics fm = g.getFontMetrics();
 
-        for (int r = 0; r < grid.rows; r++) {
-            for (int c = 0; c < grid.cols; c++) {
+        for (int r = 0; r < grid.getRighe(); r++) {
+            for (int c = 0; c < grid.getColonne(); c++) {
                 int x = c * cellSize;
                 int y = r * cellSize;
 
@@ -78,23 +78,21 @@ public class GrigliaPanel extends JPanel {
 
                 // Origine
                 if (origine != null && c == origine.x && r == origine.y) {
-                    g.setColor(Color.RED);
                     g.fillRect(x, y, cellSize, cellSize);
                     String oText = "O";
                     int tw = fm.stringWidth(oText);
                     int th = fm.getAscent();
-                    g.setColor(Color.WHITE);
+                    g.setColor(Color.RED);
                     g.drawString(oText, x + (cellSize - tw) / 2, y + (cellSize + th) / 2 - fm.getDescent());
                 }
 
                 // Destinazione
                 if (destinazione != null && c == destinazione.x && r == destinazione.y) {
-                    g.setColor(Color.RED);
                     g.fillRect(x, y, cellSize, cellSize);
                     String dText = "D";
                     int tw = fm.stringWidth(dText);
                     int th = fm.getAscent();
-                    g.setColor(Color.WHITE);
+                    g.setColor(Color.RED);
                     g.drawString(dText, x + (cellSize - tw) / 2, y + (cellSize + th) / 2 - fm.getDescent());
                 }
 

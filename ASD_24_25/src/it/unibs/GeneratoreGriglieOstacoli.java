@@ -34,7 +34,7 @@ import java.util.Random;
 public class GeneratoreGriglieOstacoli {
     private final Configurazione cfg;
     private final Random rnd;
-    public final Griglia grid;
+    private final Griglia grid;
 
     public GeneratoreGriglieOstacoli(Configurazione cfg) {
         this.cfg = cfg;
@@ -56,8 +56,8 @@ public class GeneratoreGriglieOstacoli {
     // Genera singole celle
     private void generaSemplici(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.rows);
-            int c = rnd.nextInt(grid.cols);
+            int r = rnd.nextInt(grid.getRighe());
+            int c = rnd.nextInt(grid.getColonne());
             grid.setObstacle(r, c);
         }
     }
@@ -65,8 +65,8 @@ public class GeneratoreGriglieOstacoli {
     // Genera insiemi con 2, 3 o 4 celle
     private void generaAgglomerati(int n) {
         for (int i = 0; i < n; i++) {
-            int baseR = rnd.nextInt(grid.rows);
-            int baseC = rnd.nextInt(grid.cols);
+            int baseR = rnd.nextInt(grid.getRighe());
+            int baseC = rnd.nextInt(grid.getColonne());
             int dim = 2 + rnd.nextInt(3); // da 2 a 4 celle
             for (int j = 0; j < dim; j++) {
                 int r = baseR + rnd.nextInt(2) - 1;
@@ -79,8 +79,8 @@ public class GeneratoreGriglieOstacoli {
     // Genera insiemi con 2, 3 o 4 celle in diagonale
     private void generaDiagonali(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.rows - 3);
-            int c = rnd.nextInt(grid.cols - 3);
+            int r = rnd.nextInt(grid.getRighe() - 3);
+            int c = rnd.nextInt(grid.getColonne() - 3);
             int len = 2 + rnd.nextInt(3);
             for (int k = 0; k < len; k++) {
                 if (rnd.nextBoolean())
@@ -97,8 +97,8 @@ public class GeneratoreGriglieOstacoli {
             boolean orizzontale = rnd.nextBoolean();
             int lung = 3 + rnd.nextInt(5);
             int spess = 1 + rnd.nextInt(2);
-            int r = rnd.nextInt(grid.rows - (orizzontale ? spess : lung));
-            int c = rnd.nextInt(grid.cols - (orizzontale ? lung : spess));
+            int r = rnd.nextInt(grid.getRighe() - (orizzontale ? spess : lung));
+            int c = rnd.nextInt(grid.getColonne() - (orizzontale ? lung : spess));
             for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
                 for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
                     grid.setObstacle(r + dr, c + dc);
@@ -108,8 +108,8 @@ public class GeneratoreGriglieOstacoli {
     // Genera anelli non attraversabili che delimitano celle attraversabili
     private void generaAnelli(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.rows - 6);
-            int c = rnd.nextInt(grid.cols - 6);
+            int r = rnd.nextInt(grid.getRighe() - 6);
+            int c = rnd.nextInt(grid.getColonne() - 6);
             int size = 3 + rnd.nextInt(4);
             for (int k = 0; k < size; k++) {
                 grid.setObstacle(r, c + k);
@@ -119,4 +119,8 @@ public class GeneratoreGriglieOstacoli {
             }
         }
     }
+
+	public Griglia getGrid() {
+		return grid;
+	}
 }

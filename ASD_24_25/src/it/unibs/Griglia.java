@@ -1,51 +1,63 @@
 package it.unibs;
 
-import java.io.FileWriter;
-import java.io.IOException;
-
 public class Griglia {
-    private final char[][] cells;
-    public final int rows, cols;
+	private Cella[][] celle;
+	private final int righe, colonne;
 
-    // Creazione griglia formato command line che verra' convertito in GUI
-    public Griglia(int rows, int cols) {
-        this.rows = rows;
-        this.cols = cols;
-        this.cells = new char[rows][cols];
-        for (int r = 0; r < rows; r++)
-            for (int c = 0; c < cols; c++)
-                cells[r][c] = '.'; // '.' = cella libera
+    // Costruttore
+    public Griglia(int righe, int colonne) {
+    	this.righe = righe;
+    	this.colonne = colonne;
+        this.celle = new Cella[righe][colonne];
+        for (int i = 0; i < righe; i++) {
+            for (int j = 0; j < colonne; j++) {
+                celle[i][j] = new Cella(i, j); // tipo di default "attraversabile"
+            }
+        }
     }
-
+    
     // 
     public boolean inBounds(int r, int c) {
-        return r >= 0 && r < rows && c >= 0 && c < cols;
+        return r >= 0 && r < righe && c >= 0 && c < colonne;
     }
 
     // Riconosce le celle libere
     public boolean isFree(int r, int c) {
-        return inBounds(r, c) && cells[r][c] == '.';
+        return inBounds(r, c) && celle[r][c].getTipo().equals("attraversabile");
     }
 
-    // Riconosce gli ostacoli
+    // Inserisce gli ostacoli
     public void setObstacle(int r, int c) {
-        if (inBounds(r, c)) cells[r][c] = '#';
+        if (inBounds(r, c)) celle[r][c].setTipo("ostacolo");
     }
 
-    // Restituisce la cella usando le coordinate
-    public char get(int r, int c) {
-        return cells[r][c];
+    // Restituisce una cella della griglia
+    public Cella getCella(int riga, int colonna) {
+        return celle[riga][colonna];
     }
-    /*
-    // Salvataggio della griglia su file esterno
-    public void saveToFile(String path) {
-        try (FileWriter fw = new FileWriter(path)) {
-            for (int r = 0; r < rows; r++) {
-                fw.write(cells[r]);
-                fw.write("\n");
+
+    // Modifica del tipo di una cella
+    public void setTipo(int riga, int colonna, String tipo) {
+        celle[riga][colonna].setTipo(tipo);
+    }
+
+    // Restituisce il numero di righe della griglia
+    public int getRighe() {
+		return righe;
+	}
+
+    // Restituisce il numero di colonne della griglia
+	public int getColonne() {
+		return colonne;
+	}
+
+	// Stampa della griglia
+    public void stampaGriglia() {
+        for (int i = 0; i < celle.length; i++) {
+            for (int j = 0; j < celle[i].length; j++) {
+                System.out.print(celle[i][j].getTipo().charAt(0) + " "); 
             }
-        } catch (IOException e) {
-            System.err.println("Errore nel salvataggio griglia: " + e.getMessage());
+            System.out.println();
         }
-    }*/
+    }
 }

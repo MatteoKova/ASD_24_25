@@ -28,12 +28,12 @@ public class GrigliaFrame extends JFrame {
     private JLabel infoLabel;
     private GrigliaPanel panel;
 
-    public GrigliaFrame(Griglia grid) {
-        this.grid = grid;
+    public GrigliaFrame(Griglia griglia) {
+        this.grid = griglia;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        panel = new GrigliaPanel(grid);
+        panel = new GrigliaPanel(griglia);
         add(panel, BorderLayout.CENTER);
 
         // Legenda laterale
@@ -45,7 +45,7 @@ public class GrigliaFrame extends JFrame {
         legendaPanel.add(creaVoceLegenda(Color.YELLOW, "Asse"));
         legendaPanel.add(creaVoceLegenda(Color.ORANGE, "Complemento"));
         legendaPanel.add(creaVoceLegenda(Color.RED, "Origine (O)"));
-        legendaPanel.add(creaVoceLegenda(Color.BLACK, "Destinazione (D)"));
+        legendaPanel.add(creaVoceLegenda(Color.RED, "Destinazione (D)"));
         legendaPanel.add(creaVoceLegenda(Color.WHITE, "Cella libera"));
 
         add(legendaPanel, BorderLayout.EAST);
@@ -68,27 +68,29 @@ public class GrigliaFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 int cellSize = panel.getCellSize();
                 if (cellSize <= 0) return;
-                int c = e.getX() / cellSize;
-                int r = e.getY() / cellSize;
-                if (!grid.inBounds(r, c) || !grid.isFree(r, c)) return;
+                int colonna = e.getX() / cellSize;
+                int riga = e.getY() / cellSize;
+                if (!griglia.inBounds(riga, colonna) || !griglia.isFree(riga, colonna)) return;
 
                 if (origine == null) {
-                    origine = new Point(c, r);
-                    infoLabel.setText("Origine selezionata: " + origine + ". Ora scegli Destinazione.");
+                    origine = new Point(colonna, riga);
+                    infoLabel.setText("Origine selezionata: Punto[x=" + origine.x + ", y=" + origine.y + "]. Ora scegli Destinazione.");
+                    contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
+                    complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
                 } else if (destinazione == null) {
-                    destinazione = new Point(c, r);
+                    destinazione = new Point(colonna, riga);
                     infoLabel.setText("Destinazione: " + destinazione);
-                    contesto = AnalizzatoreCammini.calcolaContesto(grid, origine);
-                    complemento = AnalizzatoreCammini.calcolaComplemento(grid, origine);
-                    double dist = AnalizzatoreCammini.dlib(origine, destinazione);
+                    double dist = AnalizzatoreCammini.dlib(origine, destinazione, contesto, complemento);
                     infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
                 } else {
                     // Reset: nuova origine
-                    origine = new Point(c, r);
+                    origine = new Point(colonna, riga);
                     destinazione = null;
                     contesto = null;
                     complemento = null;
-                    infoLabel.setText("Origine aggiornata: " + origine + ". Ora scegli Destinazione.");
+                    infoLabel.setText("Origine aggiornata: Punto[x=" + origine.x + ", y=" + origine.y + "]. Ora scegli Destinazione.");
+                    contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
+                    complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
                 }
 
                 // Comunica i dati aggiornati al pannello e chiedi repaint
