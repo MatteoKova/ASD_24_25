@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Set;
@@ -21,10 +20,10 @@ public class GrigliaFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private Griglia grid;
-    private Point origine = null;
-    private Point destinazione = null;
-    private Set<Point> contesto = null;
-    private Set<Point> complemento = null;
+    private Cella origine = null;
+    private Cella destinazione = null;
+    private Set<Cella> contesto = null;
+    private Set<Cella> complemento = null;
     private JLabel infoLabel;
     private GrigliaPanel panel;
 
@@ -73,22 +72,22 @@ public class GrigliaFrame extends JFrame {
                 if (!griglia.inBounds(riga, colonna) || !griglia.isFree(riga, colonna)) return;
 
                 if (origine == null) {
-                    origine = new Point(colonna, riga);
-                    infoLabel.setText("Origine selezionata: Punto[x=" + origine.x + ", y=" + origine.y + "]. Ora scegli Destinazione.");
+                    origine = new Cella(colonna, riga);
+                    infoLabel.setText("Origine selezionata: Cella[x=" + origine.getX() + ", y=" + origine.getY() + "]. Ora scegli Destinazione.");
                     contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
                     complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
                 } else if (destinazione == null) {
-                    destinazione = new Point(colonna, riga);
+                    destinazione = new Cella(colonna, riga);
                     infoLabel.setText("Destinazione: " + destinazione);
                     double dist = AnalizzatoreCammini.dlib(origine, destinazione, contesto, complemento);
                     infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
                 } else {
                     // Reset: nuova origine
-                    origine = new Point(colonna, riga);
+                    origine = new Cella(colonna, riga);
                     destinazione = null;
                     contesto = null;
                     complemento = null;
-                    infoLabel.setText("Origine aggiornata: Punto[x=" + origine.x + ", y=" + origine.y + "]. Ora scegli Destinazione.");
+                    infoLabel.setText("Origine aggiornata: Cella[x=" + origine.getX() + ", y=" + origine.getY() + "]. Ora scegli Destinazione.");
                     contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
                     complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
                 }

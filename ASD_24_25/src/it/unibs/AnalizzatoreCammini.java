@@ -57,11 +57,8 @@ dy = |rD - rO|
 delta_min = min(dx, dy)
 delta_max = max(dx, dy)
 dlib = sqrt(2)*delta_min + (delta_max - delta_min)
-
-
 */
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -71,10 +68,10 @@ import java.util.Set;
 public class AnalizzatoreCammini {
 
     // Calcolo della distanza libera dlib(O, D)
-    public static double dlib(Point O, Point D, Set<Point> contesto, Set<Point> complemento) {
-    	if (contesto.contains(D) || complemento.contains(D)) {
-    		int dx = Math.abs(D.x - O.x);
-            int dy = Math.abs(D.y - O.y);
+    public static double dlib(Cella o, Cella d, Set<Cella> contesto, Set<Cella> complemento) {
+    	if (contesto.contains(d) || complemento.contains(d)) {
+    		int dx = Math.abs(d.getX() - o.getX());
+            int dy = Math.abs(d.getY() - o.getY());
             int deltaMin = Math.min(dx, dy);
             int deltaMax = Math.max(dx, dy);
             return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
@@ -83,12 +80,12 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola se esiste un cammino libero di tipo 1 o 2
-    public static boolean camminoLibero(Griglia g, Point O, Point D, int tipo) {
-        int dx = D.x - O.x;
-        int dy = D.y - O.y;
+    public static boolean camminoLibero(Griglia g, Cella o, Cella d, int tipo) {
+        int dx = d.getX() - o.getX();
+        int dy = d.getY() - o.getY();
 
         if (dx == 0 && dy == 0) return true;
-        if (!g.isFree(O.y, O.x) || !g.isFree(D.y, D.x)) return false;
+        if (!g.isFree(o.getY(), o.getX()) || !g.isFree(d.getY(), d.getX())) return false;
 
         int stepX = Integer.compare(dx, 0);
         int stepY = Integer.compare(dy, 0);
@@ -100,29 +97,29 @@ public class AnalizzatoreCammini {
 
         // tipo 1: diagonale poi orizz/vert
         if (tipo == 1) {
-            if (!percorri(g, O, stepX, stepY, diagSteps)) return false;
-            Point mid = new Point(O.x + stepX * diagSteps, O.y + stepY * diagSteps);
+            if (!percorri(g, o, stepX, stepY, diagSteps)) return false;
+            Cella mid = new Cella(o.getX() + stepX * diagSteps, o.getY() + stepY * diagSteps);
             if (absDx > absDy)
                 return percorri(g, mid, stepX, 0, remSteps);
             else
                 return percorri(g, mid, 0, stepY, remSteps);
         } else { // tipo 2: orizz/vert poi diagonale
-            Point mid;
+            Cella mid;
             if (absDx > absDy) {
-                if (!percorri(g, O, stepX, 0, remSteps)) return false;
-                mid = new Point(O.x + stepX * remSteps, O.y);
+                if (!percorri(g, o, stepX, 0, remSteps)) return false;
+                mid = new Cella(o.getX() + stepX * remSteps, o.getY());
             } else {
-                if (!percorri(g, O, 0, stepY, remSteps)) return false;
-                mid = new Point(O.x, O.y + stepY * remSteps);
+                if (!percorri(g, o, 0, stepY, remSteps)) return false;
+                mid = new Cella(o.getX(), o.getY() + stepY * remSteps);
             }
             return percorri(g, mid, stepX, stepY, diagSteps);
         }
     }
 
     // Percorre un certo numero di passi in una direzione
-    private static boolean percorri(Griglia g, Point start, int dx, int dy, int passi) {
-        int x = start.x;
-        int y = start.y;
+    private static boolean percorri(Griglia g, Cella start, int dx, int dy, int passi) {
+        int x = start.getX();
+        int y = start.getY();
         for (int i = 0; i < passi; i++) {
             x += dx;
             y += dy;
@@ -132,12 +129,12 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola il contesto (celle raggiungibili con cammini tipo 1)
-    public static Set<Point> calcolaContesto(Griglia g, Point O) {
-        Set<Point> contesto = new HashSet<>();
+    public static Set<Cella> calcolaContesto(Griglia g, Cella o) {
+        Set<Cella> contesto = new HashSet<>();
         for (int r = 0; r < g.getRighe(); r++) {
             for (int c = 0; c < g.getColonne(); c++) {
-                Point D = new Point(c, r);
-                if (camminoLibero(g, O, D, 1))
+                Cella D = new Cella(c, r);
+                if (camminoLibero(g, o, D, 1))
                     contesto.add(D);
             }
         }
@@ -145,12 +142,12 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola il complemento (celle raggiungibili SOLO con cammini tipo 2)
-    public static Set<Point> calcolaComplemento(Griglia g, Point O) {
-        Set<Point> complemento = new HashSet<>();
+    public static Set<Cella> calcolaComplemento(Griglia g, Cella o) {
+        Set<Cella> complemento = new HashSet<>();
         for (int r = 0; r < g.getRighe(); r++) {
             for (int c = 0; c < g.getColonne(); c++) {
-                Point D = new Point(c, r);
-                if (!camminoLibero(g, O, D, 1) && camminoLibero(g, O, D, 2))
+                Cella D = new Cella(c, r);
+                if (!camminoLibero(g, o, D, 1) && camminoLibero(g, o, D, 2))
                     complemento.add(D);
             }
         }
@@ -158,23 +155,23 @@ public class AnalizzatoreCammini {
     }
     
     // Controlla che il punto appartenga alla frontiera
-    public static boolean controllaVicini(Point punto, Griglia griglia, Set<Point> chiusura) {
+    public static boolean controllaVicini(Cella cella, Griglia griglia, Set<Cella> chiusura) {
     	// Ascissa vicini a sinistra
-    	int xsinistra = punto.x - 1;
+    	int xsinistra = cella.getX() - 1;
     	// Ascissa vicini a al centro
-    	int xcentro = punto.x;
+    	int xcentro = cella.getX();
     	// Ascissa vicini a destra
-    	int xdestra = punto.x + 1;
+    	int xdestra = cella.getX() + 1;
     	// Ordinata vicini sopra
-    	int ysopra = punto.y - 1;
+    	int ysopra = cella.getY() - 1;
     	// Ordinata vicini al centro
-    	int ycentro = punto.y;
+    	int ycentro = cella.getY();
     	// Ordinata vicini sotto
-    	int ysotto = punto.y + 1;
+    	int ysotto = cella.getY() + 1;
     	
     	
     	// Punto sopra-sinistra
-    	// da aggiungere alla condizione if: && !chiusura.contains(Point(xsinistra, ysopra))
+    	// da aggiungere alla condizione if: && !chiusura.contains(Cella(xsinistra, ysopra))
     	if (griglia.isFree(xsinistra, ysopra)) {
     		return true;
     	}
@@ -217,14 +214,14 @@ public class AnalizzatoreCammini {
     }
     
     // Calcola la frontiera
-    public static Set<Point> calcolaFrontiera(Set<Point> contesto, Set<Point> complemento, Griglia griglia) {
-    	Set<Point> frontiera = new HashSet<Point>();
+    public static Set<Cella> calcolaFrontiera(Set<Cella> contesto, Set<Cella> complemento, Griglia griglia) {
+    	Set<Cella> frontiera = new HashSet<Cella>();
     	
     	// Calcola la chiusura
-    	Set<Point> chiusura = new HashSet<>(contesto);
+    	Set<Cella> chiusura = new HashSet<>(contesto);
     	chiusura.addAll(complemento);
 
-    	for (Point p : chiusura) {
+    	for (Cella p : chiusura) {
     		if (controllaVicini(p, griglia, chiusura)) {
     			frontiera.add(p);
     		}

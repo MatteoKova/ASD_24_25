@@ -58,7 +58,7 @@ public class GeneratoreGriglieOstacoli {
         for (int i = 0; i < n; i++) {
             int r = rnd.nextInt(grid.getRighe());
             int c = rnd.nextInt(grid.getColonne());
-            grid.setObstacle(r, c);
+            grid.inserisciOstacolo(r, c);
         }
     }
 
@@ -71,7 +71,7 @@ public class GeneratoreGriglieOstacoli {
             for (int j = 0; j < dim; j++) {
                 int r = baseR + rnd.nextInt(2) - 1;
                 int c = baseC + rnd.nextInt(2) - 1;
-                if (grid.inBounds(r, c)) grid.setObstacle(r, c);
+                if (grid.inBounds(r, c)) grid.inserisciOstacolo(r, c);
             }
         }
     }
@@ -84,9 +84,9 @@ public class GeneratoreGriglieOstacoli {
             int len = 2 + rnd.nextInt(3);
             for (int k = 0; k < len; k++) {
                 if (rnd.nextBoolean())
-                    grid.setObstacle(r + k, c + k);
+                    grid.inserisciOstacolo(r + k, c + k);
                 else
-                    grid.setObstacle(r + k, c - k >= 0 ? c - k : c + k);
+                    grid.inserisciOstacolo(r + k, c - k >= 0 ? c - k : c + k);
             }
         }
     }
@@ -101,7 +101,7 @@ public class GeneratoreGriglieOstacoli {
             int c = rnd.nextInt(grid.getColonne() - (orizzontale ? lung : spess));
             for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
                 for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
-                    grid.setObstacle(r + dr, c + dc);
+                    grid.inserisciOstacolo(r + dr, c + dc);
         }
     }
 
@@ -112,10 +112,10 @@ public class GeneratoreGriglieOstacoli {
             int c = rnd.nextInt(grid.getColonne() - 6);
             int size = 3 + rnd.nextInt(4);
             for (int k = 0; k < size; k++) {
-                grid.setObstacle(r, c + k);
-                grid.setObstacle(r + size - 1, c + k);
-                grid.setObstacle(r + k, c);
-                grid.setObstacle(r + k, c + size - 1);
+                grid.inserisciOstacolo(r, c + k);
+                grid.inserisciOstacolo(r + size - 1, c + k);
+                grid.inserisciOstacolo(r + k, c);
+                grid.inserisciOstacolo(r + k, c + size - 1);
             }
         }
     }

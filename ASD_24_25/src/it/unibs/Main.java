@@ -36,7 +36,7 @@ public class Main {
             try {
                 valore = Integer.parseInt(s);
                 if (valore >= 0 && valore <= 100) {
-                    valido = true; // input corretto
+                    valido = true;
                 } else {
                     JOptionPane.showMessageDialog(null,
                             "Errore: inserisci un numero tra 0 e 100.",

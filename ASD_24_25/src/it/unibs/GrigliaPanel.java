@@ -9,8 +9,8 @@ public class GrigliaPanel extends JPanel {
     private static final long serialVersionUID = 1L;
 
     private Griglia grid;
-    private Point origine, destinazione;
-    private Set<Point> contesto, complemento;
+    private Cella origine, destinazione;
+    private Set<Cella> contesto, complemento;
 
     public GrigliaPanel(Griglia grid) {
         this.grid = grid;
@@ -19,7 +19,7 @@ public class GrigliaPanel extends JPanel {
     }
 
     // Aggiornamento dati e repaint
-    public void aggiornaDati(Point origine, Point destinazione, Set<Point> contesto, Set<Point> complemento) {
+    public void aggiornaDati(Cella origine, Cella destinazione, Set<Cella> contesto, Set<Cella> complemento) {
         this.origine = origine;
         this.destinazione = destinazione;
         this.contesto = contesto;
@@ -62,22 +62,22 @@ public class GrigliaPanel extends JPanel {
                 }
 
                 // Overlay contesto / complemento
-                if (contesto != null && contesto.contains(new Point(c, r))) {
+                if (contesto != null && contesto.contains(new Cella(c, r))) {
                     g.setColor(Color.GREEN.darker());
                     g.fillRect(x, y, cellSize, cellSize);
-                } else if (complemento != null && complemento.contains(new Point(c, r))) {
+                } else if (complemento != null && complemento.contains(new Cella(c, r))) {
                     g.setColor(Color.ORANGE);
                     g.fillRect(x, y, cellSize, cellSize);
                 }
 
                 // Assi rispetto all'origine
-                if (origine != null && (r == origine.y || c == origine.x) && grid.isFree(r, c)) {
+                if (origine != null && (r == origine.getY() || c == origine.getX()) && grid.isFree(r, c)) {
                     g.setColor(Color.YELLOW);
                     g.fillRect(x, y, cellSize, cellSize);
                 }
 
                 // Origine
-                if (origine != null && c == origine.x && r == origine.y) {
+                if (origine != null && c == origine.getX() && r == origine.getY()) {
                     g.fillRect(x, y, cellSize, cellSize);
                     String oText = "O";
                     int tw = fm.stringWidth(oText);
@@ -87,7 +87,7 @@ public class GrigliaPanel extends JPanel {
                 }
 
                 // Destinazione
-                if (destinazione != null && c == destinazione.x && r == destinazione.y) {
+                if (destinazione != null && c == destinazione.getX() && r == destinazione.getY()) {
                     g.fillRect(x, y, cellSize, cellSize);
                     String dText = "D";
                     int tw = fm.stringWidth(dText);

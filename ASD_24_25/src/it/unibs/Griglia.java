@@ -16,18 +16,18 @@ public class Griglia {
         }
     }
     
-    // 
+    // Controlla se la cella e' all'interno della griglia
     public boolean inBounds(int r, int c) {
         return r >= 0 && r < righe && c >= 0 && c < colonne;
     }
 
     // Riconosce le celle libere
     public boolean isFree(int r, int c) {
-        return inBounds(r, c) && celle[r][c].getTipo().equals("attraversabile");
+    	return inBounds(r, c) && celle[r][c].getTipo().equals("attraversabile");
     }
 
-    // Inserisce gli ostacoli
-    public void setObstacle(int r, int c) {
+    // Trasforma una cella in ostacolo
+    public void inserisciOstacolo(int r, int c) {
         if (inBounds(r, c)) celle[r][c].setTipo("ostacolo");
     }
 
@@ -51,7 +51,8 @@ public class Griglia {
 		return colonne;
 	}
 
-	// Stampa della griglia
+	/*
+	// Stampa la griglia
     public void stampaGriglia() {
         for (int i = 0; i < celle.length; i++) {
             for (int j = 0; j < celle[i].length; j++) {
@@ -60,4 +61,5 @@ public class Griglia {
             System.out.println();
         }
     }
+    */
 }
