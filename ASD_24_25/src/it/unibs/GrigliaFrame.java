@@ -19,7 +19,7 @@ import javax.swing.SwingConstants;
 public class GrigliaFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
-    private Griglia griglia;
+    //private Griglia griglia;
     private Cella origine = null;
     private Cella destinazione = null;
     private Set<Cella> contesto = null;
@@ -30,7 +30,7 @@ public class GrigliaFrame extends JFrame {
     private GrigliaPanel panel;
 
     public GrigliaFrame(Griglia griglia) {
-        this.griglia = griglia;
+        //this.griglia = griglia;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -76,8 +76,9 @@ public class GrigliaFrame extends JFrame {
                 if (origine == null) {
                 	origine = griglia.getCella(riga, colonna);
                     infoLabel.setText("Origine selezionata: Cella[riga=" + origine.getRiga() + ", colonna=" + origine.getColonna() + "]. Ora scegli Destinazione.");
-                    contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
-                    complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
+                    Set<Cella> ostacoli = AnalizzatoreCammini.trovaOstacoli(griglia);
+                    contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine, ostacoli);
+                    complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine, ostacoli);
                     frontiera = AnalizzatoreCammini.calcolaFrontiera(contesto, complemento, griglia);    
                     
                 } else if (destinazione == null) {
@@ -96,8 +97,9 @@ public class GrigliaFrame extends JFrame {
                     contesto = null;
                     complemento = null;
                     infoLabel.setText("Origine aggiornata: Cella[riga=" + origine.getRiga() + ", colonna=" + origine.getColonna() + "]. Ora scegli Destinazione.");
-                    contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
-                    complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
+                    Set<Cella> ostacoli = AnalizzatoreCammini.trovaOstacoli(griglia);
+                    contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine, ostacoli);
+                    complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine, ostacoli);
                     frontiera = AnalizzatoreCammini.calcolaFrontiera(contesto, complemento, griglia);
                 }
 

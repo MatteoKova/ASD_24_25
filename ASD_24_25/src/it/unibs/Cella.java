@@ -33,12 +33,13 @@ public class Cella {
 	    return Objects.hash(riga, colonna);
 	}
 
-    // Getter
+    // Getters
     public int getRiga() { return riga; }
     public int getColonna() { return colonna; }
     public int getTipo() { return tipo; }
     public boolean isAttraversabile() { return isAttraversabile; }
 
+    // Setters
     public void setAttraversabile(boolean isAttraversabile) {
         this.isAttraversabile = isAttraversabile;
     }
