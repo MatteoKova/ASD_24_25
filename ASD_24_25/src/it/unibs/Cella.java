@@ -2,46 +2,49 @@ package it.unibs;
 
 import java.util.Objects;
 
-//Classe che rappresenta una singola cella
 public class Cella {
-	private int x, y;
-	private String tipo = "attraversabile";
-	
-	// Costruttore con tipo di default
-	public Cella(int x, int y) {
-	    this.x = x;
-	    this.y = y;
-	}
-	/*
-	// Costruttore con tipo personalizzato
-	public Cella(int x, int y, String tipo) {
-	    this.x = x;
-	    this.y = y;
-	    this.tipo = tipo;
-	}
-	*/
-	@Override
+    private int riga, colonna;
+    private int tipo = 1;
+    private boolean isAttraversabile = true;
+
+    // Costruttore con tipo di default
+    public Cella(int riga, int colonna) {
+        this.riga = riga;
+        this.colonna = colonna;
+    }
+
+    // Costruttore con tipo personalizzato
+    public Cella(int riga, int colonna, int tipo) {
+        this.riga = riga;
+        this.colonna = colonna;
+        this.tipo = tipo;
+    }
+    
+    @Override
 	public boolean equals(Object o) {
 	    if (this == o) return true;
 	    if (!(o instanceof Cella)) return false;
 	    Cella other = (Cella) o;
-	    return this.x == other.x && this.y == other.y;
+	    return this.riga == other.riga && this.colonna == other.colonna;
 	}
 
 	@Override
 	public int hashCode() {
-	    return Objects.hash(x, y);
+	    return Objects.hash(riga, colonna);
 	}
-	
-	// Getter e Setter
-	public int getX() { return x; }
-	public int getY() { return y; }
-	public String getTipo() { return tipo; }
-	public void setTipo(String tipo) { this.tipo = tipo; }
-	/*
-	@Override
-	public String toString() {
-		return "Cella(x=" + x + ", y=" + y + ", tipo=" + tipo + ")";
+
+    // Getter
+    public int getRiga() { return riga; }
+    public int getColonna() { return colonna; }
+    public int getTipo() { return tipo; }
+    public boolean isAttraversabile() { return isAttraversabile; }
+
+    public void setAttraversabile(boolean isAttraversabile) {
+        this.isAttraversabile = isAttraversabile;
     }
-    */
+
+    @Override
+    public String toString() {
+        return "Cella(riga=" + riga + ", colonna=" + colonna + ", tipo=" + tipo + ")";
+    }
 }

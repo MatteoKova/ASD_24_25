@@ -19,16 +19,18 @@ import javax.swing.SwingConstants;
 public class GrigliaFrame extends JFrame {
     private static final long serialVersionUID = 1L;
 
-    private Griglia grid;
+    private Griglia griglia;
     private Cella origine = null;
     private Cella destinazione = null;
     private Set<Cella> contesto = null;
     private Set<Cella> complemento = null;
+    private Set<Cella> frontiera = null;
+    //private Set<Map.Entry<Cella, Integer>> frontiera = null;
     private JLabel infoLabel;
     private GrigliaPanel panel;
 
     public GrigliaFrame(Griglia griglia) {
-        this.grid = griglia;
+        this.griglia = griglia;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -69,31 +71,37 @@ public class GrigliaFrame extends JFrame {
                 if (cellSize <= 0) return;
                 int colonna = e.getX() / cellSize;
                 int riga = e.getY() / cellSize;
-                if (!griglia.inBounds(riga, colonna) || !griglia.isFree(riga, colonna)) return;
+                if (!griglia.isNeiMargini(riga, colonna) || !griglia.isLibera(riga, colonna)) return;
 
                 if (origine == null) {
-                    origine = new Cella(colonna, riga);
-                    infoLabel.setText("Origine selezionata: Cella[x=" + origine.getX() + ", y=" + origine.getY() + "]. Ora scegli Destinazione.");
+                	origine = griglia.getCella(riga, colonna);
+                    infoLabel.setText("Origine selezionata: Cella[riga=" + origine.getRiga() + ", colonna=" + origine.getColonna() + "]. Ora scegli Destinazione.");
                     contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
                     complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
+                    frontiera = AnalizzatoreCammini.calcolaFrontiera(contesto, complemento, griglia);        
                 } else if (destinazione == null) {
-                    destinazione = new Cella(colonna, riga);
+                    destinazione = griglia.getCella(riga, colonna);
                     infoLabel.setText("Destinazione: " + destinazione);
                     double dist = AnalizzatoreCammini.dlib(origine, destinazione, contesto, complemento);
                     infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
+                    Set<Cella> ostacoli = AnalizzatoreCammini.trovaOstacoli(griglia);
+                    RisultatoCammino cammino = AnalizzatoreCammini.camminoMin(origine, destinazione, griglia, ostacoli);
+                    cammino.stampa();
+                    
                 } else {
                     // Reset: nuova origine
-                    origine = new Cella(colonna, riga);
+                    origine = griglia.getCella(riga, colonna);
                     destinazione = null;
                     contesto = null;
                     complemento = null;
-                    infoLabel.setText("Origine aggiornata: Cella[x=" + origine.getX() + ", y=" + origine.getY() + "]. Ora scegli Destinazione.");
+                    infoLabel.setText("Origine aggiornata: Cella[riga=" + origine.getRiga() + ", colonna=" + origine.getColonna() + "]. Ora scegli Destinazione.");
                     contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
                     complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
+                    frontiera = AnalizzatoreCammini.calcolaFrontiera(contesto, complemento, griglia);
                 }
 
                 // Comunica i dati aggiornati al pannello e chiedi repaint
-                panel.aggiornaDati(origine, destinazione, contesto, complemento);
+                panel.aggiornaDati(origine, destinazione, contesto, complemento, frontiera);
             }
         });
     }

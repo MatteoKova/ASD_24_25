@@ -34,12 +34,12 @@ import java.util.Random;
 public class GeneratoreGriglieOstacoli {
     private final Configurazione cfg;
     private final Random rnd;
-    private final Griglia grid;
+    private final Griglia griglia;
 
     public GeneratoreGriglieOstacoli(Configurazione cfg) {
         this.cfg = cfg;
         this.rnd = new Random(cfg.seed);
-        this.grid = new Griglia(cfg.rows, cfg.cols);
+        this.griglia = new Griglia(cfg.righe, cfg.colonne);
     }
 
     // Genera tutte le tipologie di ostacoli
@@ -56,22 +56,22 @@ public class GeneratoreGriglieOstacoli {
     // Genera singole celle
     private void generaSemplici(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.getRighe());
-            int c = rnd.nextInt(grid.getColonne());
-            grid.inserisciOstacolo(r, c);
+            int r = rnd.nextInt(griglia.getRighe());
+            int c = rnd.nextInt(griglia.getColonne());
+            griglia.inserisciOstacolo(r, c);
         }
     }
 
     // Genera insiemi con 2, 3 o 4 celle
     private void generaAgglomerati(int n) {
         for (int i = 0; i < n; i++) {
-            int baseR = rnd.nextInt(grid.getRighe());
-            int baseC = rnd.nextInt(grid.getColonne());
+            int baseR = rnd.nextInt(griglia.getRighe());
+            int baseC = rnd.nextInt(griglia.getColonne());
             int dim = 2 + rnd.nextInt(3); // da 2 a 4 celle
             for (int j = 0; j < dim; j++) {
                 int r = baseR + rnd.nextInt(2);
                 int c = baseC + rnd.nextInt(2);
-                grid.inserisciOstacolo(r, c); //se le coordinate non sono valide, non stampa cella
+                griglia.inserisciOstacolo(r, c); // se le coordinate non sono valide, non stampa cella
             }
         }
     }
@@ -79,15 +79,15 @@ public class GeneratoreGriglieOstacoli {
     // Genera insiemi con 2, 3 o 4 celle in diagonale
     private void generaDiagonali(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.getRighe());
-            int c = rnd.nextInt(grid.getColonne());
+            int r = rnd.nextInt(griglia.getRighe());
+            int c = rnd.nextInt(griglia.getColonne());
             boolean verso = rnd.nextBoolean();
             int len = 2 + rnd.nextInt(3);
             for (int k = 0; k < len; k++) {
-                if (verso) //diagonale creata verso dx
-                    grid.inserisciOstacolo(r + k, c + k); //se supera i limiti, inBounds() evita che venga stampato
-                else //diagonale creata verso sx
-                    grid.inserisciOstacolo(r + len - k, c - k); //se supera i limiti, inBounds() evita che venga stampato
+                if (verso) // diagonale creata verso dx
+                    griglia.inserisciOstacolo(r + k, c + k); // se supera i limiti, inBounds() evita che venga stampato
+                else // diagonale creata verso sx
+                    griglia.inserisciOstacolo(r + len - k, c - k); // se supera i limiti, inBounds() evita che venga stampato
             }
         }
     }
@@ -98,30 +98,30 @@ public class GeneratoreGriglieOstacoli {
             boolean orizzontale = rnd.nextBoolean();
             int lung = 3 + rnd.nextInt(5);
             int spess = 1 + rnd.nextInt(2);
-            int r = rnd.nextInt(grid.getRighe());
-            int c = rnd.nextInt(grid.getColonne());
+            int r = rnd.nextInt(griglia.getRighe());
+            int c = rnd.nextInt(griglia.getColonne());
             for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
                 for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
-                    grid.inserisciOstacolo(r + dr, c + dc);
+                    griglia.inserisciOstacolo(r + dr, c + dc);
         }
     }
 
-    // Genera anelli non attraversabili che delimitano celle attraversabili
+    // Genera anelli non attraversabili che racchiudono celle attraversabili
     private void generaAnelli(int n) {
         for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(grid.getRighe());
-            int c = rnd.nextInt(grid.getColonne());
+            int r = rnd.nextInt(griglia.getRighe());
+            int c = rnd.nextInt(griglia.getColonne());
             int size = 3 + rnd.nextInt(4);
             for (int k = 0; k < size; k++) {
-                grid.inserisciOstacolo(r, c + k);
-                grid.inserisciOstacolo(r + size - 1, c + k);
-                grid.inserisciOstacolo(r + k, c);
-                grid.inserisciOstacolo(r + k, c + size - 1);
+                griglia.inserisciOstacolo(r, c + k);
+                griglia.inserisciOstacolo(r + size - 1, c + k);
+                griglia.inserisciOstacolo(r + k, c);
+                griglia.inserisciOstacolo(r + k, c + size - 1);
             }
         }
     }
 
 	public Griglia getGrid() {
-		return grid;
+		return griglia;
 	}
 }

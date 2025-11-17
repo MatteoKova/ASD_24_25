@@ -7,13 +7,13 @@ public class Main {
 	public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             // Inserimento dei parametri da parte dell'utente
-            int rows = chiediIntero("Numero di righe della griglia:", 20);
-            int cols = chiediIntero("Numero di colonne della griglia:", 20);
+            int righe = chiediIntero("Numero di righe della griglia:", 20);
+            int colonne = chiediIntero("Numero di colonne della griglia:", 20);
             long seed = chiediLong("Seed per la generazione (0 = casuale):", 0);
 
             Configurazione cfg = new Configurazione();
-            cfg.rows = rows;
-            cfg.cols = cols;
+            cfg.righe = righe;
+            cfg.colonne = colonne;
             if (seed != 0) cfg.seed = seed;
 
             GeneratoreGriglieOstacoli gen = new GeneratoreGriglieOstacoli(cfg);
@@ -78,5 +78,4 @@ public class Main {
         }
         return valore;
     }
-
 }
