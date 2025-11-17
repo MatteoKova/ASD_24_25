@@ -78,7 +78,8 @@ public class GrigliaFrame extends JFrame {
                     infoLabel.setText("Origine selezionata: Cella[riga=" + origine.getRiga() + ", colonna=" + origine.getColonna() + "]. Ora scegli Destinazione.");
                     contesto = AnalizzatoreCammini.calcolaContesto(griglia, origine);
                     complemento = AnalizzatoreCammini.calcolaComplemento(griglia, origine);
-                    frontiera = AnalizzatoreCammini.calcolaFrontiera(contesto, complemento, griglia);        
+                    frontiera = AnalizzatoreCammini.calcolaFrontiera(contesto, complemento, griglia);    
+                    
                 } else if (destinazione == null) {
                     destinazione = griglia.getCella(riga, colonna);
                     infoLabel.setText("Destinazione: " + destinazione);
