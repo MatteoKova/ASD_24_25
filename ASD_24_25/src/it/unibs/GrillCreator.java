@@ -2,8 +2,7 @@ package it.unibs;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.Random;
+
 
 public class GrillCreator extends JFrame {
     private JTextField rowsField, colsField;
@@ -13,7 +12,7 @@ public class GrillCreator extends JFrame {
     private ManualGridPanel manualPanel;
 private boolean[][] backupGrid;
 
-    private JButton[][] cells;
+ 
     private int rows, cols;
     private long seed = 0;
 
@@ -61,14 +60,13 @@ private boolean[][] backupGrid;
     private void prepareGridPanel() {
         grillPanel.removeAll();
         grillPanel.setLayout(new GridLayout(rows, cols));
-        cells = new JButton[rows][cols];
     }
 
 
     private void createRandomGrill() {
         readDimensions();
         prepareGridPanel();
-        Random rand = new Random();
+       
 
         double density = 0.1;
         String d = (String) densityBox.getSelectedItem();
@@ -131,6 +129,9 @@ private boolean[][] backupGrid;
                 if (obs[r][c])
                     g.setObstacle(r, c);
 
+
+
+        g.calculateOstacoli();    
         new GrigliaFrame(g);  // open analysis frame
     });
 

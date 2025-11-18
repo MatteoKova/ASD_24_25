@@ -45,12 +45,47 @@ public class GeneratoreGriglieOstacoli {
     // Genera tutte le tipologie di ostacoli rispettando la densità specificata
     public void generateAll() {
         if (cfg.density <= 0) return;
+    double densita;
         do{
         generaSemplici(cfg.numSemplici);
         generaAgglomerati(cfg.numAgglomerati);
         generaDiagonali(cfg.numDiagonali);
         generaBarre(cfg.numBarre);
-        generaAnelli(cfg.numAnelli);} while (griglia.calcolaDensita() < cfg.density);
+        generaAnelli(cfg.numAnelli);
+        densita = griglia.calcolaDensita();
+        System.out.println("density: " + densita + ", target: " + cfg.density);
+    } while (densita < cfg.density );
+
+     griglia.calculateOstacoli();
+      rimuoviOstacoliEccesso(densita);
+    
+
+    }
+
+    public void pulisciGriglia() {
+        for (int r = 0; r < cfg.righe; r++) {
+            for (int c = 0; c < cfg.colonne; c++) {
+                griglia.getCella(r, c).setAttraversabile(true);
+            }
+        }
+    }
+
+    private void rimuoviOstacoliEccesso(double densitaAttuale) {
+        double densitaTarget = cfg.density;
+        int righe = cfg.righe;
+        int colonne = cfg.colonne;
+        int totaleCelle = righe * colonne;
+        int ostacoliDaRimuovere = (int) ((densitaAttuale - densitaTarget) * totaleCelle);
+
+        while (ostacoliDaRimuovere > 0) {
+            int index=rnd.nextInt(griglia.getOstacoli().size());
+            Cella ostacolo = griglia.getOstacoli().get(index);
+            int r = ostacolo.getRiga();
+            int c = ostacolo.getColonna();
+            griglia.rimuoviOstacolo(r, c);;
+            ostacoliDaRimuovere--;
+            
+        }
     }
 
     // TIPOLOGIE DI OSTACOLI
