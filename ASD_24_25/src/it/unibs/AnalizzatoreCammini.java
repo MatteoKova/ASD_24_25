@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class AnalizzatoreCammini {
 
@@ -271,10 +272,12 @@ public class AnalizzatoreCammini {
     }
 
     // Calcola il cammino minimo da O a un D che non appartiene alla sua chiusura
-    public static RisultatoCammino camminoMin(Cella o, Cella d, Griglia griglia, Set<Cella> ostacoli) {
+    public static RisultatoCammino camminoMin(Cella o, Cella d, Griglia griglia, Set<Cella> ostacoli,  Supplier<Boolean> stopCheck) {
         Set<Cella> contesto = calcolaContesto(griglia, o, ostacoli);
         Set<Cella> complemento = calcolaComplemento(griglia, o, ostacoli);
-
+        if (stopCheck.get()) {
+    return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(o));
+}
         // Se D è già nella chiusura, ritorna soluzione diretta
         if (contesto.contains(d)) {
         	Cella origine = griglia.getCella(o.getRiga(), o.getColonna());
@@ -305,7 +308,7 @@ public class AnalizzatoreCammini {
             double lF = dlib(o, f, contesto, complemento);
             if (lF >= lunghezzaMin) continue; // pruning
 
-            RisultatoCammino parziale = camminoMin(f, d, griglia, unisci(ostacoli, contesto, complemento));
+            RisultatoCammino parziale = camminoMin(f, d, griglia, unisci(ostacoli, contesto, complemento), stopCheck);
             
             double lFD = parziale.getLunghezza();
             if (Double.isInfinite(lFD)) continue;
