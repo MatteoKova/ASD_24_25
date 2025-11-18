@@ -20,11 +20,16 @@ public class RisultatoCammino {
 		return seq;
 	}
 	
-	public void stampa() {
-	    System.out.println("Lunghezza cammino: " + lunghezza);
-	    System.out.println("Sequenza dei landmark:");
-	    for (Cella cella : seq) {
-	        System.out.println(" - " + cella);
-	    }
-	}
+	public String stampa() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Lunghezza cammino: ").append(lunghezza).append("\n");
+    sb.append("Sequenza dei landmark:\n");
+
+    for (Cella cella : seq) {
+        sb.append(" - ").append(cella).append("\n");
+    }
+
+    return sb.toString();
+}
+
 }

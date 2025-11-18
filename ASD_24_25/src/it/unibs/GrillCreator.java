@@ -2,8 +2,7 @@ package it.unibs;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.Random;
+
 
 public class GrillCreator extends JFrame {
     private JTextField rowsField, colsField;
@@ -13,7 +12,7 @@ public class GrillCreator extends JFrame {
     private ManualGridPanel manualPanel;
 private boolean[][] backupGrid;
 
-    private JButton[][] cells;
+ 
     private int rows, cols;
     private long seed = 0;
 
@@ -61,14 +60,27 @@ private boolean[][] backupGrid;
     private void prepareGridPanel() {
         grillPanel.removeAll();
         grillPanel.setLayout(new GridLayout(rows, cols));
-        cells = new JButton[rows][cols];
     }
 
 
     private void createRandomGrill() {
         readDimensions();
         prepareGridPanel();
-        Random rand = new Random();
+        
+
+        if (rows <= 0 || cols <= 0) {
+            JOptionPane.showMessageDialog(this, "Rows and Columns must be positive integers.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }else if (rows > 100 || cols > 100) {
+            /*
+            
+             * Limitazione per evitare griglie troppo grandi che potrebbero causare problemi di performance o usabilità.
+             * sarebbe interessante implementare una versione non grafica per griglie più grandi.
+             * 
+             */
+            JOptionPane.showMessageDialog(this, "Rows and Columns must be less than or equal to 100.", "Input Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         double density = 0.1;
         String d = (String) densityBox.getSelectedItem();
@@ -104,8 +116,22 @@ private boolean[][] backupGrid;
     grillPanel.removeAll();
     grillPanel.setLayout(new BorderLayout());
 
+    // Wrapper per centrare il manualPanel
+    JPanel centerWrapper = new JPanel(new GridBagLayout());
     manualPanel = new ManualGridPanel(rows, cols);
-    grillPanel.add(manualPanel, BorderLayout.CENTER);
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.weightx = 1.0;
+    gbc.weighty = 1.0;
+    gbc.fill = GridBagConstraints.BOTH; // cresce sia in verticale che in orizzontale
+    gbc.anchor = GridBagConstraints.CENTER;
+
+    centerWrapper.add(manualPanel, gbc);
+
+    grillPanel.add(centerWrapper, BorderLayout.CENTER);
+
 
     JPanel bottomPanel = new JPanel();
     undoBtn = new JButton("Undo");
@@ -131,6 +157,9 @@ private boolean[][] backupGrid;
                 if (obs[r][c])
                     g.setObstacle(r, c);
 
+
+
+        g.calculateOstacoli();    
         new GrigliaFrame(g);  // open analysis frame
     });
 

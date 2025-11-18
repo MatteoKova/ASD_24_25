@@ -5,16 +5,25 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 
 public class GrigliaFrame extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -25,12 +34,15 @@ public class GrigliaFrame extends JFrame {
     private Set<Cella> contesto = null;
     private Set<Cella> complemento = null;
     private Set<Cella> frontiera = null;
+        private JButton startButton;
+private JButton stopButton;
+private PathWorker worker;
+private volatile boolean stopRequested = false;
     //private Set<Map.Entry<Cella, Integer>> frontiera = null;
     private JLabel infoLabel;
     private GrigliaPanel panel;
 
     public GrigliaFrame(Griglia griglia) {
-        //this.griglia = griglia;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -40,6 +52,18 @@ public class GrigliaFrame extends JFrame {
         // Legenda laterale
         JPanel legendaPanel = new JPanel();
         legendaPanel.setLayout(new BoxLayout(legendaPanel, BoxLayout.Y_AXIS));
+
+                // --- Bottom control panel (Start / Stop) ---
+        JPanel controls = new JPanel(new FlowLayout());
+        startButton = new JButton("Start Eval");
+        stopButton = new JButton("STOP");
+        stopButton.setEnabled(false);
+
+        controls.add(startButton);
+        controls.add(stopButton);
+
+        add(controls, BorderLayout.SOUTH);
+
 
         legendaPanel.add(creaVoceLegenda(Color.BLUE.darker(), "Ostacolo"));
         legendaPanel.add(creaVoceLegenda(Color.GREEN.darker(), "Contesto"));
@@ -88,12 +112,14 @@ public class GrigliaFrame extends JFrame {
                 } else if (destinazione == null) {
                     destinazione = griglia.getCella(riga, colonna);
                     infoLabel.setText("Destinazione: " + destinazione);
+                    //questo va inserito nel worker
+                    /*
                     Set<Cella> ostacoli = AnalizzatoreCammini.trovaOstacoli(griglia);
                     RisultatoCammino cammino = AnalizzatoreCammini.camminoMin(origine, destinazione, griglia, ostacoli);
                     double dist = cammino.getLunghezza();
                     infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
                     cammino.stampa();
-                    
+                    */
                 } else {
                     // Reset: nuova origine
                     origine = griglia.getCella(riga, colonna);
@@ -111,6 +137,67 @@ public class GrigliaFrame extends JFrame {
                 panel.aggiornaDati(origine, destinazione, contesto, complemento, frontiera);
             }
         });
+        
+        startButton.addActionListener(e -> {
+
+
+
+    if (origine == null || destinazione == null) {
+                JOptionPane.showMessageDialog(this, "Seleziona prima Origine e Destinazione.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+    // Create a dialog to confirm and enter time limit
+    JPanel panel = new JPanel(new BorderLayout(5, 5));
+    JPanel inputPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+
+    inputPanel.add(new JLabel("Confirm start algorithm?"));
+    inputPanel.add(new JLabel()); // spacer
+
+    inputPanel.add(new JLabel("Time limit (ms):"));
+    JTextField timeField = new JTextField("1000000"); // default 1,000,000
+    inputPanel.add(timeField);
+
+    panel.add(inputPanel, BorderLayout.CENTER);
+
+    int result = JOptionPane.showConfirmDialog(this, panel, "Confirm Start", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+    if (result == JOptionPane.OK_OPTION) {
+        long timeLimit = 1000000;
+        try {
+            timeLimit = Long.parseLong(timeField.getText());
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Invalid time limit, using default 1,000,000 ms.");
+        }
+
+      
+        stopRequested = false; // reset stop flag
+
+      
+            worker = new PathWorker(griglia, timeLimit);
+            startButton.setEnabled(false);
+            stopButton.setEnabled(true);
+            infoLabel.setText("Esecuzione algoritmo…");
+            worker.execute();
+    }
+});
+
+
+
+
+            
+
+         
+     
+
+    stopButton.addActionListener(e -> {
+    if (worker != null) {
+        stopRequested = true;
+        worker.cancel(true);
+        infoLabel.setText("Stopping…");
+    }
+});
+
+
     }
 
     // Definisce il formato della legenda
@@ -125,4 +212,102 @@ public class GrigliaFrame extends JFrame {
         voce.add(new JLabel(testo));
         return voce;
     }
+
+    private class PathWorker extends SwingWorker<RisultatoCammino, String> {
+         Griglia griglia;
+    long timeLimit; // in milliseconds
+    long startTime;
+
+    public PathWorker(Griglia griglia, long timeLimit) {
+        this.griglia = griglia;
+        this.timeLimit = timeLimit;
+    }
+
+    @Override
+    protected RisultatoCammino doInBackground() throws Exception {
+        Set<Cella> ostacoli = AnalizzatoreCammini.trovaOstacoli(this.griglia);
+
+        startTime = System.currentTimeMillis();
+
+        return AnalizzatoreCammini.camminoMin(
+            origine,
+            destinazione,
+            griglia,
+            ostacoli,
+            () -> {
+                // Stop if user requested or time limit elapsed
+                return stopRequested || (System.currentTimeMillis() - startTime) >= timeLimit;
+            }
+        );
+    }
+
+    @Override
+    protected void done() {
+        startButton.setEnabled(true);
+        stopButton.setEnabled(false);
+
+        RisultatoCammino result = null;
+        boolean cancelled = false;
+
+        try {
+            result = get();
+        } catch (Exception ex) {
+            cancelled = true;
+        }
+
+        if (cancelled || stopRequested || (System.currentTimeMillis() - startTime) >= timeLimit) {
+            infoLabel.setText("Evaluation stopped.");
+            showSummaryDialog(result, true);
+        } else {
+            infoLabel.setText("Evaluation finished.");
+            showSummaryDialog(result, false);
+        }
+    }
+}
+
+private void showSummaryDialog(RisultatoCammino result, boolean stopped) {
+    JDialog dialog = new JDialog(this, "Summary", true);
+    dialog.setSize(400, 300);
+    dialog.setLayout(new BorderLayout());
+
+    JTextArea area = new JTextArea();
+    area.setEditable(false);
+
+    if (stopped) {
+        area.setText("PROCESS STOPPED BY USER.\n\nPartial summary:\n\n");
+       if (result != null) {
+            area.append(result.stampa());
+        }
+    } else {
+        area.setText("PROCESS COMPLETED.\n\nSummary:\n\n");
+        if (result != null) {
+            area.append(result.stampa());
+        }
+    }
+
+    dialog.add(new JScrollPane(area), BorderLayout.CENTER);
+
+    // SAVE button
+    JButton saveBtn = new JButton("Save to .txt");
+    saveBtn.addActionListener(ev -> {
+        JFileChooser chooser = new JFileChooser();
+        if (chooser.showSaveDialog(dialog) == JFileChooser.APPROVE_OPTION) {
+            try (java.io.PrintWriter out = new java.io.PrintWriter(chooser.getSelectedFile())) {
+                out.print(area.getText());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(dialog, "Error saving file: " + ex.getMessage());
+            }
+        }
+    });
+
+    JPanel bottom = new JPanel();
+    bottom.add(saveBtn);
+
+    dialog.add(bottom, BorderLayout.SOUTH);
+
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+}
+
+
 }

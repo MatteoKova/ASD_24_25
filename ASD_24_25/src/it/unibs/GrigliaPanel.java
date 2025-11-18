@@ -147,6 +147,8 @@ public class GrigliaPanel extends JPanel {
     private Set<Cella> contesto, complemento;
     private Set<Cella> frontiera;
 
+
+
     public GrigliaPanel(Griglia grid) {
         this.griglia = grid;
         setBackground(Color.WHITE);
