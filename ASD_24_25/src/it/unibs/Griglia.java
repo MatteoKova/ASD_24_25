@@ -26,11 +26,29 @@ public class Griglia {
         return isNeiMargini(r, c) && celle[r][c].isAttraversabile();
     }
 
+
     // Trasforma una cella in ostacolo
     public void inserisciOstacolo(int r, int c) {
         if (isNeiMargini(r, c)) {			// && isLibera(r, c)
             celle[r][c].setAttraversabile(false);
         }
+    }
+    public double calcolaDensita() {
+        double sum = 0;;
+        for (int r = 0; r < getRighe(); r++) {
+            for (int c = 0; c < getColonne(); c++) {
+                if (!isLibera(r, c)) {
+                    sum += 1;
+                }
+            }
+        }
+        return sum/(getRighe() * getColonne());
+    }
+
+    // Inserisce gli ostacoli
+    public void setObstacle(int r, int c) {
+        if (isNeiMargini(r, c)) inserisciOstacolo(r, c);
+
     }
 
     // Restituisce una cella della griglia

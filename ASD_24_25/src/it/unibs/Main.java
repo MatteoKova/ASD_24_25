@@ -1,16 +1,19 @@
 package it.unibs;
 
 import javax.swing.*;
-import javax.swing.JOptionPane;
 
 public class Main {
 	public static void main(String[] args) {
+    
         SwingUtilities.invokeLater(() -> {
-            // Inserimento dei parametri da parte dell'utente
-            int righe = chiediIntero("Numero di righe della griglia:", 20);
-            int colonne = chiediIntero("Numero di colonne della griglia:", 20);
-            long seed = chiediLong("Seed per la generazione (0 = casuale):", 0);
 
+            GrillCreator creator= new GrillCreator();
+            creator.setVisible(true);
+            // Inserimento dei parametri da parte dell'utente
+           /*  int rows = chiediIntero("Numero di righe della griglia:", 20);
+            int cols = chiediIntero("Numero di colonne della griglia:", 20);
+            long seed = chiediLong("Seed per la generazione (0 = casuale):", 0);
+            
             Configurazione cfg = new Configurazione();
             cfg.righe = righe;
             cfg.colonne = colonne;
@@ -18,7 +21,7 @@ public class Main {
 
             GeneratoreGriglieOstacoli gen = new GeneratoreGriglieOstacoli(cfg);
             gen.generateAll();
-            new GrigliaFrame(gen.getGrid());
+            new GrigliaFrame(gen.getGrid());*/
         });
     }
 

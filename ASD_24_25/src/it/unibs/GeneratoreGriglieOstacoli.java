@@ -42,13 +42,15 @@ public class GeneratoreGriglieOstacoli {
         this.griglia = new Griglia(cfg.righe, cfg.colonne);
     }
 
-    // Genera tutte le tipologie di ostacoli
+    // Genera tutte le tipologie di ostacoli rispettando la densità specificata
     public void generateAll() {
+        if (cfg.density <= 0) return;
+        do{
         generaSemplici(cfg.numSemplici);
         generaAgglomerati(cfg.numAgglomerati);
         generaDiagonali(cfg.numDiagonali);
         generaBarre(cfg.numBarre);
-        generaAnelli(cfg.numAnelli);
+        generaAnelli(cfg.numAnelli);} while (griglia.calcolaDensita() < cfg.density);
     }
 
     // TIPOLOGIE DI OSTACOLI
@@ -120,6 +122,8 @@ public class GeneratoreGriglieOstacoli {
             }
         }
     }
+
+    
 
 	public Griglia getGrid() {
 		return griglia;
