@@ -84,10 +84,10 @@ public class GrigliaFrame extends JFrame {
                 } else if (destinazione == null) {
                     destinazione = griglia.getCella(riga, colonna);
                     infoLabel.setText("Destinazione: " + destinazione);
-                    double dist = AnalizzatoreCammini.dlib(origine, destinazione, contesto, complemento);
-                    infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
                     Set<Cella> ostacoli = AnalizzatoreCammini.trovaOstacoli(griglia);
                     RisultatoCammino cammino = AnalizzatoreCammini.camminoMin(origine, destinazione, griglia, ostacoli);
+                    double dist = cammino.getLunghezza();
+                    infoLabel.setText("dlib(O,D) = " + String.format("%.3f", dist));
                     cammino.stampa();
                     
                 } else {

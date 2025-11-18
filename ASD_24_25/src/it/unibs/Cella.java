@@ -12,14 +12,14 @@ public class Cella {
         this.riga = riga;
         this.colonna = colonna;
     }
-
+    /*
     // Costruttore con tipo personalizzato
     public Cella(int riga, int colonna, int tipo) {
         this.riga = riga;
         this.colonna = colonna;
         this.tipo = tipo;
     }
-    
+    */
     @Override
 	public boolean equals(Object o) {
 	    if (this == o) return true;
@@ -43,8 +43,12 @@ public class Cella {
     public void setAttraversabile(boolean isAttraversabile) {
         this.isAttraversabile = isAttraversabile;
     }
+    
+    public void setTipo(int tipo) {
+		this.tipo = tipo;
+	}
 
-    @Override
+	@Override
     public String toString() {
         return "Cella(riga=" + riga + ", colonna=" + colonna + ", tipo=" + tipo + ")";
     }
