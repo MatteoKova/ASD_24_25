@@ -67,12 +67,16 @@ public class GrigliaFrame extends JFrame {
         // Permette di registrare gli eventi del mouse
         panel.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                int cellSize = panel.getCellSize();
-                if (cellSize <= 0) return;
-                int colonna = e.getX() / cellSize;
-                int riga = e.getY() / cellSize;
-                if (!griglia.isNeiMargini(riga, colonna) || !griglia.isLibera(riga, colonna)) return;
+            	int cellSize = panel.getCellSize();
+            	if (cellSize <= 0) return;
 
+            	int offsetX = 40; // stesso valore usato in paintComponent
+            	int offsetY = 40;
+
+            	int colonna = (e.getX() - offsetX) / cellSize;
+            	int riga = (e.getY() - offsetY) / cellSize;
+            	if (!griglia.isNeiMargini(riga, colonna) || !griglia.isLibera(riga, colonna)) return;
+            	
                 if (origine == null) {
                 	origine = griglia.getCella(riga, colonna);
                     infoLabel.setText("Origine selezionata: Cella[riga=" + origine.getRiga() + ", colonna=" + origine.getColonna() + "]. Ora scegli Destinazione.");

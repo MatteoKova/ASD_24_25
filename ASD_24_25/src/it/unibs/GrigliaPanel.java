@@ -1,5 +1,5 @@
 package it.unibs;
-
+/*
 import javax.swing.*;
 
 import java.awt.*;
@@ -39,23 +39,38 @@ public class GrigliaPanel extends JPanel {
         return Math.max(4, Math.min(larghezza / griglia.getColonne(), altezza / griglia.getRighe()));
     }
 
-	@Override
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
         int dimCella = getCellSize();
         if (dimCella <= 0) return;
 
-        // Preparazione font per eventuali lettere dentro le celle
-        Font cellFont = new Font("SansSerif", Font.BOLD, Math.max(12, dimCella / 2));
-        g.setFont(cellFont);
+        int offsetX = 30; // spazio per numeri colonne
+        int offsetY = 30; // spazio per numeri righe
+
         FontMetrics fm = g.getFontMetrics();
 
+        // Etichette colonne
         for (int x = 0; x < griglia.getColonne(); x++) {
-        	for (int y = 0; y < griglia.getRighe(); y++) {
-                int xGUI = x * dimCella;
-                int yGUI = y * dimCella;
+            String label = String.valueOf(x);
+            int tw = fm.stringWidth(label);
+            g.drawString(label, offsetX + x * dimCella + (dimCella - tw) / 2, offsetY - 5);
+        }
 
+        // Etichette righe
+        for (int y = 0; y < griglia.getRighe(); y++) {
+            String label = String.valueOf(y);
+            int th = fm.getAscent();
+            g.drawString(label, offsetX - 20, offsetY + y * dimCella + (dimCella + th) / 2 - fm.getDescent());
+        }
+
+        // Disegno celle
+        for (int x = 0; x < griglia.getColonne(); x++) {
+            for (int y = 0; y < griglia.getRighe(); y++) {
+                int xGUI = offsetX + x * dimCella;
+                int yGUI = offsetY + y * dimCella;
+                
                 // Sfondo base
                 if (!griglia.isLibera(y, x)) {
                     g.setColor(Color.BLUE.darker());
@@ -99,6 +114,141 @@ public class GrigliaPanel extends JPanel {
 	                    int padding = 1;
 	                    g.drawOval(xGUI + padding, yGUI + padding, dimCella - 2 * padding, dimCella - 2 * padding);
 	                }
+                }
+
+                // Destinazione
+                if (destinazione != null && x == destinazione.getColonna() && y == destinazione.getRiga()) {
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                    String dTesto = "D";
+                    int tw = fm.stringWidth(dTesto);
+                    int th = fm.getAscent();
+                    g.setColor(Color.RED);
+                    g.drawString(dTesto, xGUI + (dimCella - tw) / 2, yGUI + (dimCella + th) / 2 - fm.getDescent());
+                }
+
+                // Bordo cella
+                g.setColor(Color.LIGHT_GRAY);
+                g.drawRect(xGUI, yGUI, dimCella, dimCella);
+            }
+        }
+    }
+}
+*/
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Set;
+
+public class GrigliaPanel extends JPanel {
+    private static final long serialVersionUID = 1L;
+
+    private Griglia griglia;
+    private Cella origine, destinazione;
+    private Set<Cella> contesto, complemento;
+    private Set<Cella> frontiera;
+
+    public GrigliaPanel(Griglia grid) {
+        this.griglia = grid;
+        setBackground(Color.WHITE);
+        setPreferredSize(new Dimension(
+                Math.max(400, grid.getColonne() * 20 + 50), 
+                Math.max(400, grid.getRighe() * 20 + 50)
+        ));
+    }
+
+    // Aggiornamento dati e repaint
+    public void aggiornaDati(Cella origine, Cella destinazione, Set<Cella> contesto, Set<Cella> complemento, Set<Cella> frontiera) {
+        this.origine = origine;
+        this.destinazione = destinazione;
+        this.contesto = contesto;
+        this.complemento = complemento;
+        this.frontiera = frontiera;
+        repaint();
+    }
+
+    // Restituisce le dimensioni di una cella
+    public int getCellSize() {
+        int larghezza = getWidth() - 50; // tolgo offset
+        int altezza = getHeight() - 50;
+        if (griglia.getColonne() == 0 || griglia.getRighe() == 0) return 0;
+        return Math.max(4, Math.min(larghezza / griglia.getColonne(), altezza / griglia.getRighe()));
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+
+        int dimCella = getCellSize();
+        if (dimCella <= 0) return;
+
+        int offsetX = 40; // spazio per numeri colonne
+        int offsetY = 40; // spazio per numeri righe
+
+        Font cellFont = new Font("SansSerif", Font.BOLD, Math.max(12, dimCella / 2));
+        g.setFont(cellFont);
+        FontMetrics fm = g.getFontMetrics();
+
+        // Etichette colonne
+        for (int x = 0; x < griglia.getColonne(); x++) {
+            String label = String.valueOf(x);
+            int tw = fm.stringWidth(label);
+            g.setColor(Color.BLACK);
+            g.drawString(label, offsetX + x * dimCella + (dimCella - tw) / 2, offsetY - 10);
+        }
+
+        // Etichette righe
+        for (int y = 0; y < griglia.getRighe(); y++) {
+            String label = String.valueOf(y);
+            int th = fm.getAscent();
+            g.setColor(Color.BLACK);
+            g.drawString(label, offsetX - 30, offsetY + y * dimCella + (dimCella + th) / 2 - fm.getDescent());
+        }
+
+        // Disegno celle
+        for (int x = 0; x < griglia.getColonne(); x++) {
+            for (int y = 0; y < griglia.getRighe(); y++) {
+                int xGUI = offsetX + x * dimCella;
+                int yGUI = offsetY + y * dimCella;
+
+                // Sfondo base
+                if (!griglia.isLibera(y, x)) {
+                    g.setColor(Color.BLUE.darker());
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                } else {
+                    g.setColor(Color.WHITE);
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                }
+
+                // Overlay contesto / complemento
+                if (contesto != null && contesto.contains(griglia.getCella(y, x))) {
+                    g.setColor(Color.GREEN.darker());
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                } else if (complemento != null && complemento.contains(griglia.getCella(y, x))) {
+                    g.setColor(Color.ORANGE);
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                }
+
+                // Assi rispetto all'origine
+                if (origine != null && destinazione == null && (y == origine.getRiga() || x == origine.getColonna()) && griglia.isLibera(y, x)) {
+                    g.setColor(Color.YELLOW);
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                }
+
+                // Origine
+                if (origine != null && x == origine.getColonna() && y == origine.getRiga()) {
+                    g.fillRect(xGUI, yGUI, dimCella, dimCella);
+                    String oTesto = "O";
+                    int tw = fm.stringWidth(oTesto);
+                    int th = fm.getAscent();
+                    g.setColor(Color.RED);
+                    g.drawString(oTesto, xGUI + (dimCella - tw) / 2, yGUI + (dimCella + th) / 2 - fm.getDescent());
+                }
+
+                // Frontiera
+                if (frontiera != null && frontiera.contains(griglia.getCella(y, x))) {
+                    g.setColor(Color.BLACK);
+                    int padding = 2;
+                    g.drawOval(xGUI + padding, yGUI + padding, dimCella - 2 * padding, dimCella - 2 * padding);
                 }
 
                 // Destinazione
