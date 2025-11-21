@@ -229,16 +229,23 @@ private volatile boolean stopRequested = false;
 
         startTime = System.currentTimeMillis();
 
-        return AnalizzatoreCammini.camminoMin(
-            origine,
-            destinazione,
-            griglia,
-            ostacoli,
-            () -> {
+        
+        
+        AnalizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
+        long t1 = System.nanoTime(); // Inizializzazione timer
+        
+        RisultatoCammino r1 = AnalizzatoreCammini.camminoMin(origine, destinazione, griglia, ostacoli, () -> {
                 // Stop if user requested or time limit elapsed
                 return stopRequested || (System.currentTimeMillis() - startTime) >= timeLimit;
             }
         );
+        
+        long t2 = System.nanoTime();
+
+        System.out.println("Tempo: " + (t2 - t1) + " ns"); // per controllare se meglio la condizione a riga 16 o 17
+        System.out.println("Ricorsioni: " + AnalizzatoreCammini.calls.get()); // per controllare se meglio la condizione a riga 16 o 17
+        
+        return r1;
     }
 
     @Override

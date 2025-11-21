@@ -63,9 +63,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 public class AnalizzatoreCammini {
+	public static AtomicLong calls = new AtomicLong(0);
 
     // Calcolo della distanza libera dlib(O, D)
     public static double dlib(Cella o, Cella d, Set<Cella> contesto, Set<Cella> complemento) {
@@ -273,11 +275,13 @@ public class AnalizzatoreCammini {
 
     // Calcola il cammino minimo da O a un D che non appartiene alla sua chiusura
     public static RisultatoCammino camminoMin(Cella o, Cella d, Griglia griglia, Set<Cella> ostacoli,  Supplier<Boolean> stopCheck) {
+    	calls.incrementAndGet();
+    	
         Set<Cella> contesto = calcolaContesto(griglia, o, ostacoli);
         Set<Cella> complemento = calcolaComplemento(griglia, o, ostacoli);
         if (stopCheck.get()) {
-    return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(o));
-}
+        	return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(o));
+        }
         // Se D è già nella chiusura, ritorna soluzione diretta
         if (contesto.contains(d)) {
         	Cella origine = griglia.getCella(o.getRiga(), o.getColonna());
@@ -306,7 +310,7 @@ public class AnalizzatoreCammini {
 
         for (Cella f : frontiera) {
             double lF = dlib(o, f, contesto, complemento);
-            if (lF >= lunghezzaMin) continue; // pruning
+            if ((lF + dlib(f, d, contesto, complemento)) >= lunghezzaMin) continue; // pruning
 
             RisultatoCammino parziale = camminoMin(f, d, griglia, unisci(ostacoli, contesto, complemento), stopCheck);
             
