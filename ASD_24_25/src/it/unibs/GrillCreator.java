@@ -88,6 +88,9 @@ private boolean[][] backupGrid;
         if ("Medium".equals(d)) density = 0.25;
         if ("High".equals(d)) density = 0.45;
         
+        //Creo la matrice che memorizza le celle non attraversabili(ostacoli permanenti e "temporanei")
+        boolean[][] mat_ostacoli = new boolean[rows][cols];
+        
           
         Configurazione cfg = new Configurazione();
             cfg.righe = rows;
@@ -95,13 +98,14 @@ private boolean[][] backupGrid;
             cfg.density = density;
             if (seed != 0) cfg.seed = seed;
 
-            GeneratoreGriglieOstacoli gen = new GeneratoreGriglieOstacoli(cfg);
+          
+            GeneratoreGriglieOstacoli gen = new GeneratoreGriglieOstacoli(cfg, mat_ostacoli);
             
           if ("Custom".equals(d)) {
-            custumizeObstacles(gen);
+            custumizeObstacles(mat_ostacoli);
         } else {
             gen.generateAll();
-            new GrigliaFrame(gen.getGrid());}
+            new GrigliaFrame(mat_ostacoli);}
 
         
 
@@ -111,7 +115,7 @@ private boolean[][] backupGrid;
        
     }
 
-    public void custumizeObstacles(GeneratoreGriglieOstacoli gen){
+    public void custumizeObstacles(boolean[][] mat_ostacoli){
        
     grillPanel.removeAll();
     grillPanel.setLayout(new BorderLayout());
@@ -150,17 +154,17 @@ private boolean[][] backupGrid;
 
     confirmBtn.addActionListener(e -> {
         boolean[][] obs = manualPanel.getObstacles();
-        Griglia g = gen.getGrid();
+        
 
         for (int r = 0; r < rows; r++)
             for (int c = 0; c < cols; c++)
                 if (obs[r][c])
-                    g.setObstacle(r, c);
+                    mat_ostacoli[r][c] = true;
 
 
 
-        g.calculateOstacoli();    
-        new GrigliaFrame(g);  // open analysis frame
+        //g.calculateOstacoli();    
+        new GrigliaFrame(mat_ostacoli);  // open analysis frame
     });
 
     grillPanel.revalidate();

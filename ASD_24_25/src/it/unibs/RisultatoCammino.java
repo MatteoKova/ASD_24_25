@@ -5,9 +5,9 @@ import java.util.List;
 public class RisultatoCammino {
 	
 	private double lunghezza;
-	private List<Cella> seq;
+	private List<Landmark> seq;
 	
-	public RisultatoCammino(double lunghezza, List<Cella> seq) {
+	public RisultatoCammino(double lunghezza, List<Landmark> seq) {
 		this.lunghezza = lunghezza;
 		this.seq = seq;
 	}
@@ -16,7 +16,7 @@ public class RisultatoCammino {
 		return lunghezza;
 	}
 
-	public List<Cella> getSeq() {
+	public List<Landmark> getSeq() {
 		return seq;
 	}
 	
@@ -25,8 +25,8 @@ public class RisultatoCammino {
     sb.append("Lunghezza cammino: ").append(lunghezza).append("\n");
     sb.append("Sequenza dei landmark:\n");
 
-    for (Cella cella : seq) {
-        sb.append(" - ").append(cella).append("\n");
+    for (Landmark landmark : seq) {
+        sb.append(" - ").append(landmark.toString()).append("\n");
     }
 
     return sb.toString();

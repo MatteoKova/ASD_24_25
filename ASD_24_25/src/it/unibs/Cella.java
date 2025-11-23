@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Cella {
     private int riga, colonna;
-    private int tipo = 1;
-    private boolean isAttraversabile = true;
+    //private int tipo = 1;
+    //private boolean isAttraversabile = true;
 
     // Costruttore con tipo di default
     public Cella(int riga, int colonna) {
@@ -36,20 +36,20 @@ public class Cella {
     // Getters
     public int getRiga() { return riga; }
     public int getColonna() { return colonna; }
-    public int getTipo() { return tipo; }
-    public boolean isAttraversabile() { return isAttraversabile; }
+    //public int getTipo() { return tipo; }
+ //   public boolean isAttraversabile() { return isAttraversabile; }
 
     // Setters
-    public void setAttraversabile(boolean isAttraversabile) {
+/*    public void setAttraversabile(boolean isAttraversabile) {
         this.isAttraversabile = isAttraversabile;
-    }
+    }*/
     
-    public void setTipo(int tipo) {
+    /*public void setTipo(int tipo) {
 		this.tipo = tipo;
-	}
+	}*/
 
 	@Override
     public String toString() {
-        return "Cella(riga=" + riga + ", colonna=" + colonna + ", tipo=" + tipo + ")";
+        return "Cella(riga=" + riga + ", colonna=" + colonna + ")";// tipo=" + tipo + ")";
     }
 }

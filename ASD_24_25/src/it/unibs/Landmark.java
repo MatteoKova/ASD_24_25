@@ -1,5 +1,5 @@
 package it.unibs;
-/*
+
 public class Landmark {
 	private Cella cella;
 	private int tipo;
@@ -9,8 +9,11 @@ public class Landmark {
 		this.tipo = tipo;
 	}
 	
-    public String toString() {
+    public Cella getCella() {
+		return cella;
+	}
+
+	public String toString() {
         return "(" + cella + ", " + tipo + ")";
     }
 }
-*/

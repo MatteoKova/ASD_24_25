@@ -60,15 +60,31 @@ dlib = sqrt(2)*delta_min + (delta_max - delta_min)
 */
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.function.Supplier;
 
 public class AnalizzatoreCammini {
+	public AtomicLong calls = new AtomicLong(0);
 
-    // Calcolo della distanza libera dlib(O, D)
-    public static double dlib(Cella o, Cella d, Set<Cella> contesto, Set<Cella> complemento) {
+	private boolean[][] mat_ostacoli;
+	private Stack<Cella> stack_ostacoli;
+	private Stack<int[][]> stack_griglia_tipi;
+	int nr, nc;
+
+	public AnalizzatoreCammini(boolean[][] mat_ostacoli, Stack<Cella> stack_ostacoli, Stack<int[][]> stack_griglia_tipi) {
+		this.mat_ostacoli = mat_ostacoli;
+		this.stack_ostacoli = stack_ostacoli;
+		this.stack_griglia_tipi = stack_griglia_tipi;
+		this.nr = mat_ostacoli.length;
+		this.nc = mat_ostacoli[0].length;
+	}
+
+	// Calcolo della distanza libera dlib(O, D)
+    public static double dlib(Cella o, Cella d) {
     	//if (contesto.contains(d) || complemento.contains(d)) {
     		int dx = Math.abs(d.getColonna() - o.getColonna());
             int dy = Math.abs(d.getRiga() - o.getRiga());
@@ -79,17 +95,25 @@ public class AnalizzatoreCammini {
     	//else return 0;
     }
 
-    // Permette di compiere un cammino libero di tio 1 o 2
-    public static boolean camminoLibero(Griglia g, Cella o, Cella d, int tipo, Set<Cella> ostacoli) {
+    // Permette di compiere un cammino libero di tipo 1 o 2
+    public boolean camminoLibero(Griglia griglia, Cella origine, Cella destinazione, int tipo) {
 
-        int dx = d.getColonna() - o.getColonna();
-        int dy = d.getRiga() - o.getRiga();
+        int dx = destinazione.getColonna() - origine.getColonna();
+        int dy = destinazione.getRiga() - origine.getRiga();
 
         if (dx == 0 && dy == 0) return true;
 
         // sorgente o destinazione bloccate?
-        if (!g.isLibera(o.getRiga(), o.getColonna()) || !g.isLibera(d.getRiga(), d.getColonna()) || ostacoli.contains(d)) return false;
-
+        int ro = origine.getRiga();
+        int co = origine.getColonna();
+        int rd = destinazione.getRiga();
+        int cd = destinazione.getColonna();
+        
+        if (ro > griglia.getRighe() || co > griglia.getColonne() ||
+        		rd > griglia.getRighe() || cd > griglia.getColonne() ||
+        			mat_ostacoli[ro][co] == true || mat_ostacoli[rd][cd] == true)
+        	return false;
+       
         int stepX = Integer.compare(dx, 0);
         int stepY = Integer.compare(dy, 0);
 
@@ -98,91 +122,98 @@ public class AnalizzatoreCammini {
 
         int diagSteps = Math.min(absDx, absDy);
         int remSteps = Math.abs(absDx - absDy);
+        
+        Cella mid;
 
         if (tipo == 1) {
-            // diagonale
-            if (!percorri(g, o, stepX, stepY, diagSteps, ostacoli)) return false;
+            // verifico di poter percorrere la diagonale
+            if (!percorri(griglia, origine, stepX, stepY, diagSteps)) return false;
 
-            Cella mid = g.getCella(
-                o.getRiga() + stepY * diagSteps,
-                o.getColonna() + stepX * diagSteps
+            //Calcolo il punto su cui mi trovo dopo la diagonale
+            mid = new Cella(
+                ro + stepY * diagSteps,
+                co + stepX * diagSteps
             );
 
-            // poi orizz/vert
+            // poi verifico percorribilità in orizz/vert
             if (absDx > absDy)
-                return percorri(g, mid, stepX, 0, remSteps, ostacoli);
+                return percorri(griglia, mid, stepX, 0, remSteps);
             else
-                return percorri(g, mid, 0, stepY, remSteps, ostacoli);
+                return percorri(griglia, mid, 0, stepY, remSteps);
 
         } else { // tipo 2
 
-            Cella mid;
-
             // orizz/vert
             if (absDx > absDy) {
-                if (!percorri(g, o, stepX, 0, remSteps, ostacoli)) return false;
-                mid = g.getCella(o.getRiga(), o.getColonna() + stepX * remSteps);
+                if (!percorri(griglia, origine, stepX, 0, remSteps)) return false;
+                mid = new Cella(ro, co + stepX * remSteps);
             } else {
-                if (!percorri(g, o, 0, stepY, remSteps, ostacoli)) return false;
-                mid = g.getCella(o.getRiga() + stepY * remSteps, o.getColonna());
+                if (!percorri(griglia, origine, 0, stepY, remSteps)) return false;
+                mid = new Cella(ro + stepY * remSteps, co);
             }
 
             // poi diagonale
-            return percorri(g, mid, stepX, stepY, diagSteps, ostacoli);
+            return percorri(griglia, mid, stepX, stepY, diagSteps);
         }
     }
 
     // Percorre la griglia lungo una direzione
-    private static boolean percorri(Griglia g, Cella start, int stepX, int stepY, int steps, Set<Cella> ostacoli) {
+    private boolean percorri(Griglia griglia, Cella start, int stepX, int stepY, int steps) {
         int r = start.getRiga();
         int c = start.getColonna();
 
-        for (int i = 0; i < steps; i++) {
+        for (int i = 0; i < steps; i++) { //percorre ma non controlla che per ogni cella attraversata, non passi sopra ad ostacoli
             r += stepY;
             c += stepX;
 
-            // Cella corrente
-            Cella attuale = g.getCella(r, c);
-
             // Se fuori griglia → bloccato
-            if (attuale == null) return false;
+            if (!griglia.isNeiMargini(r, c)) return false;
 
             // Se non libera nella griglia → bloccato
-            if (!attuale.isAttraversabile()) return false;
-
             // SESTA COSA IMPORTANTE: se è negli ostacoli dinamici -> bloccato
-            if (ostacoli.contains(attuale)) return false;
+            if (mat_ostacoli[r][c] == true) return false;
         }
-
         return true;
     }
 
-    // Calcola il contesto di O (punti raggiungibili con cammini di tipo 1)
-    public static Set<Cella> calcolaContesto(Griglia g, Cella o, Set<Cella> ostacoli) {
-    	Set<Cella> contesto = new HashSet<>();
+    public int[][] calcolaContesto(Griglia griglia, Cella origine, int[][] griglia_tipi) {
+    	
+    	for (int r = 0; r < griglia.getRighe(); r++) {
+    		for (int c = 0; c < griglia.getColonne(); c++) {
 
-    	for (int r = 0; r < g.getRighe(); r++) {
-    		for (int c = 0; c < g.getColonne(); c++) {
-
-    			Cella cella = g.getCella(r, c);
+    			Cella cella = new Cella(r, c);
 
 	            // Se la cella è bloccata o appartiene agli ostacoli dinamici -> salta
-	            if (!cella.isAttraversabile() || ostacoli.contains(cella)) {
+	            if (mat_ostacoli[r][c] == true) {
 	                continue;
 	            }
 	
 	            // Se esiste un cammino libero di tipo 1, allora la cella appartiene al contesto
-	            if (camminoLibero(g, o, cella, 1, ostacoli)) {
-	                contesto.add(cella);
+	            if (camminoLibero(griglia, origine, cella, 1)) {
+	                griglia_tipi[r][c]=1; 
 	            }
 	        }
 	    }
-	
-	    return contesto;
-	}
+    	return griglia_tipi;
+    }
+    
+    public int[][] calcolaComplemento(Griglia griglia, Cella origine, int[][] griglia_tipi) {
+    	for (int r = 0; r < griglia.getRighe(); r++) {
+            for (int c = 0; c < griglia.getColonne(); c++) {
+
+                if (mat_ostacoli[r][c]) continue; //se la cella su cui sono non è attraversabile(perchè ostacolo o anche chiusura di punto precedente del cammino), salta
+
+                //cella analizzata deve essere di tipo 2, e non deve appartenere al conteesto di origine
+                if (camminoLibero(griglia, origine, new Cella(r,c), 2) && griglia_tipi[r][c]==0) {
+                    griglia_tipi[r][c]=2;
+                }
+            }
+        }
+    	return griglia_tipi;
+    }
 
     // Calcola il complemento di O (punti raggiungibili SOLO con cammini di tipo 2)
-    public static Set<Cella> calcolaComplemento(Griglia g, Cella o, Set<Cella> ostacoli) {
+    /*public static Set<Cella> calcolaComplemento(Griglia g, Cella o, Set<Cella> ostacoli) {
         Set<Cella> complemento = new HashSet<>();
 
         for (int r = 0; r < g.getRighe(); r++) {
@@ -199,10 +230,42 @@ public class AnalizzatoreCammini {
         }
 
         return complemento;
+    }*/
+    
+    public boolean controllaVicini(Cella cella, Griglia griglia, int[][] griglia_tipi) {
+    	int[] dx = {-1, 0, 1};
+        int[] dy = {-1, 0, 1};
+        
+        int r = cella.getRiga();
+        int c = cella.getColonna();
+        
+        int righe_tot = griglia.getRighe();
+        int col_tot = griglia.getColonne();
+        
+        for (int fx : dx) {
+            for (int fy : dy) {
+
+                if (fx == 0 && fy == 0) continue;
+
+                int nx = c + fx;
+                int ny = r + fy;
+                
+                if (nx < 0 || ny < 0) continue;
+
+                if (nx >= col_tot || ny >= righe_tot) continue;
+
+                //se la cella limitrofa, non è un ostacolo, e non appartiene alla chiusura dell'origine, 
+                if (mat_ostacoli[ny][nx] == false && griglia_tipi[ny][nx] == 0) {
+                    return true; 
+                }
+            }
+        }
+        return false;
     }
     
+    
     // Controlla che il punto appartenga alla frontiera
-    public static boolean controllaVicini(Cella cella, Griglia griglia, Set<Cella> chiusura) {
+  /*  public static boolean controllaVicini(Cella cella, Griglia griglia, Set<Cella> chiusura) {
         int[] dx = {-1, 0, 1};
         int[] dy = {-1, 0, 1};
 
@@ -222,11 +285,28 @@ public class AnalizzatoreCammini {
             }
         }
         return false;
-    }
+    }*/
 
+    //TODO?: potrei unire calcolaFrontiera/Contesto/Complemento, in modo da ridurre le operazioni totali
+    public Set<Landmark> calcolaFrontiera(int[][] griglia_tipi, Griglia griglia) {
+    	Set<Landmark> frontiera = new HashSet<Landmark>();
+    	Cella cella;
+
+    	for(int r = 0; r < griglia.getRighe(); r++) {
+    		for(int c = 0; c < griglia.getColonne(); c++) {
+    			if(griglia_tipi[r][c] == 1 || griglia_tipi[r][c] == 2){
+    				cella = new Cella(r,c);
+    				if(controllaVicini(cella, griglia, griglia_tipi)) { //Se la cella appartiene alla chiusura dell'origine
+    					frontiera.add(new Landmark(cella,griglia_tipi[r][c])); //SISTEMO: non trova punti di frontiera!!!
+    				}
+    			}
+    		}
+    	}
+    	return frontiera;
+    }
     
     // Calcola la frontiera
-    public static Set<Cella> calcolaFrontiera(Set<Cella> contesto, Set<Cella> complemento, Griglia griglia) {
+    /*public Set<Cella> calcolaFrontiera(Set<Cella> contesto, Set<Cella> complemento, Griglia griglia) {
     	Set<Cella> frontiera = new HashSet<Cella>();
     	
     	// Calcola la chiusura
@@ -239,21 +319,21 @@ public class AnalizzatoreCammini {
     		}
     	}
     	return frontiera;
-    }
+    }*/
     
     // Restituisce le celle che compongono gli ostacoli della griglia
-    public static Set<Cella> trovaOstacoli(Griglia griglia) {
+/*    public static Set<Cella> trovaOstacoli(Griglia griglia) {
     	Set<Cella> ostacoli = new HashSet<Cella>();
     	for (int i=0; i < griglia.getRighe(); i++) {
     		for (int j=0; j < griglia.getColonne(); j++) {
-    			Cella cella = griglia.getCella(i, j);
+    			Cella cella = new Cella(i, j);
     			if (!cella.isAttraversabile()) {
     				ostacoli.add(cella);
     			}
     		}
     	}
     	return ostacoli;
-    }
+    }*/
     
     // Unisce 3 set di celle
     public static Set<Cella> unisci(Set<Cella> seq1, Set<Cella> seq2, Set<Cella> seq3) {
@@ -263,67 +343,126 @@ public class AnalizzatoreCammini {
         return chiusura;
     }
     
-    // Unisce 2 set di celle rimuovendo il primo elemento della seconda
-    public static List<Cella> compatta(List<Cella> seq1, List<Cella> seq2) {
-        List<Cella> risultato = new ArrayList<>(seq1);
+    // Unisce 2 liste di landmark, rimuovendo il primo elemento della seconda
+    public static List<Landmark> compatta(List<Landmark> seq1, List<Landmark> seq2) {
+    	List<Landmark> result = new ArrayList<>(seq1);
         // aggiungi tutti gli elementi di seq2 tranne il primo
-        risultato.addAll(seq2.subList(1, seq2.size()));
-        return risultato;
+        result.addAll(seq2.subList(1, seq2.size()));
+        return result;
     }
 
-    // Calcola il cammino minimo da O a un D che non appartiene alla sua chiusura
-    public static RisultatoCammino camminoMin(Cella o, Cella d, Griglia griglia, Set<Cella> ostacoli,  Supplier<Boolean> stopCheck) {
-        Set<Cella> contesto = calcolaContesto(griglia, o, ostacoli);
-        Set<Cella> complemento = calcolaComplemento(griglia, o, ostacoli);
-        if (stopCheck.get()) {
-    return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(o));
-}
-        // Se D è già nella chiusura, ritorna soluzione diretta
-        if (contesto.contains(d)) {
-        	Cella origine = griglia.getCella(o.getRiga(), o.getColonna());
-        	origine.setTipo(0);
-        	Cella destinazione = griglia.getCella(d.getRiga(), d.getColonna());
-        	destinazione.setTipo(1);
-        	return new RisultatoCammino(dlib(o, d, contesto, complemento), List.of(origine, destinazione));
+    public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, Supplier<Boolean> stopCheck) {
+    	calls.incrementAndGet();
+    	
+    	int[][] griglia_tipi = new int[griglia.getRighe()][griglia.getColonne()]; //crea una nuova matrice per memorizzare i tipi relativi ad O, inizializzandola a 0
+    	calcolaContesto(griglia, origine, griglia_tipi); //è inutile che restituisca qualcosa, visto che sta modificando griglia_tipi
+    	calcolaComplemento(griglia, origine, griglia_tipi);
+    	
+        if (stopCheck.get()) 
+            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)));
+        
+        if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==1) {
+        	//origine.setTipo(0);
+        	//destinazione.setTipo(1);
+        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1)));
         }
-        if (complemento.contains(d)) {
-        	Cella origine = griglia.getCella(o.getRiga(), o.getColonna());
-        	origine.setTipo(0);
-        	Cella destinazione = griglia.getCella(d.getRiga(), d.getColonna());
-        	destinazione.setTipo(2);
-        	return new RisultatoCammino(dlib(o, d, contesto, complemento), List.of(origine, destinazione));
+        else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==2) {
+        	//origine.setTipo(0);
+        	//destinazione.setTipo(2);
+        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,2)));
         }
-
-        Set<Cella> frontiera = calcolaFrontiera(contesto, complemento, griglia);
-
+        
+        //Set<Landmark> frontiera = calolaFrontiera(...,griglia_tipi);
+        Set<Landmark> frontiera = calcolaFrontiera(griglia_tipi, griglia); //Sarebbe da passare a list
+        
         // CASO BASE: se frontiera è vuota => non si può espandere -> impossibile
         if (frontiera.isEmpty()) {
             return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of());
         }
-
+        
+        int num_ostacoli_temporanei = aggiornaOstacoli(griglia_tipi);
+        //ATTENZIONE: sto duplicando la matrice iniziale
+        stack_griglia_tipi.add(griglia_tipi); //memorizza la matrice dei tipi, per poterla riprendere dopo aver trovato il sottocammino cella_frontiera -> destinazione, migliore
+        
         double lunghezzaMin = Double.POSITIVE_INFINITY;
-        List<Cella> seqMin = new ArrayList<>();
-
-        for (Cella f : frontiera) {
-            double lF = dlib(o, f, contesto, complemento);
-            if (lF >= lunghezzaMin) continue; // pruning
-
-            RisultatoCammino parziale = camminoMin(f, d, griglia, unisci(ostacoli, contesto, complemento), stopCheck);
-            
-            double lFD = parziale.getLunghezza();
-            if (Double.isInfinite(lFD)) continue;
-
-            double lTot = lF + lFD;
-            if (lTot < lunghezzaMin) {
+        List<Landmark> seqMin = new ArrayList<>();
+        double lF, lFD, lTot;
+        
+        for (Landmark landmark_frontiera : frontiera) {
+        	Cella cella_frontiera = landmark_frontiera.getCella();
+        	mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = false; //imposta temporaneamente la cella di forntiera che sto considerando, come libera
+        	lF = dlib(origine, cella_frontiera);
+        	//if (lF >= lunghezzaMin) continue; //proning
+        	if (lF + dlib(cella_frontiera, destinazione) >= lunghezzaMin) continue; // pruning
+        	
+        	RisultatoCammino sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia, stopCheck);
+        	
+        	mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = true;
+        	//stack_griglia_tipi.pop(); //rimuove la griglia dei tipi del sotto_cammino dallo stack
+        	
+        	lFD = sotto_cammino.getLunghezza();
+        	if(Double.isInfinite(lFD)) continue;
+        	
+        	lTot = lF + lFD;
+        	if (lTot < lunghezzaMin) {
                 lunghezzaMin = lTot;
-                Cella origine = griglia.getCella(o.getRiga(), o.getColonna());
-                origine.setTipo(0);
-                Cella landmark = griglia.getCella(f.getRiga(), f.getColonna());
                 
-                seqMin = compatta(List.of(origine, landmark), parziale.getSeq());
+                seqMin = compatta(List.of(new Landmark(origine, 0), landmark_frontiera), sotto_cammino.getSeq());
             }
         }
+        rimuoviOstacoli(num_ostacoli_temporanei); //elimina gli ostacoli relativi a questo livello
+        stack_griglia_tipi.pop(); //tolgo la matrice di questo livello 
+        return new RisultatoCammino(lunghezzaMin, seqMin); //Restituisce il percorso con distanza minore tra origine e destinazione
+    }
+    
+    /*
+     * Funzione per aggiornare la matrice contenente gli ostacoli, aggiungedogli le celle della chiusura dell'origine.
+     * Viene memorizzato anche l'elenco delle celle rese ostacoli, in modo da poterle rimuovere quando terminarà un ierazione di camminoMin
+     */
+    private int aggiornaOstacoli(int[][]griglia_tipi) {
+    	int num_ostacoli_aggiunti = 0;
+    	
+    	for(int r = 0; r < griglia_tipi.length; r++) {
+    		for(int c = 0; c < griglia_tipi[0].length; c++) {
+    			if(griglia_tipi[r][c] == 1 || griglia_tipi[r][c] == 2) { //se sono in una cella della chiusura della mia origine
+    				mat_ostacoli[r][c] = true; //segna la cella come ostacolo (temporaneo)
+    				stack_ostacoli.push(new Cella(r,c)); //e aggiungila allo stack degli ostacoli, in mod oda poterla rimuovere da mat_ostacoli, quando camminoMin tornerà ad un livello superiore
+    				num_ostacoli_aggiunti++; //serve per aver modo di rimuovere il giusto numero di ostacoli, ogni volta che risalgo un livello
+    			}
+    		}
+    	}
+    	return num_ostacoli_aggiunti;
+    }
+    
+    private void rimuoviOstacoli(int num_ostacoli) {
+    	Cella ostacolo;
+    	for (int i = 0; i < num_ostacoli; i++) {
+    		ostacolo = stack_ostacoli.pop();
+    		mat_ostacoli[ostacolo.getRiga()][ostacolo.getColonna()] = false; //toglie l'ostacolo, perchè relativo ad un iterazione di acmminoMin già terminata
+    	}
+    }
 
-        return new RisultatoCammino(lunghezzaMin, seqMin);
+    public int[][] getMatTipi() {
+    	return stack_griglia_tipi.peek();
+    }
+
+    /*
+     * Funzione per rimuovere eventuali matrici di tipi, rimaste a seguito di un interruzione
+     * di cammminoMin fatto dall'utente
+     */
+    public void ripristinaCoerenzaTipi() {
+    	stack_griglia_tipi = new Stack<int[][]>();
+    }
+
+    /*
+     * Funzione per rimuovere tutti gli ostacoli "temporanei", che possono essere rimasti a seguito
+     * di un interruzione di camminoMin fatto dall'utente
+     */
+    public void ripristinaCoerenzaOstacoli() {
+    	Cella cella;
+    	while(!stack_ostacoli.isEmpty()) {
+    		cella = stack_ostacoli.pop();
+    		mat_ostacoli[cella.getRiga()][cella.getColonna()] = false;
+    	}
     }
 }

@@ -3,20 +3,20 @@ package it.unibs;
 import java.util.List;
 
 public class Griglia {
-    private Cella[][] celle;
+    //private Cella[][] celle;
     private final int righe, colonne;
-    private  List <Cella> ostacoli;
+    //private  List <Cella> ostacoli;
     // Costruttore
     public Griglia(int righe, int colonne) {
         this.righe = righe;
         this.colonne = colonne;
-        this.celle = new Cella[righe][colonne];
-        this.ostacoli = new java.util.ArrayList<>();
-        for (int r = 0; r < righe; r++) {
+        //this.celle = new Cella[righe][colonne];
+        //this.ostacoli = new java.util.ArrayList<>();
+        /*for (int r = 0; r < righe; r++) {
             for (int c = 0; c < colonne; c++) {
                 celle[r][c] = new Cella(r, c); // riga, colonna
             }
-        }
+        }*/
     }
     
     // Controlla se la cella è all'interno della griglia
@@ -25,7 +25,7 @@ public class Griglia {
     }
 
     // Riconosce le celle libere
-    public boolean isLibera(int r, int c) {
+ /*   public boolean isLibera(int r, int c) {
         return isNeiMargini(r, c) && celle[r][c].isAttraversabile();
     }
 
@@ -76,9 +76,9 @@ public class Griglia {
             }
         }
         return ostacoli;
-    }
+    }*/
 
-    public List<Cella> getOstacoli() {
+    /*public List<Cella> getOstacoli() {
         return ostacoli;
     }
 
@@ -86,7 +86,7 @@ public class Griglia {
     // Restituisce una cella della griglia
     public Cella getCella(int r, int c) {
         return celle[r][c];
-    }
+    }*/
 
     // Restituisce il numero di righe della griglia
     public int getRighe() {

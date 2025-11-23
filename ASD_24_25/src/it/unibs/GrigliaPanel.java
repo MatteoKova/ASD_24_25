@@ -144,22 +144,28 @@ public class GrigliaPanel extends JPanel {
 
     private Griglia griglia;
     private Cella origine, destinazione;
-    private Set<Cella> contesto, complemento;
-    private Set<Cella> frontiera;
+    private int[][] contesto, complemento;
+    private Set<Landmark> frontiera;
+    private boolean[][] mat_ostacoli;
 
 
 
-    public GrigliaPanel(Griglia grid) {
-        this.griglia = grid;
+    public GrigliaPanel(Griglia griglia, boolean[][] mat_ostacoli, int[][] contesto, int[][] complemento, Set<Landmark> frontiera) {
+        this.griglia = griglia;
+        this.mat_ostacoli = mat_ostacoli;
+        this.contesto = contesto;
+        this.complemento = complemento;
+        this.frontiera = frontiera;
+        
         setBackground(Color.WHITE);
         setPreferredSize(new Dimension(
-                Math.max(400, grid.getColonne() * 20 + 50), 
-                Math.max(400, grid.getRighe() * 20 + 50)
+                Math.max(400, griglia.getColonne() * 20 + 50), 
+                Math.max(400, griglia.getRighe() * 20 + 50)
         ));
     }
 
     // Aggiornamento dati e repaint
-    public void aggiornaDati(Cella origine, Cella destinazione, Set<Cella> contesto, Set<Cella> complemento, Set<Cella> frontiera) {
+    public void aggiornaDati(Cella origine, Cella destinazione, int[][] contesto, int[][] complemento, Set<Landmark> frontiera) {
         this.origine = origine;
         this.destinazione = destinazione;
         this.contesto = contesto;
@@ -178,6 +184,9 @@ public class GrigliaPanel extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+    	//Ogni volta, chiedi nuovo contesto, complemento, frontiera, in modo da averli aggiornati
+    	//mat_ostacoli, invece, rimane aggiornato, perchè ne ho un riferimento
+    	
         super.paintComponent(g);
 
         int dimCella = getCellSize();
@@ -213,7 +222,7 @@ public class GrigliaPanel extends JPanel {
                 int yGUI = offsetY + y * dimCella;
 
                 // Sfondo base
-                if (!griglia.isLibera(y, x)) {
+                if (mat_ostacoli[y][x] == true) {
                     g.setColor(Color.BLUE.darker());
                     g.fillRect(xGUI, yGUI, dimCella, dimCella);
                 } else {
@@ -222,16 +231,16 @@ public class GrigliaPanel extends JPanel {
                 }
 
                 // Overlay contesto / complemento
-                if (contesto != null && contesto.contains(griglia.getCella(y, x))) {
+                if (contesto[y][x] == 1) {
                     g.setColor(Color.GREEN.darker());
                     g.fillRect(xGUI, yGUI, dimCella, dimCella);
-                } else if (complemento != null && complemento.contains(griglia.getCella(y, x))) {
+                } else if (complemento[y][x] == 2) {
                     g.setColor(Color.ORANGE);
                     g.fillRect(xGUI, yGUI, dimCella, dimCella);
                 }
 
                 // Assi rispetto all'origine
-                if (origine != null && destinazione == null && (y == origine.getRiga() || x == origine.getColonna()) && griglia.isLibera(y, x)) {
+                if (origine != null && destinazione == null && (y == origine.getRiga() || x == origine.getColonna()) && mat_ostacoli[y][x] == false) {
                     g.setColor(Color.YELLOW);
                     g.fillRect(xGUI, yGUI, dimCella, dimCella);
                 }
@@ -247,10 +256,16 @@ public class GrigliaPanel extends JPanel {
                 }
 
                 // Frontiera
-                if (frontiera != null && frontiera.contains(griglia.getCella(y, x))) {
-                    g.setColor(Color.BLACK);
-                    int padding = 2;
-                    g.drawOval(xGUI + padding, yGUI + padding, dimCella - 2 * padding, dimCella - 2 * padding);
+                if (frontiera != null) {
+                	//frontiera.contains(griglia.getCella(y, x))) {
+                	for(Landmark landmark : frontiera){
+                		if(landmark.getCella().equals(new Cella(y,x))) {
+                			g.setColor(Color.BLACK);
+                			int padding = 2;
+                			g.drawOval(xGUI + padding, yGUI + padding, dimCella - 2 * padding, dimCella - 2 * padding);
+                		}
+                	}
+                    
                 }
 
                 // Destinazione
