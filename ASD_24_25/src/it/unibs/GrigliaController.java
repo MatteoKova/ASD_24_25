@@ -11,7 +11,7 @@ public class GrigliaController {
 		
 		SwingUtilities.invokeLater(() -> {
 
-			GrillCreator creator= new GrillCreator();
+			CreatoreGriglia creator= new CreatoreGriglia();
 			creator.setVisible(true);
 
 		});

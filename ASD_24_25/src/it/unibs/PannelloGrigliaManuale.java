@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class ManualGridPanel extends JPanel {
+public class PannelloGrigliaManuale extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
@@ -15,7 +15,7 @@ public class ManualGridPanel extends JPanel {
     private boolean painting = false;   // left-drag painting ON
     private boolean erasing = false;    // right-drag erasing ON
 
-    public ManualGridPanel(int r, int c) {
+    public PannelloGrigliaManuale(int r, int c) {
         this.rows = r;
         this.cols = c;
         obstacles = new boolean[rows][cols];
@@ -97,11 +97,11 @@ public class ManualGridPanel extends JPanel {
         return (r >= 0 && r < rows && c >= 0 && c < cols);
     }
 
-    public boolean[][] getObstacles() {
+    public boolean[][] getOstacoli() {
         return obstacles;
     }
 
-    public void setObstacles(boolean[][] grid) {
+    public void setOstacoli(boolean[][] grid) {
         this.obstacles = grid;
         repaint();
     }

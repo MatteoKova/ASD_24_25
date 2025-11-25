@@ -49,7 +49,7 @@ public class GeneratoreGriglieOstacoli {
     }
 
     // Genera tutte le tipologie di ostacoli rispettando la densità specificata
-    public void generateAll() {
+    public void generaTutto() {
     	if (cfg.density <= 0) return;
     	double densita;
     	do{
