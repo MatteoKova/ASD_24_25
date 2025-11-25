@@ -198,21 +198,56 @@ public class GrigliaPanel extends JPanel {
         Font cellFont = new Font("SansSerif", Font.BOLD, Math.max(12, dimCella / 2));
         g.setFont(cellFont);
         FontMetrics fm = g.getFontMetrics();
-
+        
         // Etichette colonne
         for (int x = 0; x < griglia.getColonne(); x++) {
+
+            if (x % 5 != 0) continue; // mostra solo multipli di 5
+
             String label = String.valueOf(x);
             int tw = fm.stringWidth(label);
+
+            int labelX = offsetX + x * dimCella + (dimCella - tw) / 2;
+            int labelY = offsetY - 10;
+
             g.setColor(Color.BLACK);
-            g.drawString(label, offsetX + x * dimCella + (dimCella - tw) / 2, offsetY - 10);
+            g.drawString(label, labelX, labelY);
+
+            // Barretta verticale sotto il numero
+            int barX = offsetX + x * dimCella + dimCella / 2;
+            int barYStart = offsetY - 8;
+            int barYEnd = offsetY - 2;
+
+            g.drawLine(barX, barYStart, barX, barYEnd);
         }
 
-        // Etichette righe
+        // Etichette righe (es.: solo multipli di 5 per non affollare)
+        int labelPadding = 6; // spazio tra numero e bordo della griglia
+        int barLength = Math.max(6, dimCella / 3); // lunghezza della barretta
+
         for (int y = 0; y < griglia.getRighe(); y++) {
+        	
+        	
+            if (y % 5 != 0) continue; // mostra solo multipli di 5
+
             String label = String.valueOf(y);
             int th = fm.getAscent();
+
+            // posizione del testo (allineato a destra nell'area etichette)
+            int labelX = offsetX - labelPadding - fm.stringWidth(label);
+            int labelY = offsetY + y * dimCella + (dimCella + th) / 2 - fm.getDescent();
+
             g.setColor(Color.BLACK);
-            g.drawString(label, offsetX - 30, offsetY + y * dimCella + (dimCella + th) / 2 - fm.getDescent());
+            g.drawString(label, labelX, labelY);
+
+            // Calcola centro verticale della cella (indipendente da offsetX del testo)
+            int cellMidY = offsetY + y * dimCella + dimCella / 2;
+
+            // Disegna la barretta orizzontale che parte dal bordo sinistro della griglia
+            // e si estende di 'barLength' verso destra (in direzione della tabella)
+            int barXStart = offsetX - labelPadding;        // subito a sinistra del bordo della tabella
+            int barXEnd = Math.min(offsetX - labelPadding + barLength, offsetX - 2); // evita sovrapposizione
+            g.drawLine(barXStart, cellMidY, barXEnd, cellMidY);
         }
 
         // Disegno celle
