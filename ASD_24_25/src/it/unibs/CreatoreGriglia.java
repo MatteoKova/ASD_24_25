@@ -2,7 +2,11 @@ package it.unibs;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 import java.awt.*;
+import java.awt.event.ItemEvent;
 
 public class CreatoreGriglia extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -15,7 +19,7 @@ public class CreatoreGriglia extends JFrame {
 
     private int righe, colonne;
     private long seed = 0;
-
+    
     public CreatoreGriglia() {
         setTitle("Creazione Griglia");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -77,29 +81,73 @@ public class CreatoreGriglia extends JFrame {
         add(pannelloGriglia, BorderLayout.CENTER);
 
         // Azioni
-        pulsanteAnteprima.addActionListener(e -> mostraAnteprima());
-        pulsanteConferma.addActionListener(e -> creaGriglia());
-
+        pulsanteAnteprima.addActionListener(e -> {
+        	mostraAnteprima();
+        	pulsanteConferma.setEnabled(true);
+        });
+        
+        pulsanteConferma.addActionListener(e -> {
+        	if (leggiParametri())
+        		creaGriglia();
+        	}
+        );
+        
+        disattivaConferma();
+        
         // Mostra anteprima iniziale con parametri di default
         mostraAnteprima();
     }
+    
+    // Se l'utente modifica un input, il pulsante di conferma si disattiva finché non aggiorna l'anteprima
+    public void disattivaConferma() {
+    	// --- LISTENER PER I CAMPI ---
+        DocumentListener listenerCampi = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) { pulsanteConferma.setEnabled(false); }
+            @Override
+            public void removeUpdate(DocumentEvent e) { pulsanteConferma.setEnabled(false); }
+            @Override
+            public void changedUpdate(DocumentEvent e) { pulsanteConferma.setEnabled(false); }
+        };
 
-    // Metodo che recupera i dati inseriti dall'utente
-    private void leggiParametri() {
-        righe = Integer.parseInt(campoRighe.getText());
-        colonne = Integer.parseInt(campoColonne.getText());
-        seed = Long.parseLong(campoSeed.getText());
+        // Aggiungo il listener ai JTextField
+        campoRighe.getDocument().addDocumentListener(listenerCampi);
+        campoColonne.getDocument().addDocumentListener(listenerCampi);
+        campoSeed.getDocument().addDocumentListener(listenerCampi);
+        
+        // Se hai anche una JComboBox per la densità:
+        boxDensita.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                pulsanteConferma.setEnabled(false);
+            }
+        });
     }
-
+    
+    // Metodo che recupera i dati inseriti dall'utente
+    private boolean leggiParametri() {
+        try {
+            righe = Integer.parseInt(campoRighe.getText().trim());
+            colonne = Integer.parseInt(campoColonne.getText().trim());
+            seed = Long.parseLong(campoSeed.getText().trim());
+            return true;
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this,
+                "Inserisci valori numerici validi per righe, colonne e seed", "Errore di input", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+    
     // Metodo che chiama il generatore degli ostacoli
     private boolean[][] generaOstacoli() {
         leggiParametri();
 
         if (righe <= 0 || colonne <= 0) {
-            JOptionPane.showMessageDialog(this, "Righe e colonne devono essere interi positivi.", "Errore input", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La matrice deve avere un numero positivo di righe e e di colonne", "Errore input",
+            		JOptionPane.ERROR_MESSAGE);
             return null;
         } else if (righe > 100 || colonne > 100) {
-            JOptionPane.showMessageDialog(this, "Righe e colonne devono essere ≤ 100.", "Errore input", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La matrice non può avere più di 100 righe e 100 colonne", "Errore input",
+            		JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -127,10 +175,15 @@ public class CreatoreGriglia extends JFrame {
 
         if ("Personalizzata".equals(scelta)) {
             pannelloGriglia.setLayout(new BorderLayout());
-            pannelloGriglia.add(new JLabel("Anteprima non disponibile in modalità personalizzata", SwingConstants.CENTER), BorderLayout.CENTER);
+            pannelloGriglia.add(new JLabel("Anteprima non disponibile in modalità personalizzata",
+            		SwingConstants.CENTER), BorderLayout.CENTER);
+            grigliaBackup = null; // nessuna anteprima disponibile
         } else {
             boolean[][] ostacoli = generaOstacoli();
             if (ostacoli == null) return;
+            
+            // Salvo la griglia generata
+            grigliaBackup = ostacoli;
 
             PannelloAnteprima anteprima = new PannelloAnteprima(ostacoli);
             pannelloGriglia.setLayout(new BorderLayout());
@@ -148,9 +201,14 @@ public class CreatoreGriglia extends JFrame {
             boolean[][] ostacoli = new boolean[righe][colonne];
             personalizzaOstacoli(ostacoli);
         } else {
-            boolean[][] ostacoli = generaOstacoli();
-            if (ostacoli != null) {
-                new GrigliaFrame(ostacoli);
+        	// Se ho già un'anteprima, la riuso
+            if (grigliaBackup != null) {
+                new FinestraGriglia(grigliaBackup);
+            } else {
+	            boolean[][] ostacoli = generaOstacoli();
+	            if (ostacoli != null) {
+	                new FinestraGriglia(ostacoli);
+	            }
             }
         }
     }
@@ -190,7 +248,7 @@ public class CreatoreGriglia extends JFrame {
                 for (int c = 0; c < colonne; c++)
                     if (obs[r][c]) ostacoli[r][c] = true;
 
-            new GrigliaFrame(ostacoli);
+            new FinestraGriglia(ostacoli);
         });
 
         pannelloGriglia.revalidate();
