@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Set;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PannelloGriglia extends JPanel {
@@ -16,7 +17,8 @@ public class PannelloGriglia extends JPanel {
     private int[][] matriceContesto, matriceComplemento;
     private Set<Landmark> frontiera;
     private boolean[][] matriceOstacoli;
-    private List<Cella> cammino = List.of(); 
+    private List<Cella> camminoOrdinato;
+    private boolean[][] camminoMask;
     
     public PannelloGriglia(Griglia griglia, boolean[][] matriceOstacoli, int[][] matriceContesto,
     						int[][] matriceComplemento, Set<Landmark> frontiera) {
@@ -43,11 +45,20 @@ public class PannelloGriglia extends JPanel {
         repaint();
     }
     
-    // Aggiorna il cammino minimo
+    // Aggiorna il cammino minimo e popola la griglia di boolean che servirà per disegnare il cammino minimo
     public void aggiornaCammino(List<Cella> cammino) {
-        this.cammino = cammino;
+        // reset
+        this.camminoMask = new boolean[griglia.getRighe()][griglia.getColonne()];
+        this.camminoOrdinato = new ArrayList<>(cammino);
+
+        // riempi la maschera
+        for (Cella c : cammino) {
+            camminoMask[c.getRiga()][c.getColonna()] = true;
+        }
+
         repaint();
     }
+
 
     // Calcola la dimensione di una cella in base allo spazio disponibile
     public int getDimensioneCella() {
@@ -169,28 +180,9 @@ public class PannelloGriglia extends JPanel {
                     disegnaLetteraCella(g, "D", posX, posY, dimCella);
                 }
                 
-                // Disegno il cammino minimo
-                if (cammino != null && cammino.size() > 1) {
-
-                    Graphics2D g2 = (Graphics2D) g.create();
-                    g2.setColor(Color.BLACK);
-                    g2.setStroke(new BasicStroke(Math.max(2, dimCella / 5), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-
-                    for (int i = 0; i < cammino.size() - 1; i++) {
-                        Cella c1 = cammino.get(i);
-                        Cella c2 = cammino.get(i + 1);
-
-                        int x1 = OFFSET + c1.getColonna() * dimCella + dimCella / 2;
-                        int y1 = OFFSET + c1.getRiga() * dimCella + dimCella / 2;
-
-                        int x2 = OFFSET + c2.getColonna() * dimCella + dimCella / 2;
-                        int y2 = OFFSET + c2.getRiga() * dimCella + dimCella / 2;
-
-                        g2.drawLine(x1, y1, x2, y2);
-                    }
-
-                    g2.dispose();
-                }
+                
+                Graphics2D g2 = (Graphics2D) g.create();
+                disegnaCammino(g2, dimCella);
                 
                 // Bordo cella
                 g.setColor(Color.LIGHT_GRAY);
@@ -217,5 +209,25 @@ public class PannelloGriglia extends JPanel {
 
         g.setColor(Color.RED);
         g.drawString(lettera, xTesto, yTesto);
+    }
+    
+    // Disegna una linea (spezzata) che individua il cammino minimo
+    private void disegnaCammino(Graphics2D g2, int dimCella) {
+        if (camminoOrdinato == null || camminoOrdinato.size() < 2) return;
+
+        g2.setStroke(new BasicStroke(Math.max(2, dimCella / 5), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.setColor(Color.BLACK);
+
+        for (int i = 0; i < camminoOrdinato.size() - 1; i++) {
+            Cella a = camminoOrdinato.get(i);
+            Cella b = camminoOrdinato.get(i + 1);
+
+            int ax = OFFSET + a.getColonna() * dimCella + dimCella / 2;
+            int ay = OFFSET + a.getRiga() * dimCella + dimCella / 2;
+            int bx = OFFSET + b.getColonna() * dimCella + dimCella / 2;
+            int by = OFFSET + b.getRiga() * dimCella + dimCella / 2;
+
+            g2.drawLine(ax, ay, bx, by);
+        }
     }
 }
