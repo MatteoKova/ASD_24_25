@@ -9,6 +9,8 @@ import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
@@ -271,7 +273,19 @@ public class FinestraGriglia extends JFrame {
                     return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
                 }
             );
+            
+            List<Cella> camminoCompleto = new ArrayList<>();
 
+            List<Landmark> seq = risultato.getSeq();
+
+            for (int i = 0; i < seq.size() - 1; i++) {
+                Cella a = seq.get(i).getCella();
+                Cella b = seq.get(i+1).getCella();
+                camminoCompleto.addAll(analizzatoreCammini.ricostruisciCammino(a, b));
+            }
+            
+            pannelloGriglia.aggiornaCammino(camminoCompleto);
+            
             long t2 = System.nanoTime();
             System.out.println("Tempo: " + (t2 - t1) + " ns");
 

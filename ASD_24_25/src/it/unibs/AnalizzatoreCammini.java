@@ -465,4 +465,29 @@ public class AnalizzatoreCammini {
     		mat_ostacoli[cella.getRiga()][cella.getColonna()] = false;
     	}
     }
+    
+    /**
+     * Ricostruisce il cammino cella-per-cella tra due celle consecutive
+     * seguendo il percorso minimo rettilineo/diagonale che dlib assume
+     */
+    public List<Cella> ricostruisciCammino(Cella a, Cella b) {
+        List<Cella> path = new ArrayList<>();
+        
+        int x = a.getColonna();
+        int y = a.getRiga();
+        int targetX = b.getColonna();
+        int targetY = b.getRiga();
+
+        int dx = Integer.signum(targetX - x);
+        int dy = Integer.signum(targetY - y);
+
+        while (x != targetX || y != targetY) {
+            path.add(new Cella(y, x));
+            if (x != targetX) x += dx;
+            if (y != targetY) y += dy;
+        }
+
+        path.add(b);
+        return path;
+    }
 }

@@ -132,9 +132,7 @@ public class CreatoreGriglia extends JFrame {
             return true;
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this,
-                "Inserisci valori numerici validi per righe, colonne e seed",
-                "Errore di input",
-                JOptionPane.ERROR_MESSAGE);
+                "Inserisci valori numerici validi per righe, colonne e seed", "Errore di input", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }

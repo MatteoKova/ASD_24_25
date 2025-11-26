@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.Set;
+import java.util.List;
 
 public class PannelloGriglia extends JPanel {
     private static final long serialVersionUID = 1L;
@@ -15,7 +16,8 @@ public class PannelloGriglia extends JPanel {
     private int[][] matriceContesto, matriceComplemento;
     private Set<Landmark> frontiera;
     private boolean[][] matriceOstacoli;
-
+    private List<Cella> cammino = List.of(); 
+    
     public PannelloGriglia(Griglia griglia, boolean[][] matriceOstacoli, int[][] matriceContesto,
     						int[][] matriceComplemento, Set<Landmark> frontiera) {
         this.griglia = griglia;
@@ -38,6 +40,12 @@ public class PannelloGriglia extends JPanel {
         this.matriceContesto = matriceContesto;
         this.matriceComplemento = matriceComplemento;
         this.frontiera = frontiera;
+        repaint();
+    }
+    
+    // Aggiorna il cammino minimo
+    public void aggiornaCammino(List<Cella> cammino) {
+        this.cammino = cammino;
         repaint();
     }
 
@@ -160,7 +168,30 @@ public class PannelloGriglia extends JPanel {
                     g.fillRect(posX, posY, dimCella, dimCella);
                     disegnaLetteraCella(g, "D", posX, posY, dimCella);
                 }
+                
+                // Disegno il cammino minimo
+                if (cammino != null && cammino.size() > 1) {
 
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setColor(Color.BLACK);
+                    g2.setStroke(new BasicStroke(Math.max(2, dimCella / 5), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+                    for (int i = 0; i < cammino.size() - 1; i++) {
+                        Cella c1 = cammino.get(i);
+                        Cella c2 = cammino.get(i + 1);
+
+                        int x1 = OFFSET + c1.getColonna() * dimCella + dimCella / 2;
+                        int y1 = OFFSET + c1.getRiga() * dimCella + dimCella / 2;
+
+                        int x2 = OFFSET + c2.getColonna() * dimCella + dimCella / 2;
+                        int y2 = OFFSET + c2.getRiga() * dimCella + dimCella / 2;
+
+                        g2.drawLine(x1, y1, x2, y2);
+                    }
+
+                    g2.dispose();
+                }
+                
                 // Bordo cella
                 g.setColor(Color.LIGHT_GRAY);
                 g.drawRect(posX, posY, dimCella, dimCella);
