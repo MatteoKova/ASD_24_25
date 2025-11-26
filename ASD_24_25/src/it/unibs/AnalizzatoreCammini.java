@@ -353,7 +353,7 @@ public class AnalizzatoreCammini {
         return result;
     }
 
-    public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, int istr16Contatore, int contatoreFrontiera, Supplier<Boolean> stopCheck) {
+    public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, Supplier<Boolean> stopCheck) {
     	calls.incrementAndGet();
         
     	
@@ -401,8 +401,9 @@ public class AnalizzatoreCammini {
         	lF = dlib(origine, cella_frontiera);
         	//if (lF >= lunghezzaMin) continue; //proning
         	if (lF + dlib(cella_frontiera, destinazione) >= lunghezzaMin) continue; // pruning
-        	
-        	RisultatoCammino sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia, istr16Contatore+1, contatoreFrontiera,stopCheck);
+            istr16Contatore++;
+        	System.out.println("istruzione 16 eseguita: confronto " +istr16Contatore);
+            RisultatoCammino sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia,stopCheck);
         	
         	mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = true;
         	//stack_griglia_tipi.pop(); //rimuove la griglia dei tipi del sotto_cammino dallo stack
@@ -471,5 +472,10 @@ public class AnalizzatoreCammini {
     		cella = stack_ostacoli.pop();
     		mat_ostacoli[cella.getRiga()][cella.getColonna()] = false;
     	}
+    }
+
+    public void resetContatori() {
+    	this.istr16Contatore = 0;
+    	this.contatoreFrontiera = 0;
     }
 }

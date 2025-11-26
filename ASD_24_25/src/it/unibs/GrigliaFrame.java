@@ -269,10 +269,11 @@ public class GrigliaFrame extends JFrame {
 			startTime = System.currentTimeMillis();
 			
 			analizzatore_cammini.calls.set(0); // Inizializzazione ricorsioni
+			analizzatore_cammini.resetContatori();
 	        long t1 = System.nanoTime(); // Inizializzazione timer
 
 			//AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(mat_ostacoli, stack_ostacoli, stack_tipi_cammini);
-
+			
 			RisultatoCammino result = analizzatore_cammini.camminoMin(
 					origine,
 					destinazione,

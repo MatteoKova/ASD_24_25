@@ -36,11 +36,11 @@ public class RisultatoCammino {
 	sb.append("Dimnensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
 	//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
     sb.append("Lunghezza cammino: ").append(lunghezza).append("\n");
-    sb.append("Sequenza dei landmark:\n");
+  
 	sb.append("Tempo di calcolo: ").append(tempoCalcolo).append(" ns\n");
 	sb.append("Istruzioni di tipo 16 eseguite: ").append(istr16Contatore).append("\n");
 	sb.append("Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n");
-
+	  sb.append("Sequenza dei landmark:\n");
 
     for (Landmark landmark : seq) {
         sb.append(" - ").append(landmark.toString()).append("\n");
