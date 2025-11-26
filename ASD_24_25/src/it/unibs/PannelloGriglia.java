@@ -63,7 +63,9 @@ public class PannelloGriglia extends JPanel {
         
         // Etichette colonne (solo multipli di 5)
         for (int x = 0; x < griglia.getColonne(); x++) {
-            if (x % 5 != 0) continue;
+        	if(griglia.getColonne() > 25)
+        		if (x % 5 != 0)
+        			continue;
 
             String etichetta = String.valueOf(x);
             int larghezzaTesto = fm.stringWidth(etichetta);
@@ -84,7 +86,9 @@ public class PannelloGriglia extends JPanel {
         int lunghezzaTacca = Math.max(6, dimCella / 3);
 
         for (int y = 0; y < griglia.getRighe(); y++) {
-            if (y % 5 != 0) continue;
+        	if(griglia.getRighe() > 25)
+        		if (y % 5 != 0)
+        			continue;
 
             String etichetta = String.valueOf(y);
             int altezzaTesto = fm.getAscent();

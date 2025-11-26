@@ -96,10 +96,12 @@ public class CreatoreGriglia extends JFrame {
         leggiParametri();
 
         if (righe <= 0 || colonne <= 0) {
-            JOptionPane.showMessageDialog(this, "Righe e colonne devono essere interi positivi.", "Errore input", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La matrice deve avere un numero positivo di righe e e di colonne", "Errore input",
+            		JOptionPane.ERROR_MESSAGE);
             return null;
         } else if (righe > 100 || colonne > 100) {
-            JOptionPane.showMessageDialog(this, "Righe e colonne devono essere ≤ 100.", "Errore input", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "La matrice non può avere più di 100 righe e 100 colonne", "Errore input",
+            		JOptionPane.ERROR_MESSAGE);
             return null;
         }
 
@@ -127,10 +129,15 @@ public class CreatoreGriglia extends JFrame {
 
         if ("Personalizzata".equals(scelta)) {
             pannelloGriglia.setLayout(new BorderLayout());
-            pannelloGriglia.add(new JLabel("Anteprima non disponibile in modalità personalizzata", SwingConstants.CENTER), BorderLayout.CENTER);
+            pannelloGriglia.add(new JLabel("Anteprima non disponibile in modalità personalizzata",
+            		SwingConstants.CENTER), BorderLayout.CENTER);
+            grigliaBackup = null; // nessuna anteprima disponibile
         } else {
             boolean[][] ostacoli = generaOstacoli();
             if (ostacoli == null) return;
+            
+            // Salvo la griglia generata
+            grigliaBackup = ostacoli;
 
             PannelloAnteprima anteprima = new PannelloAnteprima(ostacoli);
             pannelloGriglia.setLayout(new BorderLayout());
@@ -148,9 +155,14 @@ public class CreatoreGriglia extends JFrame {
             boolean[][] ostacoli = new boolean[righe][colonne];
             personalizzaOstacoli(ostacoli);
         } else {
-            boolean[][] ostacoli = generaOstacoli();
-            if (ostacoli != null) {
-                new GrigliaFrame(ostacoli);
+        	// Se ho già un'anteprima, la riuso
+            if (grigliaBackup != null) {
+                new FinestraGriglia(grigliaBackup);
+            } else {
+	            boolean[][] ostacoli = generaOstacoli();
+	            if (ostacoli != null) {
+	                new FinestraGriglia(ostacoli);
+	            }
             }
         }
     }
@@ -190,7 +202,7 @@ public class CreatoreGriglia extends JFrame {
                 for (int c = 0; c < colonne; c++)
                     if (obs[r][c]) ostacoli[r][c] = true;
 
-            new GrigliaFrame(ostacoli);
+            new FinestraGriglia(ostacoli);
         });
 
         pannelloGriglia.revalidate();
