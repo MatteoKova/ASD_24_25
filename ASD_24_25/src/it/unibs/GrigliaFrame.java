@@ -42,7 +42,7 @@ public class GrigliaFrame extends JFrame {
 	private volatile boolean stopRequested = false;
 	//private Set<Map.Entry<Cella, Integer>> frontiera = null;
 	private JLabel infoLabel;
-	private GrigliaPanel panel;
+	private PannelloGriglia panel;
 
 	public GrigliaFrame(boolean[][] mat_ostacoli) {
 		
@@ -65,7 +65,7 @@ public class GrigliaFrame extends JFrame {
 		contesto = new int[nr][nc];
 		complemento = new int[nr][nc];
 
-		panel = new GrigliaPanel(griglia, mat_ostacoli, contesto, complemento, frontiera);
+		panel = new PannelloGriglia(griglia, mat_ostacoli, contesto, complemento, frontiera);
 		add(panel, BorderLayout.CENTER);
 
 		// Legenda laterale
@@ -110,14 +110,11 @@ public class GrigliaFrame extends JFrame {
 		// Permette di registrare gli eventi del mouse
 		panel.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
-				int cellSize = panel.getCellSize();
+				int cellSize = panel.getDimensioneCella();
 				if (cellSize <= 0) return;
 
-				int offsetX = 40; // stesso valore usato in paintComponent
-				int offsetY = 40;
-
-				int colonna = (e.getX() - offsetX) / cellSize;
-				int riga = (e.getY() - offsetY) / cellSize;
+				int colonna = (e.getX() - PannelloGriglia.OFFSET) / cellSize;
+				int riga = (e.getY() - PannelloGriglia.OFFSET) / cellSize;
 				if (!griglia.isNeiMargini(riga, colonna) || mat_ostacoli[riga][colonna]) return;
 
 				if (origine == null) {
