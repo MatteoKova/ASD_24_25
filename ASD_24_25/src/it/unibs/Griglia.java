@@ -88,6 +88,8 @@ public class Griglia {
         return celle[r][c];
     }*/
 
+        
+
     // Restituisce il numero di righe della griglia
     public int getRighe() {
         return righe;

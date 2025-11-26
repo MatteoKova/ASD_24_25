@@ -6,15 +6,20 @@ public class GrigliaController {
 	
 	AnalizzatoreCammini analizzatore_cammini ;
 
-	public GrigliaController() {
+	public GrigliaController(int modalita) {
+
 		
-		
-		SwingUtilities.invokeLater(() -> {
+		if (modalita == 1) // grafica
+		{		SwingUtilities.invokeLater(() -> {
 
 			CreatoreGriglia creator= new CreatoreGriglia();
 			creator.setVisible(true);
 
-		});
+		});}
+		else if (modalita == 0) // batch
+		{
+			// codice batch
+		}
 		
 		
 		
@@ -24,3 +29,4 @@ public class GrigliaController {
 	
 
 }
+

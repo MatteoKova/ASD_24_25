@@ -285,6 +285,8 @@ public class GrigliaFrame extends JFrame {
 			
 			long t2 = System.nanoTime();
 
+			result.setTempo(t2 - t1);
+
 	        System.out.println("Tempo: " + (t2 - t1) + " ns"); // per controllare se meglio la condizione a riga 16 o 17
 	        
 	        return result;
