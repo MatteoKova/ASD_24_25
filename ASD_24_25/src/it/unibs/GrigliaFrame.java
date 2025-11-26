@@ -217,7 +217,7 @@ public class GrigliaFrame extends JFrame {
 				analizzatore_cammini.ripristinaCoerenzaOstacoli();
 				analizzatore_cammini.ripristinaCoerenzaTipi();
 				stopRequested = true;
-				worker.cancel(true);
+				//worker.cancel(false);
 				infoLabel.setText("Stopping…");
 			}
 		});
@@ -243,11 +243,13 @@ public class GrigliaFrame extends JFrame {
 		long timeLimit; // in milliseconds
 		long startTime;
 		AnalizzatoreCammini analizzatore_cammini;
+		RisultatoCammino result;
 
 		public PathWorker(AnalizzatoreCammini analizzatore_cammini, Griglia griglia, long timeLimit) {
 			this.griglia = griglia;
 			this.timeLimit = timeLimit;
 			this.analizzatore_cammini = analizzatore_cammini;
+			this.result = null;
 		}
 
 		@Override
@@ -260,6 +262,7 @@ public class GrigliaFrame extends JFrame {
 			//Matrice per rimuovere gli ostacoli relativi ad un livello, quando esco dal livello
 			Stack<Cella> stack_ostacoli = new Stack<>(); 
 			Stack<int[][]> stack_tipi_cammini = new Stack<>();
+			
 
 
 
@@ -270,8 +273,8 @@ public class GrigliaFrame extends JFrame {
 	        long t1 = System.nanoTime(); // Inizializzazione timer
 
 			//AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(mat_ostacoli, stack_ostacoli, stack_tipi_cammini);
-			
-			RisultatoCammino result = analizzatore_cammini.camminoMin(
+			try{
+			 this.result = analizzatore_cammini.camminoMin(
 					origine,
 					destinazione,
 					griglia,
@@ -280,7 +283,9 @@ public class GrigliaFrame extends JFrame {
 						return stopRequested || (System.currentTimeMillis() - startTime) >= timeLimit;
 					}
 					);
-			
+				}catch (StopException e){
+				 this.result= e.partialResult;
+				}
 			long t2 = System.nanoTime();
 
 			result.setTempo(t2 - t1);
@@ -304,17 +309,21 @@ public class GrigliaFrame extends JFrame {
 				cancelled = true;
 			}
 
-			if (cancelled || stopRequested || (System.currentTimeMillis() - startTime) >= timeLimit) {
+			if (stopRequested ) {
 				infoLabel.setText("Evaluation stopped.");
-				showSummaryDialog(result, true);
-			} else {
+				showSummaryDialog(result, 0);
+			} else if ((System.currentTimeMillis() - startTime) >= timeLimit){
+				infoLabel.setText("Evaluation timed out.");
+				showSummaryDialog(result, 1);
+			} 
+			else{
 				infoLabel.setText("Evaluation finished.");
-				showSummaryDialog(result, false);
+				showSummaryDialog(result, 2);
 			}
 		}
 	}
 
-	private void showSummaryDialog(RisultatoCammino result, boolean stopped) {
+	private void showSummaryDialog(RisultatoCammino result, int status) {
 		JDialog dialog = new JDialog(this, "Summary", true);
 		dialog.setSize(400, 300);
 		dialog.setLayout(new BorderLayout());
@@ -322,12 +331,17 @@ public class GrigliaFrame extends JFrame {
 		JTextArea area = new JTextArea();
 		area.setEditable(false);
 
-		if (stopped) {
+		if (status == 0	) {
 			area.setText("PROCESS STOPPED BY USER.\n\nPartial summary:\n\n");
 			if (result != null) {
 				area.append(result.stampa());
 			}
-		} else {
+		} else if (status == 1){
+			area.setText("PROCESS STOPPED BY TIMED OUT.\n\nPartial summary:\n\n");
+			if (result != null) {
+				area.append(result.stampa());
+			}}
+		else if (status == 2){
 			area.setText("PROCESS COMPLETED.\n\nSummary:\n\n");
 			if (result != null) {
 				area.append(result.stampa());

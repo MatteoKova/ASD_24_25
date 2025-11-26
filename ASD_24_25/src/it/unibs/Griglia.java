@@ -5,11 +5,14 @@ import java.util.List;
 public class Griglia {
     //private Cella[][] celle;
     private final int righe, colonne;
+     private boolean[][] mat_ostacoli;
     //private  List <Cella> ostacoli;
     // Costruttore
     public Griglia(int righe, int colonne) {
         this.righe = righe;
         this.colonne = colonne;
+        
+        
         //this.celle = new Cella[righe][colonne];
         //this.ostacoli = new java.util.ArrayList<>();
         /*for (int r = 0; r < righe; r++) {

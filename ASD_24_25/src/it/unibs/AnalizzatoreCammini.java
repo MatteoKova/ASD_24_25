@@ -362,8 +362,9 @@ public class AnalizzatoreCammini {
     	calcolaComplemento(griglia, origine, griglia_tipi);
     	
         if (stopCheck.get()) 
-            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)), 
-                                            istr16Contatore , contatoreFrontiera, griglia);
+           throw new StopException(new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)), 
+                                            istr16Contatore , contatoreFrontiera, griglia));
+
         
         if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==1) {
         	//origine.setTipo(0);
