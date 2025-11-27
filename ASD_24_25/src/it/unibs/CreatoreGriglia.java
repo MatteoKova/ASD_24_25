@@ -7,15 +7,17 @@ import javax.swing.event.DocumentListener;
 
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.io.File;
+import java.io.IOException;
 
 public class CreatoreGriglia extends JFrame {
     private static final long serialVersionUID = 1L;
 	private JTextField campoRighe, campoColonne, campoSeed;
-    private JButton pulsanteAnteprima, pulsanteConferma, pulsanteAnnulla;
+    private JButton pulsanteAnteprima, pulsanteConferma,  pulsanteSalva, pulsanteAnnulla, pulsanteCarica;
     private JComboBox<String> boxDensita;
     private JPanel pannelloGriglia;
     private PannelloGrigliaManuale pannelloManuale;
-    private boolean[][] grigliaBackup;
+    private Griglia grigliaBackup;
 
     private int righe, colonne;
     private long seed = 0;
@@ -52,7 +54,7 @@ public class CreatoreGriglia extends JFrame {
         // Densità ostacoli
         gbc.gridx = 0; gbc.gridy = 2;
         pannelloForm.add(new JLabel("Densità ostacoli:"), gbc);
-        boxDensita = new JComboBox<>(new String[]{"Bassa", "Media", "Alta", "Personalizzata"});
+        boxDensita = new JComboBox<>(new String[]{"Bassa", "Media", "Alta","Spirale", "Scacchi", "Righe", "Unico Ostacolo", "Personalizzata"});
         gbc.gridx = 1;
         pannelloForm.add(boxDensita, gbc);
 
@@ -67,8 +69,15 @@ public class CreatoreGriglia extends JFrame {
         JPanel pannelloPulsanti = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         pulsanteAnteprima = new JButton("Aggiorna anteprima");
         pulsanteConferma = new JButton("Conferma");
+        pulsanteSalva = new JButton("Salva JSON");
+        pulsanteCarica = new JButton("Carica JSON");
+      
+       
+
         pannelloPulsanti.add(pulsanteAnteprima);
         pannelloPulsanti.add(pulsanteConferma);
+        pannelloPulsanti.add(pulsanteSalva);
+        pannelloPulsanti.add(pulsanteCarica);
 
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
         pannelloForm.add(pannelloPulsanti, gbc);
@@ -84,6 +93,8 @@ public class CreatoreGriglia extends JFrame {
         pulsanteAnteprima.addActionListener(e -> {
         	mostraAnteprima();
         	pulsanteConferma.setEnabled(true);
+            pulsanteSalva.setEnabled(true);
+            pulsanteCarica.setEnabled(true);
         });
         
         pulsanteConferma.addActionListener(e -> {
@@ -91,8 +102,14 @@ public class CreatoreGriglia extends JFrame {
         		creaGriglia();
         	}
         );
+
         
+        pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
+        pulsanteCarica.addActionListener(e -> caricaGrigliaJson());
+
+
         disattivaConferma();
+      
         
         // Mostra anteprima iniziale con parametri di default
         mostraAnteprima();
@@ -103,11 +120,21 @@ public class CreatoreGriglia extends JFrame {
     	// --- LISTENER PER I CAMPI ---
         DocumentListener listenerCampi = new DocumentListener() {
             @Override
-            public void insertUpdate(DocumentEvent e) { pulsanteConferma.setEnabled(false); }
+            public void insertUpdate(DocumentEvent e) { 
+                pulsanteConferma.setEnabled(false); 
+                pulsanteSalva.setEnabled(false);
+                pulsanteCarica.setEnabled(false);
+            }
             @Override
-            public void removeUpdate(DocumentEvent e) { pulsanteConferma.setEnabled(false); }
+            public void removeUpdate(DocumentEvent e) { 
+                pulsanteConferma.setEnabled(false);
+                pulsanteSalva.setEnabled(false);
+                pulsanteCarica.setEnabled(false); }
             @Override
-            public void changedUpdate(DocumentEvent e) { pulsanteConferma.setEnabled(false); }
+            public void changedUpdate(DocumentEvent e) { 
+                pulsanteConferma.setEnabled(false);
+                pulsanteSalva.setEnabled(false);
+                pulsanteCarica.setEnabled(false); }
         };
 
         // Aggiungo il listener ai JTextField
@@ -115,10 +142,14 @@ public class CreatoreGriglia extends JFrame {
         campoColonne.getDocument().addDocumentListener(listenerCampi);
         campoSeed.getDocument().addDocumentListener(listenerCampi);
         
+        
+
         // Se hai anche una JComboBox per la densità:
         boxDensita.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 pulsanteConferma.setEnabled(false);
+                pulsanteSalva.setEnabled(false);
+
             }
         });
     }
@@ -152,15 +183,22 @@ public class CreatoreGriglia extends JFrame {
         }
 
         double densita = 0.1;
+        TipoPattern tipo = TipoPattern.DENS_BASSA;
         String scelta = (String) boxDensita.getSelectedItem();
-        if ("Media".equals(scelta)) densita = 0.25;
-        if ("Alta".equals(scelta)) densita = 0.45;
+        if ("Media".equals(scelta)) {tipo=TipoPattern.DENS_MEDIA;densita = 0.25;}
+        if ("Alta".equals(scelta)) {tipo=TipoPattern.DENS_ALTA;densita = 0.45;}
+        if ("Spirale".equals(scelta)) tipo=TipoPattern.SPIRALE;
+        if("Scacchi".equals(scelta)) tipo=TipoPattern.SCACCHI;
+        if("Righe".equals(scelta)) tipo=TipoPattern.RIGHE;  
+        if("Unico Ostacolo".equals(scelta)) tipo=TipoPattern.UNICO;
+       
 
         boolean[][] ostacoli = new boolean[righe][colonne];
         Configurazione cfg = new Configurazione();
         cfg.righe = righe;
         cfg.colonne = colonne;
         cfg.density = densita;
+        cfg.tipoPattern = tipo;
         if (seed != 0) cfg.seed = seed;
 
         GeneratoreGriglieOstacoli generatore = new GeneratoreGriglieOstacoli(cfg, ostacoli);
@@ -179,11 +217,13 @@ public class CreatoreGriglia extends JFrame {
             		SwingConstants.CENTER), BorderLayout.CENTER);
             grigliaBackup = null; // nessuna anteprima disponibile
         } else {
+            Griglia g = new Griglia(righe, colonne);
             boolean[][] ostacoli = generaOstacoli();
+            g.setOstacoli(ostacoli);
             if (ostacoli == null) return;
             
             // Salvo la griglia generata
-            grigliaBackup = ostacoli;
+            grigliaBackup=g;
 
             PannelloAnteprima anteprima = new PannelloAnteprima(ostacoli);
             pannelloGriglia.setLayout(new BorderLayout());
@@ -198,12 +238,12 @@ public class CreatoreGriglia extends JFrame {
     private void creaGriglia() {
         String scelta = (String) boxDensita.getSelectedItem();
         if ("Personalizzata".equals(scelta)) {
-            boolean[][] ostacoli = new boolean[righe][colonne];
-            personalizzaOstacoli(ostacoli);
+           Griglia g = new Griglia(righe, colonne);
+            personalizzaOstacoli(g.getOstacoli());
         } else {
         	// Se ho già un'anteprima, la riuso
             if (grigliaBackup != null) {
-                new FinestraGriglia(grigliaBackup);
+                new FinestraGriglia(grigliaBackup.getOstacoli());
             } else {
 	            boolean[][] ostacoli = generaOstacoli();
 	            if (ostacoli != null) {
@@ -238,9 +278,9 @@ public class CreatoreGriglia extends JFrame {
         pannelloBasso.add(pulsanteConferma);
         pannelloGriglia.add(pannelloBasso, BorderLayout.SOUTH);
 
-        grigliaBackup = new boolean[righe][colonne];
+        grigliaBackup = new Griglia(righe, colonne);
 
-        pulsanteAnnulla.addActionListener(e -> pannelloManuale.setOstacoli(grigliaBackup));
+        pulsanteAnnulla.addActionListener(e -> pannelloManuale.setOstacoli(grigliaBackup.getOstacoli()));
 
         pulsanteConferma.addActionListener(e -> {
             boolean[][] obs = pannelloManuale.getOstacoli();
@@ -255,6 +295,112 @@ public class CreatoreGriglia extends JFrame {
         pannelloGriglia.repaint();
     }
     
+    // Metodo che salva la griglia in un file JSON
+    private void salvaGrigliaJson() {
+    if (grigliaBackup == null) {
+        JOptionPane.showMessageDialog(this,
+                "Nessuna griglia da salvare. Genera prima un'anteprima.",
+                "Errore",
+                JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Converto la matrice in un oggetto Griglia
+    Griglia g =grigliaBackup;
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Salva griglia come JSON");
+
+    int result = chooser.showSaveDialog(this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File file = chooser.getSelectedFile();
+
+        // Aggiunge estensione .json se mancante
+        if (!file.getName().toLowerCase().endsWith(".json")) {
+            file = new File(file.getAbsolutePath() + ".json");
+        }
+
+        try {
+            GrigliaIO.writeGriglia(g, file);
+            JOptionPane.showMessageDialog(this,
+                    "Griglia salvata con successo in:\n" + file.getAbsolutePath(),
+                    "Salvataggio completato",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Errore durante il salvataggio del file.",
+                    "Errore",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+private void caricaGrigliaJson() {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Carica griglia da JSON");
+
+    int result = chooser.showOpenDialog(this);
+    if (result != JFileChooser.APPROVE_OPTION) {
+        return;
+    }
+
+    File file = chooser.getSelectedFile();
+
+    try {
+        // Reads a list OR a single Griglia (your IO class handles both)
+        java.util.List<Griglia> lista = GrigliaIO.readGriglie(file);
+
+        if (lista.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Il file non contiene griglie valide.",
+                    "Errore",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Take first one (or ask user if multiple)
+        Griglia g = lista.get(0);
+
+        // --- VALIDATION: size must be <= 100 ---
+        if (g.getRighe() > 100 || g.getColonne() > 100) {
+            JOptionPane.showMessageDialog(this,
+                    "La griglia caricata supera le dimensioni massime (100x100).",
+                    "Errore dimensioni",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Store it as current backup
+        grigliaBackup = g;
+
+        // Update input fields
+        campoRighe.setText(String.valueOf(g.getRighe()));
+        campoColonne.setText(String.valueOf(g.getColonne()));
+        campoSeed.setText("0");
+        boxDensita.setSelectedItem("Bassa");
+
+        // Show preview
+        pannelloGriglia.removeAll();
+        pannelloGriglia.setLayout(new BorderLayout());
+
+        PannelloAnteprima anteprima = new PannelloAnteprima(g.getOstacoli());
+        pannelloGriglia.add(anteprima, BorderLayout.CENTER);
+
+        pannelloGriglia.revalidate();
+        pannelloGriglia.repaint();
+
+        pulsanteConferma.setEnabled(true);
+        pulsanteSalva.setEnabled(true);
+
+    } catch (IOException ex) {
+        ex.printStackTrace();
+        JOptionPane.showMessageDialog(this,
+                "Errore durante il caricamento del file JSON.",
+                "Errore",
+                JOptionPane.ERROR_MESSAGE);
+    }
+}
+
+
     // Classe interna che rappresenta il pannello dell'anteprima
     class PannelloAnteprima extends JPanel {
         private static final long serialVersionUID = 1L;

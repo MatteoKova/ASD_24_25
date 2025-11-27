@@ -11,4 +11,5 @@ public class Configurazione {
     public int numBarre = 1;//5;
     public int numAnelli = 1;//3;
     public double density;
+    public TipoPattern tipoPattern;
 }

@@ -18,6 +18,7 @@ public class RisultatoCammino {
 		this.istr16Contatore = istr16Contatore;
 		this.griglia = griglia;
 		this.contatoreFrontiera = contatoreFrontiera;	
+		
 	}
 
 	public double getLunghezza() {
@@ -31,9 +32,12 @@ public class RisultatoCammino {
 	public void setTempo(long tempoCalcolo) {
 		this.tempoCalcolo = tempoCalcolo;
 		}
+
+
 	public String stampa() {
     StringBuilder sb = new StringBuilder();
 	sb.append("Dimnensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
+	sb.append("Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
 	//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
     sb.append("Lunghezza cammino: ").append(lunghezza).append("\n");
   
@@ -47,6 +51,23 @@ public class RisultatoCammino {
     }
 
     return sb.toString();
+	}	
+
+
+public long getTempoCalcolo() {
+    return tempoCalcolo;
+}
+
+public int getIstr16Contatore() {
+    return istr16Contatore;
+}
+
+public Griglia getGriglia() {
+    return griglia;
+}
+
+public int getContatoreFrontiera() {
+    return contatoreFrontiera;
 }
 
 }

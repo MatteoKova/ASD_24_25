@@ -264,10 +264,11 @@ public class FinestraGriglia extends JFrame {
 
         @Override
         protected RisultatoCammino doInBackground() throws Exception {
-            tempoInizio = System.currentTimeMillis();
+            
             // Inizializzazione timer
            analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
 		    analizzatoreCammini.resetContatori();
+            tempoInizio = System.currentTimeMillis();
 	        long t1 = System.nanoTime(); // Inizializzazione timer
 
 
