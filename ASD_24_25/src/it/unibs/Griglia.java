@@ -23,6 +23,8 @@ public class Griglia {
                                             // una matrice di boolean in cui true = ostacolo false = libera
                                             //quindi un po lungo andare a modificare tutto il codice per ora lascio cosi
         this.ostacoli = new boolean[righe][colonne];
+        this.origineDefault = null;
+        this.destinazioneDefault = null;
         
         
         //this.celle = new Cella[righe][colonne];
@@ -39,7 +41,9 @@ public class Griglia {
         @JsonProperty("righe") int righe,
         @JsonProperty("colonne") int colonne,
         @JsonProperty("tipologia") TipoPattern tipologia,
-        @JsonProperty("ostacoli") boolean[][] ostacoli
+        @JsonProperty("ostacoli") boolean[][] ostacoli,
+        @JsonProperty("origineDefault") Cella origineDefault,
+        @JsonProperty("destinazioneDefault") Cella destinazioneDefault
         
     ) {
 

@@ -2,13 +2,21 @@ package it.unibs;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Cella {
     private int riga, colonna;
     //private int tipo = 1;
     //private boolean isAttraversabile = true;
 
     // Costruttore con tipo di default
-    public Cella(int riga, int colonna) {
+    
+    @JsonCreator
+    public Cella(
+        @JsonProperty("riga") int riga,
+        @JsonProperty("colonna") int colonna
+    ) {
         this.riga = riga;
         this.colonna = colonna;
     }
