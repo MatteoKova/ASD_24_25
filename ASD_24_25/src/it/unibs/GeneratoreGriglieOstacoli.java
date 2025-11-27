@@ -50,21 +50,27 @@ public class GeneratoreGriglieOstacoli {
 
     // Genera tutte le tipologie di ostacoli rispettando la densità specificata
     public void generaTutto() {
-    	if (cfg.density <= 0) return;
-    	double densita;
-    	do{
-    		generaSemplici(cfg.numSemplici);
-    		generaAgglomerati(cfg.numAgglomerati);
-    		generaDiagonali(cfg.numDiagonali);
-    		generaBarre(cfg.numBarre);
-    		generaAnelli(cfg.numAnelli);
-    		densita = calcolaDensita();
-    		System.out.println("density: " + densita + ", target: " + cfg.density);
-    	} while (densita < cfg.density );
-
-    	//griglia.calculateOstacoli();
-    	//rimuoviOstacoliEccesso(densita);TODO: si potrebbe reinserire la funzione, a patto di creare una lista di ostacoli tra cui scegliere randomicamente
+    	
+	 switch (cfg.tipoPattern) {
+        case DENS_BASSA, DENS_ALTA, DENS_MEDIA:
+            generaOstacoliCasuali();
+			break;
+    
+        case SPIRALE:
+            generaSpriale();break;
+        case SCACCHI:
+            generaScacchiera();break;
+        case RIGHE:
+            generaRighe();break;
+        case UNICO:
+            generaUnicoOstacolo();break;
+		default:
+			generaOstacoliCasuali();break;
     }
+
+	
+    	
+	}
 
     //NON usato
 /*    public void pulisciGriglia() {
@@ -90,7 +96,28 @@ public class GeneratoreGriglieOstacoli {
     	}
     }*/
 
+	// ----------------- MAIN GENERATION LOGIC -----------------------
+	private void generaOstacoliCasuali(){
+		if (cfg.density <= 0) return;
+    	double densita;
+		do{
+    		generaSemplici(cfg.numSemplici);
+    		generaAgglomerati(cfg.numAgglomerati);
+    		generaDiagonali(cfg.numDiagonali);
+    		generaBarre(cfg.numBarre);
+    		generaAnelli(cfg.numAnelli);
+    		densita = calcolaDensita();
+    		System.out.println("density: " + densita + ", target: " + cfg.density);
+    	} while (densita < cfg.density );
+
+    	//griglia.calculateOstacoli();
+    	//rimuoviOstacoliEccesso(densita);TODO: si potrebbe reinserire la funzione, a patto di creare una lista di ostacoli tra cui scegliere randomicamente}
+		
+	}
+    
+
     // TIPOLOGIE DI OSTACOLI
+
     
     // Genera singole celle
     private void generaSemplici(int n) {
@@ -196,4 +223,104 @@ public class GeneratoreGriglieOstacoli {
     	}
     	return false;
     }
+
+// GRIGLIA CON PATTERN PREDEFINITI
+
+	private void generaSpriale() {
+       
+
+        // Initially fill with true
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                mat_ostacoli[i][j] = true;
+            }
+        }
+
+        int top = 0, bottom = rows - 1;
+        int left = 0, right = cols - 1;
+        boolean fillFalse = true;
+
+        while (top <= bottom && left <= right) {
+            if (fillFalse) {
+                // Top row
+                for (int j = ((left-1)>0 ? left-1 : 0) ; j <= right; j++) {
+                    mat_ostacoli[top][j] = false;
+                }
+                top++;
+
+                // Right column
+                for (int i = top; i <= bottom; i++) {
+                    mat_ostacoli[i][right] = false;
+                }
+                right--;
+
+                // Bottom row
+                if (top <= bottom) {
+                    for (int j = right; j >= left; j--) {
+                        mat_ostacoli[bottom][j] = false;
+                    }
+                    bottom--;
+                }
+
+                // Left column
+                if (left <= right) {
+                    for (int i = bottom; i > top; i--) {
+                        mat_ostacoli[i][left] = false;
+                    }
+                    left++;
+                }
+            }else{top++;
+				right--;
+				bottom--;
+				left++;
+			}
+
+            fillFalse = !fillFalse; // alternate layer
+        }
+
+        
+    }
+
+
+	private void generaScacchiera() {
+    
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            mat_ostacoli[i][j] = (i + j) % 2 == 0;  // true su caselle pari
+        }
+    }
+
+    
 }
+
+
+	private void generaRighe() {
+	
+
+	for (int i = 0; i < this.rows; i++) {
+		for (int j = 0; j < this.cols; j++) {
+			mat_ostacoli[i][j] = !(i % 2 == 0);  // true su righe dispari(la prima è 0)
+			
+		}
+        if (i % 4 == 1) {
+			mat_ostacoli[i][this.cols - 1] = false; // lascia un varco ogni 4 righe
+		}else if (i % 4 == 3) {
+			mat_ostacoli[i][0] = false; // lascia un varco ogni 4 righe
+		}
+		
+	}
+
+
+}
+private void generaUnicoOstacolo() {
+	
+	int centerCol = cols / 2;
+	
+	for (int r = 0 / 2; r < rows-1 ; r++) {
+		
+				mat_ostacoli[r][centerCol] = true;
+		
+	}
+}
+	}

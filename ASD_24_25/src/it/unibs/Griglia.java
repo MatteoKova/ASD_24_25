@@ -2,14 +2,29 @@ package it.unibs;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Griglia {
     //private Cella[][] celle;
     private final int righe, colonne;
+    private boolean[][] ostacoli;
+    private TipoPattern tipologia;
+    private Cella origineDefault;
+    private Cella destinazioneDefault;
     //private  List <Cella> ostacoli;
     // Costruttore
     public Griglia(int righe, int colonne) {
         this.righe = righe;
         this.colonne = colonne;
+        this.tipologia = TipoPattern.PERS ;// Valore di default in futuro si potrebbe implementatere
+                                            // un metodo per settarlo in base al pattern scelto
+                                            //in questo momneto la classe Griglia è stata sostiuita da 
+                                            // una matrice di boolean in cui true = ostacolo false = libera
+                                            //quindi un po lungo andare a modificare tutto il codice per ora lascio cosi
+        this.ostacoli = new boolean[righe][colonne];
+        
+        
         //this.celle = new Cella[righe][colonne];
         //this.ostacoli = new java.util.ArrayList<>();
         /*for (int r = 0; r < righe; r++) {
@@ -18,6 +33,21 @@ public class Griglia {
             }
         }*/
     }
+
+    @JsonCreator
+    public Griglia(
+        @JsonProperty("righe") int righe,
+        @JsonProperty("colonne") int colonne,
+        @JsonProperty("tipologia") TipoPattern tipologia,
+        @JsonProperty("ostacoli") boolean[][] ostacoli
+        
+    ) {
+
+    this.righe = righe;
+    this.colonne = colonne;
+    this.ostacoli = ostacoli;
+    this.tipologia = tipologia;
+}
     
     // Controlla se la cella è all'interno della griglia
     public boolean isNeiMargini(int r, int c) {
@@ -88,6 +118,14 @@ public class Griglia {
         return celle[r][c];
     }*/
 
+    public void setOstacoli(boolean[][] mat_ostacoli) {
+        this.ostacoli = mat_ostacoli;
+    }
+
+    public boolean[][] getOstacoli() {
+        return ostacoli;
+    }
+
     // Restituisce il numero di righe della griglia
     public int getRighe() {
         return righe;
@@ -96,5 +134,26 @@ public class Griglia {
     // Restituisce il numero di colonne della griglia
     public int getColonne() {
         return colonne;
+    }
+
+    public TipoPattern getTipologia() {
+        return tipologia;
+    }
+
+    public void setTipologia(TipoPattern tipologia) {
+        this.tipologia = tipologia;
+    }
+
+    public Cella getOrigineDefault() {
+        return origineDefault;
+    }
+    public void setOrigineDefault(Cella origineDefault) {
+        this.origineDefault = origineDefault;
+    }
+    public Cella getDestinazioneDefault() {
+        return destinazioneDefault;
+    }   
+    public void setDestinazioneDefault(Cella destinazioneDefault) {
+        this.destinazioneDefault = destinazioneDefault;
     }
 }

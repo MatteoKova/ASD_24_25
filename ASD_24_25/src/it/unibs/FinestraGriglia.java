@@ -226,7 +226,7 @@ public class FinestraGriglia extends JFrame {
 
                 // Imposta il flag di stop e interrompe il worker
                 stopRichiesto = true;
-                lavoratore.cancel(true);
+                //lavoratore.cancel(true);
 
                 // Aggiorna l’etichetta informativa
                 etichettaInfo.setText("Interruzione in corso…");
@@ -252,28 +252,41 @@ public class FinestraGriglia extends JFrame {
         private long limiteTempo; // in millisecondi
         private long tempoInizio;
         private AnalizzatoreCammini analizzatoreCammini;
+        RisultatoCammino risultato;
 
         public LavoratorePercorso(AnalizzatoreCammini analizzatoreCammini, Griglia griglia, long limiteTempo) {
             this.griglia = griglia;
             this.limiteTempo = limiteTempo;
             this.analizzatoreCammini = analizzatoreCammini;
+            this.risultato = null;
+            System.out.println("Limite di tempo impostato a " + limiteTempo + " ms");
         }
 
         @Override
         protected RisultatoCammino doInBackground() throws Exception {
+            
             // Inizializzazione timer
+           analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
+		    analizzatoreCammini.resetContatori();
             tempoInizio = System.currentTimeMillis();
-            analizzatoreCammini.calls.set(0); // reset conteggio ricorsioni
-            long t1 = System.nanoTime();
+	        long t1 = System.nanoTime(); // Inizializzazione timer
+
 
             // Esecuzione del calcolo del cammino minimo
-            RisultatoCammino risultato = analizzatoreCammini.camminoMin(origine, destinazione, griglia,
-                () -> {
-                    // Condizione di stop: richiesta utente o tempo scaduto
-                    return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
-                }
-            );
-            
+            try{
+			 this.risultato = analizzatoreCammini.camminoMin(
+					origine,
+					destinazione,
+					griglia,
+					() -> {
+						// Stop if user requested or time limit elapsed
+						return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
+					}
+					);
+				}catch (StopException e){
+				 this.risultato= e.partialResult;
+				}
+             long t2 = System.nanoTime();    
             List<Cella> camminoCompleto = new ArrayList<>();
 
             List<Landmark> seq = risultato.getSeq();
@@ -283,10 +296,10 @@ public class FinestraGriglia extends JFrame {
                 Cella b = seq.get(i+1).getCella();
                 camminoCompleto.addAll(analizzatoreCammini.ricostruisciCammino(a, b));
             }
-            
+             
             pannelloGriglia.aggiornaCammino(camminoCompleto);
             
-            long t2 = System.nanoTime();
+           risultato.setTempo(t2 - t1);
             System.out.println("Tempo: " + (t2 - t1) + " ns");
 
             return risultato;
@@ -309,10 +322,10 @@ public class FinestraGriglia extends JFrame {
 
             // Controllo stato finale
             if (annullato || stopRichiesto) {
-                etichettaInfo.setText("Esecuzione interrotta");
+                etichettaInfo.setText("Esecuzione interrotta da utente");
                 mostraRiepilogo(risultato, 0);
             } else if ((System.currentTimeMillis() - tempoInizio) >= limiteTempo) {
-                etichettaInfo.setText("Esecuzione interrotta");
+                etichettaInfo.setText("Esecuzione interrotta da limite di tempo");
                 mostraRiepilogo(risultato, 1);
             } else {
                 etichettaInfo.setText("Esecuzione completata");
@@ -334,7 +347,7 @@ public class FinestraGriglia extends JFrame {
             areaTesto.setText("PROCESSO INTERROTTO: INTERVENTO DELL’UTENTE\n\nRiepilogo parziale:\n\n"); 
         } else if (stato == 1) {
             areaTesto.setText("PROCESSO INTERROTTO: LIMITE DI TEMPO SCADUTO\n\nRiepilogo:\n\n"); 
-        } else {
+        } else if (stato == 2) {
             areaTesto.setText("PROCESSO COMPLETATO\n\nRiepilogo:\n\n");
         }
         if (risultato != null) {
