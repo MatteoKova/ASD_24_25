@@ -259,7 +259,6 @@ public class PannelloGriglia extends JPanel {
         g.drawString(lettera, tx, ty);
     }
 
-
     private void drawCammino(Graphics2D g2, int dim, int offsetX, int offsetY) {
         if (camminoOrdinato == null || camminoOrdinato.size() < 2) return;
 

@@ -2,9 +2,12 @@ package it.unibs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -15,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -74,18 +78,26 @@ public class FinestraGriglia extends JFrame {
 
         pannelloGriglia = new PannelloGriglia(griglia, matriceOstacoli, matriceContesto, matriceComplemento, frontiera);
         add(pannelloGriglia, BorderLayout.CENTER);
-
+        
         // Pannello legenda laterale
         JPanel pannelloLegenda = new JPanel();
         pannelloLegenda.setLayout(new BoxLayout(pannelloLegenda, BoxLayout.Y_AXIS));
+        pannelloLegenda.setBorder(BorderFactory.createTitledBorder("Legenda"));
 
+        // Spaziatura interna
+        pannelloLegenda.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Legenda"),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        
+        // Voci legenda
+        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Cella libera"));
         pannelloLegenda.add(creaVoceLegenda(Color.BLUE.darker(), "Ostacolo"));
         pannelloLegenda.add(creaVoceLegenda(Color.GREEN.darker(), "Contesto"));
         pannelloLegenda.add(creaVoceLegenda(Color.YELLOW, "Asse"));
         pannelloLegenda.add(creaVoceLegenda(Color.ORANGE, "Complemento"));
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Origine (O)"));
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Destinazione (D)"));
-        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Cella libera"));
 
         add(pannelloLegenda, BorderLayout.EAST);
 
@@ -125,13 +137,6 @@ public class FinestraGriglia extends JFrame {
                 int riga = p.y;
                 int colonna = p.x;
             	
-            	/*
-                int dimensioneCella = pannelloGriglia.getDimensioneCella();
-                if (dimensioneCella <= 0) return;
-
-                int colonna = e.getX() / dimensioneCella;
-                int riga = e.getY() / dimensioneCella;
-				*/
                 if (!griglia.isNeiMargini(riga, colonna) || matriceOstacoli[riga][colonna]) return;
 
                 if (origine == null) {
@@ -247,11 +252,13 @@ public class FinestraGriglia extends JFrame {
 
     // Metodo di utilità per creare una voce della legenda
     private JPanel creaVoceLegenda(Color colore, String testo) {
-        JPanel voce = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel box = new JLabel();
         box.setOpaque(true);
         box.setBackground(colore);
         box.setPreferredSize(new Dimension(20, 20));
+        box.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        JPanel voce = new JPanel(new FlowLayout(FlowLayout.LEFT));
         voce.add(box);
         voce.add(new JLabel(testo));
         return voce;
@@ -281,7 +288,6 @@ public class FinestraGriglia extends JFrame {
         	analizzatoreCammini.resetContatori();
         	tempoInizio = System.currentTimeMillis();
         	long t1 = System.nanoTime(); // Inizializzazione timer
-
 
         	// Esecuzione del calcolo del cammino minimo
         	try{
@@ -365,8 +371,8 @@ public class FinestraGriglia extends JFrame {
 	
     // Mostra un dialogo riepilogativo al termine o all’interruzione dell’algoritmo
     private void mostraRiepilogo(RisultatoCammino risultato, int stato) {
-        JDialog dialogo = new JDialog(this, "Riepilogo", true);
-        dialogo.setSize(400, 300);
+        JDialog dialogo = new JDialog(this, "Finestra riepilogo", true);
+        dialogo.setSize(400, 400);
         dialogo.setLayout(new BorderLayout());
 
         JTextArea areaTesto = new JTextArea();

@@ -13,7 +13,7 @@ import java.io.IOException;
 public class CreatoreGriglia extends JFrame {
     private static final long serialVersionUID = 1L;
 	private JTextField campoRighe, campoColonne, campoSeed;
-    private JButton pulsanteAnteprima, pulsanteConferma,  pulsanteSalva, pulsanteAnnulla, pulsanteCarica;
+    private JButton pulsanteAnteprima, pulsanteConferma, pulsanteSalva, pulsanteCarica;
     private JComboBox<String> boxDensita;
     private JPanel pannelloGriglia;
     private PannelloGrigliaManuale pannelloManuale;
@@ -71,8 +71,6 @@ public class CreatoreGriglia extends JFrame {
         pulsanteConferma = new JButton("Conferma");
         pulsanteSalva = new JButton("Salva JSON");
         pulsanteCarica = new JButton("Carica JSON");
-      
-       
 
         pannelloPulsanti.add(pulsanteAnteprima);
         pannelloPulsanti.add(pulsanteConferma);
@@ -102,16 +100,11 @@ public class CreatoreGriglia extends JFrame {
         		creaGriglia();
         	}
         );
-
         
         pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
         pulsanteCarica.addActionListener(e -> caricaGrigliaJson());
 
-
         disattivaConferma();
-      
-        
-        // Mostra anteprima iniziale con parametri di default
         mostraAnteprima();
     }
     
@@ -141,8 +134,6 @@ public class CreatoreGriglia extends JFrame {
         campoRighe.getDocument().addDocumentListener(listenerCampi);
         campoColonne.getDocument().addDocumentListener(listenerCampi);
         campoSeed.getDocument().addDocumentListener(listenerCampi);
-        
-        
 
         // Se hai anche una JComboBox per la densità:
         boxDensita.addItemListener(e -> {
@@ -212,10 +203,18 @@ public class CreatoreGriglia extends JFrame {
         pannelloGriglia.removeAll();
 
         if ("Personalizzata".equals(scelta)) {
+            boolean[][] vuota = new boolean[righe][colonne];
+
+            // Salvo la griglia vuota
+            grigliaBackup = new Griglia(righe, colonne);
+            grigliaBackup.setOstacoli(vuota);
+
+            // Creo subito pannello manuale
+            pannelloManuale = new PannelloGrigliaManuale(righe, colonne);
+            pannelloManuale.setOstacoli(vuota);
+
             pannelloGriglia.setLayout(new BorderLayout());
-            pannelloGriglia.add(new JLabel("Anteprima non disponibile in modalità personalizzata",
-            		SwingConstants.CENTER), BorderLayout.CENTER);
-            grigliaBackup = null; // nessuna anteprima disponibile
+            pannelloGriglia.add(pannelloManuale, BorderLayout.CENTER);
         } else {
             Griglia g = new Griglia(righe, colonne);
             boolean[][] ostacoli = generaOstacoli();
@@ -223,7 +222,7 @@ public class CreatoreGriglia extends JFrame {
             if (ostacoli == null) return;
             
             // Salvo la griglia generata
-            grigliaBackup=g;
+            grigliaBackup = g;
 
             PannelloAnteprima anteprima = new PannelloAnteprima(ostacoli);
             pannelloGriglia.setLayout(new BorderLayout());
@@ -235,20 +234,13 @@ public class CreatoreGriglia extends JFrame {
     }
 
     // Metodo che chiama il generatore di griglie
-    private void creaGriglia() {
-        String scelta = (String) boxDensita.getSelectedItem();
-        if ("Personalizzata".equals(scelta)) {
-           Griglia g = new Griglia(righe, colonne);
-            personalizzaOstacoli(g.getOstacoli());
+    private void creaGriglia() {     
+        if (grigliaBackup != null) {
+            new FinestraGriglia(grigliaBackup.getOstacoli());
         } else {
-        	// Se ho già un'anteprima, la riuso
-            if (grigliaBackup != null) {
-                new FinestraGriglia(grigliaBackup.getOstacoli());
-            } else {
-	            boolean[][] ostacoli = generaOstacoli();
-	            if (ostacoli != null) {
-	                new FinestraGriglia(ostacoli);
-	            }
+            boolean[][] ostacoli = generaOstacoli();
+            if (ostacoli != null) {
+                new FinestraGriglia(ostacoli);
             }
         }
     }
@@ -269,177 +261,121 @@ public class CreatoreGriglia extends JFrame {
 
         wrapperCentro.add(pannelloManuale, gbc);
         pannelloGriglia.add(wrapperCentro, BorderLayout.CENTER);
-
-        JPanel pannelloBasso = new JPanel();
-        pulsanteAnnulla = new JButton("Annulla");
-        pulsanteConferma = new JButton("Conferma");
-
-        pannelloBasso.add(pulsanteAnnulla);
-        pannelloBasso.add(pulsanteConferma);
-        pannelloGriglia.add(pannelloBasso, BorderLayout.SOUTH);
-
-        grigliaBackup = new Griglia(righe, colonne);
-
-        pulsanteAnnulla.addActionListener(e -> pannelloManuale.setOstacoli(grigliaBackup.getOstacoli()));
-
-        pulsanteConferma.addActionListener(e -> {
-            boolean[][] obs = pannelloManuale.getOstacoli();
-            for (int r = 0; r < righe; r++)
-                for (int c = 0; c < colonne; c++)
-                    if (obs[r][c]) ostacoli[r][c] = true;
-
-            new FinestraGriglia(ostacoli);
-        });
-
         pannelloGriglia.revalidate();
         pannelloGriglia.repaint();
     }
     
     // Metodo che salva la griglia in un file JSON
     private void salvaGrigliaJson() {
-    if (grigliaBackup == null) {
-        JOptionPane.showMessageDialog(this,
-                "Nessuna griglia da salvare. Genera prima un'anteprima.",
-                "Errore",
-                JOptionPane.ERROR_MESSAGE);
-        return;
-    }
+	    if (grigliaBackup == null) {
+	        JOptionPane.showMessageDialog(this,
+	                "Nessuna griglia da salvare. Genera prima un'anteprima.",
+	                "Errore",
+	                JOptionPane.ERROR_MESSAGE);
+	        return;
+	    }
 
-    // Converto la matrice in un oggetto Griglia
-    Griglia g =grigliaBackup;
-    JFileChooser chooser = new JFileChooser();
-    chooser.setDialogTitle("Salva griglia come JSON");
+	    // Converto la matrice in un oggetto Griglia
+	    Griglia g =grigliaBackup;
+	    JFileChooser chooser = new JFileChooser();
+	    chooser.setDialogTitle("Salva griglia come JSON");
+	
+	    int result = chooser.showSaveDialog(this);
+	    if (result == JFileChooser.APPROVE_OPTION) {
+	        File file = chooser.getSelectedFile();
+	
+	        // Aggiunge estensione .json se mancante
+	        if (!file.getName().toLowerCase().endsWith(".json")) {
+	            file = new File(file.getAbsolutePath() + ".json");
+	        }
+	
+	        try {
+	            GrigliaIO.writeGriglia(g, file);
+	            JOptionPane.showMessageDialog(this,
+	                    "Griglia salvata con successo in:\n" + file.getAbsolutePath(),
+	                    "Salvataggio completato",
+	                    JOptionPane.INFORMATION_MESSAGE);
+	        } catch (IOException ex) {
+	            ex.printStackTrace();
+	            JOptionPane.showMessageDialog(this,
+	                    "Errore durante il salvataggio del file.",
+	                    "Errore",
+	                    JOptionPane.ERROR_MESSAGE);
+	        }
+	    }
+	}
+    
+	private void caricaGrigliaJson() {
+	    JFileChooser chooser = new JFileChooser();
+	    chooser.setDialogTitle("Carica griglia da JSON");
+	
+	    int result = chooser.showOpenDialog(this);
+	    if (result != JFileChooser.APPROVE_OPTION) {
+	        return;
+	    }
+	
+	    File file = chooser.getSelectedFile();
+	
+	    try {
+	        // Reads a list OR a single Griglia (your IO class handles both)
+	        java.util.List<Griglia> lista = GrigliaIO.readGriglie(file);
+	
+	        if (lista.isEmpty()) {
+	            JOptionPane.showMessageDialog(this,
+	                    "Il file non contiene griglie valide.",
+	                    "Errore",
+	                    JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	
+	        // Take first one (or ask user if multiple)
+	        Griglia g = lista.get(0);
+	
+	        // --- VALIDATION: size must be <= 100 ---
+	        if (g.getRighe() > 100 || g.getColonne() > 100) {
+	            JOptionPane.showMessageDialog(this,
+	                    "La griglia caricata supera le dimensioni massime (100x100).",
+	                    "Errore dimensioni",
+	                    JOptionPane.ERROR_MESSAGE);
+	            return;
+	        }
+	
+	        // Store it as current backup
+	        grigliaBackup = g;
+	
+	        // Update input fields
+	        campoRighe.setText(String.valueOf(g.getRighe()));
+	        campoColonne.setText(String.valueOf(g.getColonne()));
+	        campoSeed.setText("0");
+	        boxDensita.setSelectedItem("Bassa");
+	
+	        // Show preview
+	        pannelloGriglia.removeAll();
+	        pannelloGriglia.setLayout(new BorderLayout());
+	
+	        PannelloAnteprima anteprima = new PannelloAnteprima(g.getOstacoli());
+	        pannelloGriglia.add(anteprima, BorderLayout.CENTER);
+	
+	        pannelloGriglia.revalidate();
+	        pannelloGriglia.repaint();
+	
+	        pulsanteConferma.setEnabled(true);
+	        pulsanteSalva.setEnabled(true);
+	
+	    } catch (IOException ex) {
+	        ex.printStackTrace();
+	        JOptionPane.showMessageDialog(this,
+	                "Errore durante il caricamento del file JSON.",
+	                "Errore",
+	                JOptionPane.ERROR_MESSAGE);
+	    }
+	}
+	
+	public class PannelloAnteprima extends PannelloGrigliaBase {
+	    private static final long serialVersionUID = 1L;
 
-    int result = chooser.showSaveDialog(this);
-    if (result == JFileChooser.APPROVE_OPTION) {
-        File file = chooser.getSelectedFile();
-
-        // Aggiunge estensione .json se mancante
-        if (!file.getName().toLowerCase().endsWith(".json")) {
-            file = new File(file.getAbsolutePath() + ".json");
-        }
-
-        try {
-            GrigliaIO.writeGriglia(g, file);
-            JOptionPane.showMessageDialog(this,
-                    "Griglia salvata con successo in:\n" + file.getAbsolutePath(),
-                    "Salvataggio completato",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                    "Errore durante il salvataggio del file.",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
-}
-private void caricaGrigliaJson() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setDialogTitle("Carica griglia da JSON");
-
-    int result = chooser.showOpenDialog(this);
-    if (result != JFileChooser.APPROVE_OPTION) {
-        return;
-    }
-
-    File file = chooser.getSelectedFile();
-
-    try {
-        // Reads a list OR a single Griglia (your IO class handles both)
-        java.util.List<Griglia> lista = GrigliaIO.readGriglie(file);
-
-        if (lista.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Il file non contiene griglie valide.",
-                    "Errore",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // Take first one (or ask user if multiple)
-        Griglia g = lista.get(0);
-
-        // --- VALIDATION: size must be <= 100 ---
-        if (g.getRighe() > 100 || g.getColonne() > 100) {
-            JOptionPane.showMessageDialog(this,
-                    "La griglia caricata supera le dimensioni massime (100x100).",
-                    "Errore dimensioni",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        // Store it as current backup
-        grigliaBackup = g;
-
-        // Update input fields
-        campoRighe.setText(String.valueOf(g.getRighe()));
-        campoColonne.setText(String.valueOf(g.getColonne()));
-        campoSeed.setText("0");
-        boxDensita.setSelectedItem("Bassa");
-
-        // Show preview
-        pannelloGriglia.removeAll();
-        pannelloGriglia.setLayout(new BorderLayout());
-
-        PannelloAnteprima anteprima = new PannelloAnteprima(g.getOstacoli());
-        pannelloGriglia.add(anteprima, BorderLayout.CENTER);
-
-        pannelloGriglia.revalidate();
-        pannelloGriglia.repaint();
-
-        pulsanteConferma.setEnabled(true);
-        pulsanteSalva.setEnabled(true);
-
-    } catch (IOException ex) {
-        ex.printStackTrace();
-        JOptionPane.showMessageDialog(this,
-                "Errore durante il caricamento del file JSON.",
-                "Errore",
-                JOptionPane.ERROR_MESSAGE);
-    }
-}
-
-
-    // Classe interna che rappresenta il pannello dell'anteprima
-    class PannelloAnteprima extends JPanel {
-        private static final long serialVersionUID = 1L;
-		private boolean[][] ostacoli;
-
-        public PannelloAnteprima(boolean[][] ostacoli) {
-            this.ostacoli = ostacoli;
-        }
-
-        public void setOstacoli(boolean[][] ostacoli) {
-            this.ostacoli = ostacoli;
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (ostacoli == null) return;
-
-            int righe = ostacoli.length;
-            int colonne = ostacoli[0].length;
-
-            // Calcola lato cella quadrata
-            int cellSize = Math.min(getWidth() / colonne, getHeight() / righe);
-
-            // Calcola offset per centrare la griglia
-            int offsetX = (getWidth() - (colonne * cellSize)) / 2;
-            int offsetY = (getHeight() - (righe * cellSize)) / 2;
-
-            for (int r = 0; r < righe; r++) {
-                for (int c = 0; c < colonne; c++) {
-                    int x = offsetX + c * cellSize;
-                    int y = offsetY + r * cellSize;
-                    g.setColor(ostacoli[r][c] ? Color.BLUE.darker() : Color.WHITE);
-                    g.fillRect(x, y, cellSize, cellSize);
-                    g.setColor(Color.GRAY);
-                    g.drawRect(x, y, cellSize, cellSize);
-                }
-            }
-        }
-    }
+		public PannelloAnteprima(boolean[][] obstacles) {
+	        super(obstacles);
+	    }
+	}
 }

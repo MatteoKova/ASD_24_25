@@ -27,53 +27,53 @@ VERIFICHE:
  - Controlla collisioni con celle già occupate
  - Evita di posizionare anelli se nasconderebbero completamente la griglia o non lascerebbero spazio interno
  - Limita tentativi -> se fallisce skip o riduci dimensione
-*/
+ */
 
 import java.util.Random;
 
 public class GeneratoreGriglieOstacoli {
-    private final Configurazione cfg;
-    private final Random rnd;
-    private int rows;
-    private int cols;
-    //private final Griglia griglia;
-    private boolean[][] mat_ostacoli;
+	private final Configurazione cfg;
+	private final Random rnd;
+	private int rows;
+	private int cols;
+	//private final Griglia griglia;
+	private boolean[][] mat_ostacoli;
 
-    public GeneratoreGriglieOstacoli(Configurazione cfg, boolean[][] mat_ostacoli) {
-        this.cfg = cfg;
-        this.rnd = new Random(cfg.seed);
-        this.rows = cfg.righe;
-        this.cols = cfg.colonne;
-        //this.griglia = new Griglia(cfg.righe, cfg.colonne);
-        this.mat_ostacoli = mat_ostacoli;
-    }
-
-    // Genera tutte le tipologie di ostacoli rispettando la densità specificata
-    public void generaTutto() {
-    	
-	 switch (cfg.tipoPattern) {
-        case DENS_BASSA, DENS_ALTA, DENS_MEDIA:
-            generaOstacoliCasuali();
-			break;
-    
-        case SPIRALE:
-            generaSpriale();break;
-        case SCACCHI:
-            generaScacchiera();break;
-        case RIGHE:
-            generaRighe();break;
-        case UNICO:
-            generaUnicoOstacolo();break;
-		default:
-			generaOstacoliCasuali();break;
-    }
-
-	
-    	
+	public GeneratoreGriglieOstacoli(Configurazione cfg, boolean[][] mat_ostacoli) {
+		this.cfg = cfg;
+		this.rnd = new Random(cfg.seed);
+		this.rows = cfg.righe;
+		this.cols = cfg.colonne;
+		//this.griglia = new Griglia(cfg.righe, cfg.colonne);
+		this.mat_ostacoli = mat_ostacoli;
 	}
 
-    //NON usato
-/*    public void pulisciGriglia() {
+	// Genera tutte le tipologie di ostacoli rispettando la densità specificata
+	public void generaTutto() {
+		switch (cfg.tipoPattern) {
+		case DENS_BASSA, DENS_ALTA, DENS_MEDIA:
+			generaOstacoliCasuali();
+			break;
+		case SPIRALE:
+			generaSpriale();
+			break;
+		case SCACCHI:
+			generaScacchiera();
+			break;
+		case RIGHE:
+			generaRighe();
+			break;
+		case UNICO:
+			generaUnicoOstacolo();
+			break;
+		default:
+			generaOstacoliCasuali();
+			break;
+		}
+	}
+
+	//NON usato
+	/*    public void pulisciGriglia() {
     	for (int r = 0; r < cfg.righe; r++) {
     		for (int c = 0; c < cfg.colonne; c++) {
     			griglia.getCella(r, c).setAttraversabile(true);
@@ -81,7 +81,7 @@ public class GeneratoreGriglieOstacoli {
     	}
     }*/
 
-/*    private void rimuoviOstacoliEccesso(double densitaAttuale) {
+	/*    private void rimuoviOstacoliEccesso(double densitaAttuale) {
     	double densitaTarget = cfg.density;
     	int totaleCelle = rows * cols;
     	int ostacoliDaRimuovere = (int) ((densitaAttuale - densitaTarget) * totaleCelle);
@@ -99,228 +99,210 @@ public class GeneratoreGriglieOstacoli {
 	// ----------------- MAIN GENERATION LOGIC -----------------------
 	private void generaOstacoliCasuali(){
 		if (cfg.density <= 0) return;
-    	double densita;
+		double densita;
 		do{
-    		generaSemplici(cfg.numSemplici);
-    		generaAgglomerati(cfg.numAgglomerati);
-    		generaDiagonali(cfg.numDiagonali);
-    		generaBarre(cfg.numBarre);
-    		generaAnelli(cfg.numAnelli);
-    		densita = calcolaDensita();
-    		System.out.println("density: " + densita + ", target: " + cfg.density);
-    	} while (densita < cfg.density );
+			generaSemplici(cfg.numSemplici);
+			generaAgglomerati(cfg.numAgglomerati);
+			generaDiagonali(cfg.numDiagonali);
+			generaBarre(cfg.numBarre);
+			generaAnelli(cfg.numAnelli);
+			densita = calcolaDensita();
+			System.out.println("density: " + densita + ", target: " + cfg.density);
+		} while (densita < cfg.density );
 
-    	//griglia.calculateOstacoli();
-    	//rimuoviOstacoliEccesso(densita);TODO: si potrebbe reinserire la funzione, a patto di creare una lista di ostacoli tra cui scegliere randomicamente}
-		
+		//griglia.calculateOstacoli();
+		//rimuoviOstacoliEccesso(densita);TODO: si potrebbe reinserire la funzione, a patto di creare una lista di ostacoli tra cui scegliere randomicamente}
+
 	}
-    
 
-    // TIPOLOGIE DI OSTACOLI
 
-    
-    // Genera singole celle
-    private void generaSemplici(int n) {
-        for (int i = 0; i < n; i++) {
-            int r = rnd.nextInt(rows);
-            int c = rnd.nextInt(cols);
-            mat_ostacoli[r][c] = true;
-        }
-    }
+	// TIPOLOGIE DI OSTACOLI
 
-    // Genera insiemi con 2, 3 o 4 celle
-    private void generaAgglomerati(int n) {
-        for (int i = 0; i < n; i++) {
-            int baseR = rnd.nextInt(rows);
-            int baseC = rnd.nextInt(cols);
-            int dim = 2 + rnd.nextInt(3); // da 2 a 4 celle
-            for (int j = 0; j < dim; j++) {
-                int r = baseR + rnd.nextInt(2);
-                int c = baseC + rnd.nextInt(2);
-                if(controllaCoordinate(r,c)) {
-                	mat_ostacoli[r][c] = true; // se le coordinate non sono valide, non stampa cella
-                }          
-            }
-        }
-    }
 
-    // Genera insiemi con 2, 3 o 4 celle in diagonale
-    private void generaDiagonali(int n) {
-    	for (int i = 0; i < n; i++) {
-    		int r = rnd.nextInt(rows);
-    		int c = rnd.nextInt(cols);
-    		boolean verso = rnd.nextBoolean();
-    		int len = 2 + rnd.nextInt(3);
-    		for (int k = 0; k < len; k++) {
-    			if (verso) // diagonale creata verso dx
-    				if(controllaCoordinate(r+k,c+k)) { // se supera i limiti, controllaCoordinate() evita che venga stampato
-    					mat_ostacoli[r+k][c+k] = true;
-    				}
-    			else // diagonale creata verso sx
-    				if(controllaCoordinate(r + len, c - k)) {
-    					mat_ostacoli[r+len][c-k] = true;
-    				} 
-    		}
-    	}
-    }
+	// Genera singole celle
+	private void generaSemplici(int n) {
+		for (int i = 0; i < n; i++) {
+			int r = rnd.nextInt(rows);
+			int c = rnd.nextInt(cols);
+			mat_ostacoli[r][c] = true;
+		}
+	}
 
-    // Genera rettangoli con 3, 4, 5, 6 o 7 celle in lunghezza e con 1 o 2 celle in spessore
-    private void generaBarre(int n) {
-    	for (int i = 0; i < n; i++) {
-    		boolean orizzontale = rnd.nextBoolean();
-    		int lung = 3 + rnd.nextInt(5);
-    		int spess = 1 + rnd.nextInt(2);
-    		int r = rnd.nextInt(rows);
-    		int c = rnd.nextInt(cols);
-    		for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
-    			for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
-    				if(controllaCoordinate(r + dr, c + dc)) {
-    					mat_ostacoli[r+dr][c+dc] = true;
-    				}
-    	}
-    }
+	// Genera insiemi con 2, 3 o 4 celle
+	private void generaAgglomerati(int n) {
+		for (int i = 0; i < n; i++) {
+			int baseR = rnd.nextInt(rows);
+			int baseC = rnd.nextInt(cols);
+			int dim = 2 + rnd.nextInt(3); // da 2 a 4 celle
+			for (int j = 0; j < dim; j++) {
+				int r = baseR + rnd.nextInt(2);
+				int c = baseC + rnd.nextInt(2);
+				if(controllaCoordinate(r,c)) {
+					mat_ostacoli[r][c] = true; // se le coordinate non sono valide, non stampa cella
+				}          
+			}
+		}
+	}
 
-    // Genera anelli non attraversabili che racchiudono celle attraversabili
-    private void generaAnelli(int n) {
-    	for (int i = 0; i < n; i++) {
-    		int r = rnd.nextInt(rows);
-    		int c = rnd.nextInt(cols);
-    		int size = 3 + rnd.nextInt(4);
-    		for (int k = 0; k < size; k++) {
-    			if(controllaCoordinate(r, c + k)) {
-    				mat_ostacoli[r][c+k] = true;
-    			}
-    			if(controllaCoordinate(r + size - 1, c + k)) {
-    				mat_ostacoli[r+size-1][c+k] = true;
-    			}
-    			if(controllaCoordinate(r + k, c)) {
-    				mat_ostacoli[r+k][c] = true;
-    			}
-    			if(controllaCoordinate(r + k, c + size - 1)) {
-    				mat_ostacoli[r+k][c+size-1] = true;
-    			}
-    		}
-    	}
-    }
+	// Genera insiemi con 2, 3 o 4 celle in diagonale
+	private void generaDiagonali(int n) {
+		for (int i = 0; i < n; i++) {
+			int r = rnd.nextInt(rows);
+			int c = rnd.nextInt(cols);
+			boolean verso = rnd.nextBoolean();
+			int len = 2 + rnd.nextInt(3);
+			for (int k = 0; k < len; k++) {
+				if (verso) // diagonale creata verso dx
+					if(controllaCoordinate(r+k,c+k)) { // se supera i limiti, controllaCoordinate() evita che venga stampato
+						mat_ostacoli[r+k][c+k] = true;
+					}
+					else // diagonale creata verso sx
+						if(controllaCoordinate(r + len, c - k)) {
+							mat_ostacoli[r+len][c-k] = true;
+						} 
+			}
+		}
+	}
 
-    private double calcolaDensita() {
-    	double count = 0;
-    	for(int i = 0; i < rows; i++) {
-    		for(int j = 0; j < cols; j++) {
-    			if(mat_ostacoli[i][j] == true)
-    				count++;
-    		}
-    	}
-    	return count/(rows*cols);
-    }
-    
-    /*
-     * Funzione per verificare se delle coordinarte indicano una cella valida
-     */
-    public boolean controllaCoordinate(int row, int col) {
-    	if(row >= 0 && col >= 0 && row < rows && col < cols) {
-    		return true;
-    	}
-    	return false;
-    }
+	// Genera rettangoli con 3, 4, 5, 6 o 7 celle in lunghezza e con 1 o 2 celle in spessore
+	private void generaBarre(int n) {
+		for (int i = 0; i < n; i++) {
+			boolean orizzontale = rnd.nextBoolean();
+			int lung = 3 + rnd.nextInt(5);
+			int spess = 1 + rnd.nextInt(2);
+			int r = rnd.nextInt(rows);
+			int c = rnd.nextInt(cols);
+			for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
+				for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
+					if(controllaCoordinate(r + dr, c + dc)) {
+						mat_ostacoli[r+dr][c+dc] = true;
+					}
+		}
+	}
 
-// GRIGLIA CON PATTERN PREDEFINITI
+	// Genera anelli non attraversabili che racchiudono celle attraversabili
+	private void generaAnelli(int n) {
+		for (int i = 0; i < n; i++) {
+			int r = rnd.nextInt(rows);
+			int c = rnd.nextInt(cols);
+			int size = 3 + rnd.nextInt(4);
+			for (int k = 0; k < size; k++) {
+				if(controllaCoordinate(r, c + k)) {
+					mat_ostacoli[r][c+k] = true;
+				}
+				if(controllaCoordinate(r + size - 1, c + k)) {
+					mat_ostacoli[r+size-1][c+k] = true;
+				}
+				if(controllaCoordinate(r + k, c)) {
+					mat_ostacoli[r+k][c] = true;
+				}
+				if(controllaCoordinate(r + k, c + size - 1)) {
+					mat_ostacoli[r+k][c+size-1] = true;
+				}
+			}
+		}
+	}
 
+	private double calcolaDensita() {
+		double count = 0;
+		for(int i = 0; i < rows; i++) {
+			for(int j = 0; j < cols; j++) {
+				if(mat_ostacoli[i][j] == true)
+					count++;
+			}
+		}
+		return count/(rows*cols);
+	}
+
+	/*
+	 * Funzione per verificare se delle coordinarte indicano una cella valida
+	 */
+	public boolean controllaCoordinate(int row, int col) {
+		if(row >= 0 && col >= 0 && row < rows && col < cols) {
+			return true;
+		}
+		return false;
+	}
+
+	// GRIGLIA CON PATTERN PREDEFINITI
 	private void generaSpriale() {
-       
+		// Initially fill with true
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				mat_ostacoli[i][j] = true;
+			}
+		}
 
-        // Initially fill with true
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                mat_ostacoli[i][j] = true;
-            }
-        }
+		int top = 0, bottom = rows - 1;
+		int left = 0, right = cols - 1;
+		boolean fillFalse = true;
 
-        int top = 0, bottom = rows - 1;
-        int left = 0, right = cols - 1;
-        boolean fillFalse = true;
+		while (top <= bottom && left <= right) {
+			if (fillFalse) {
+				// Top row
+				for (int j = ((left-1)>0 ? left-1 : 0) ; j <= right; j++) {
+					mat_ostacoli[top][j] = false;
+				}
+				top++;
 
-        while (top <= bottom && left <= right) {
-            if (fillFalse) {
-                // Top row
-                for (int j = ((left-1)>0 ? left-1 : 0) ; j <= right; j++) {
-                    mat_ostacoli[top][j] = false;
-                }
-                top++;
+				// Right column
+				for (int i = top; i <= bottom; i++) {
+					mat_ostacoli[i][right] = false;
+				}
+				right--;
 
-                // Right column
-                for (int i = top; i <= bottom; i++) {
-                    mat_ostacoli[i][right] = false;
-                }
-                right--;
+				// Bottom row
+				if (top <= bottom) {
+					for (int j = right; j >= left; j--) {
+						mat_ostacoli[bottom][j] = false;
+					}
+					bottom--;
+				}
 
-                // Bottom row
-                if (top <= bottom) {
-                    for (int j = right; j >= left; j--) {
-                        mat_ostacoli[bottom][j] = false;
-                    }
-                    bottom--;
-                }
-
-                // Left column
-                if (left <= right) {
-                    for (int i = bottom; i > top; i--) {
-                        mat_ostacoli[i][left] = false;
-                    }
-                    left++;
-                }
-            }else{top++;
+				// Left column
+				if (left <= right) {
+					for (int i = bottom; i > top; i--) {
+						mat_ostacoli[i][left] = false;
+					}
+					left++;
+				}
+			} else {
+				top++;
 				right--;
 				bottom--;
 				left++;
 			}
 
-            fillFalse = !fillFalse; // alternate layer
-        }
-
-        
-    }
-
+			fillFalse = !fillFalse; // alternate layer
+		}
+	}
 
 	private void generaScacchiera() {
-    
-
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            mat_ostacoli[i][j] = (i + j) % 2 == 0;  // true su caselle pari
-        }
-    }
-
-    
-}
-
+		for (int i = 0; i < rows; i++) {
+			for (int j = 0; j < cols; j++) {
+				mat_ostacoli[i][j] = (i + j) % 2 == 0;  // true su caselle pari
+			}
+		}
+	}
 
 	private void generaRighe() {
-	
-
-	for (int i = 0; i < this.rows; i++) {
-		for (int j = 0; j < this.cols; j++) {
-			mat_ostacoli[i][j] = !(i % 2 == 0);  // true su righe dispari(la prima è 0)
-			
+		for (int i = 0; i < this.rows; i++) {
+			for (int j = 0; j < this.cols; j++) {
+				mat_ostacoli[i][j] = !(i % 2 == 0);  // true su righe dispari(la prima è 0)
+			}
+			if (i % 4 == 1) {
+				mat_ostacoli[i][this.cols - 1] = false; // lascia un varco ogni 4 righe
+			} else if (i % 4 == 3) {
+				mat_ostacoli[i][0] = false; // lascia un varco ogni 4 righe
+			}
 		}
-        if (i % 4 == 1) {
-			mat_ostacoli[i][this.cols - 1] = false; // lascia un varco ogni 4 righe
-		}else if (i % 4 == 3) {
-			mat_ostacoli[i][0] = false; // lascia un varco ogni 4 righe
-		}
-		
 	}
-
-
-}
-private void generaUnicoOstacolo() {
 	
-	int centerCol = cols / 2;
-	
-	for (int r = 0 / 2; r < rows-1 ; r++) {
-		
-				mat_ostacoli[r][centerCol] = true;
-		
+	private void generaUnicoOstacolo() {
+		int centerCol = cols / 2;
+
+		for (int r = 0 / 2; r < rows-1 ; r++) {
+			mat_ostacoli[r][centerCol] = true;
+		}
 	}
 }
-	}

@@ -10,5 +10,3 @@ public enum TipoPattern {
     RIGHE,
     UNICO;
 }
-
-

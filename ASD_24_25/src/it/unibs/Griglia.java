@@ -147,12 +147,15 @@ public class Griglia {
     public Cella getOrigineDefault() {
         return origineDefault;
     }
+    
     public void setOrigineDefault(Cella origineDefault) {
         this.origineDefault = origineDefault;
     }
+    
     public Cella getDestinazioneDefault() {
         return destinazioneDefault;
-    }   
+    }
+    
     public void setDestinazioneDefault(Cella destinazioneDefault) {
         this.destinazioneDefault = destinazioneDefault;
     }
