@@ -2,7 +2,6 @@ package it.unibs;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;

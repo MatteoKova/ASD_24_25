@@ -93,14 +93,11 @@ public class AnalizzatoreCammini {
 
 	// Calcolo della distanza libera dlib(O, D)
     public static double dlib(Cella o, Cella d) {
-    	//if (contesto.contains(d) || complemento.contains(d)) {
-    		int dx = Math.abs(d.getColonna() - o.getColonna());
-            int dy = Math.abs(d.getRiga() - o.getRiga());
-            int deltaMin = Math.min(dx, dy);
-            int deltaMax = Math.max(dx, dy);
-            return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
-    	//}
-    	//else return 0;
+		int dx = Math.abs(d.getColonna() - o.getColonna());
+        int dy = Math.abs(d.getRiga() - o.getRiga());
+        int deltaMin = Math.min(dx, dy);
+        int deltaMax = Math.max(dx, dy);
+        return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
     }
 
     // Permette di compiere un cammino libero di tipo 1 o 2
@@ -362,27 +359,25 @@ public class AnalizzatoreCammini {
     public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, Supplier<Boolean> stopCheck) {
     	calls.incrementAndGet();
         
-    	
     	int[][] griglia_tipi = new int[griglia.getRighe()][griglia.getColonne()]; //crea una nuova matrice per memorizzare i tipi relativi ad O, inizializzandola a 0
     	calcolaContesto(griglia, origine, griglia_tipi); //è inutile che restituisca qualcosa, visto che sta modificando griglia_tipi
     	calcolaComplemento(griglia, origine, griglia_tipi);
     	
         if (stopCheck.get()) 
            throw new StopException(new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)), 
-                                            istr16Contatore , contatoreFrontiera, griglia));
+                                            istr16Contatore, contatoreFrontiera, griglia));
 
-        
         if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==1) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(1);
-        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1))
-            , istr16Contatore, contatoreFrontiera,griglia);
+        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1)),
+        			istr16Contatore, contatoreFrontiera,griglia);
         }
         else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==2) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(2);
-        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,2))
-            ,istr16Contatore , contatoreFrontiera,  griglia);
+        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,2)),
+        			istr16Contatore, contatoreFrontiera,  griglia);
         }
         
         //Set<Landmark> frontiera = calolaFrontiera(...,griglia_tipi);

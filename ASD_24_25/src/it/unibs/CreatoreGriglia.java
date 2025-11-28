@@ -174,16 +174,15 @@ public class CreatoreGriglia extends JFrame {
         }
 
         double densita = 0.1;
-        TipoPattern tipo = TipoPattern.DENS_BASSA;
+        TipoPattern tipo = TipoPattern.DENSITÀ_BASSA;
         String scelta = (String) boxDensita.getSelectedItem();
-        if ("Media".equals(scelta)) {tipo=TipoPattern.DENS_MEDIA;densita = 0.25;}
-        if ("Alta".equals(scelta)) {tipo=TipoPattern.DENS_ALTA;densita = 0.45;}
+        if ("Media".equals(scelta)) {tipo=TipoPattern.DENSITÀ_MEDIA;densita = 0.25;}
+        if ("Alta".equals(scelta)) {tipo=TipoPattern.DENSITÀ_ALTA;densita = 0.45;}
         if ("Spirale".equals(scelta)) tipo=TipoPattern.SPIRALE;
         if("Scacchi".equals(scelta)) tipo=TipoPattern.SCACCHI;
         if("Righe".equals(scelta)) tipo=TipoPattern.RIGHE;  
-        if("Unico Ostacolo".equals(scelta)) tipo=TipoPattern.UNICO;
+        if("Unico Ostacolo".equals(scelta)) tipo=TipoPattern.UNICO_OSTACOLO;
        
-
         boolean[][] ostacoli = new boolean[righe][colonne];
         Configurazione cfg = new Configurazione();
         cfg.righe = righe;
@@ -195,6 +194,7 @@ public class CreatoreGriglia extends JFrame {
         GeneratoreGriglieOstacoli generatore = new GeneratoreGriglieOstacoli(cfg, ostacoli);
         generatore.generaTutto();
         return ostacoli;
+        //return generatore.getMat_ostacoli();
     }
     
     // Metodo che si occupa della griglia visualizzabile in anteprima
@@ -215,6 +215,7 @@ public class CreatoreGriglia extends JFrame {
 
             pannelloGriglia.setLayout(new BorderLayout());
             pannelloGriglia.add(pannelloManuale, BorderLayout.CENTER);
+            
         } else {
             Griglia g = new Griglia(righe, colonne);
             boolean[][] ostacoli = generaOstacoli();
@@ -224,7 +225,7 @@ public class CreatoreGriglia extends JFrame {
             // Salvo la griglia generata
             grigliaBackup = g;
 
-            PannelloAnteprima anteprima = new PannelloAnteprima(ostacoli);
+            PannelloGrigliaBase anteprima = new PannelloGrigliaBase(ostacoli);
             pannelloGriglia.setLayout(new BorderLayout());
             pannelloGriglia.add(anteprima, BorderLayout.CENTER);
         }
@@ -234,15 +235,47 @@ public class CreatoreGriglia extends JFrame {
     }
 
     // Metodo che chiama il generatore di griglie
-    private void creaGriglia() {     
+    private void creaGriglia2() {     
         if (grigliaBackup != null) {
             new FinestraGriglia(grigliaBackup.getOstacoli());
         } else {
             boolean[][] ostacoli = generaOstacoli();
-            if (ostacoli != null) {
-                new FinestraGriglia(ostacoli);
-            }
+            //if (ostacoli != null) {
+            	new FinestraGriglia(ostacoli);
+            //}   
         }
+    }
+    
+    // METODO PROVA CHE CONTROLLA SE LA MATRICE E' FATTA SOLO DA OSTACOLI
+    private void creaGriglia() {
+    	boolean[][] ostacoli;
+        if (grigliaBackup != null) {
+            ostacoli = grigliaBackup.getOstacoli();
+        } else {
+            ostacoli = generaOstacoli();
+        }
+        // Controllo: griglia composta solo da ostacoli
+        boolean soloOstacoli = true;
+        for (int i = 0; i < ostacoli.length; i++) {
+            for (int j = 0; j < ostacoli[i].length; j++) {
+                if (!ostacoli[i][j]) { // trovato almeno una cella libera
+                    soloOstacoli = false;
+                    break;
+                }
+            }
+            if (!soloOstacoli) break;
+        }
+
+        if (soloOstacoli) {
+            JOptionPane.showMessageDialog(this,
+                "La griglia generata contiene solo ostacoli.\n"
+              + "Non è possibile creare una griglia giocabile.",
+                "Errore griglia",
+                JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        new FinestraGriglia(ostacoli); 
     }
 
     // Metodo che si occupa delle griglie con ostacoli inseriti a mano dall'utente
@@ -276,7 +309,7 @@ public class CreatoreGriglia extends JFrame {
 	    }
 
 	    // Converto la matrice in un oggetto Griglia
-	    Griglia g =grigliaBackup;
+	    Griglia g = grigliaBackup;
 	    JFileChooser chooser = new JFileChooser();
 	    chooser.setDialogTitle("Salva griglia come JSON");
 	
@@ -353,7 +386,7 @@ public class CreatoreGriglia extends JFrame {
 	        pannelloGriglia.removeAll();
 	        pannelloGriglia.setLayout(new BorderLayout());
 	
-	        PannelloAnteprima anteprima = new PannelloAnteprima(g.getOstacoli());
+	        PannelloGrigliaBase anteprima = new PannelloGrigliaBase(g.getOstacoli());
 	        pannelloGriglia.add(anteprima, BorderLayout.CENTER);
 	
 	        pannelloGriglia.revalidate();
@@ -368,14 +401,6 @@ public class CreatoreGriglia extends JFrame {
 	                "Errore durante il caricamento del file JSON.",
 	                "Errore",
 	                JOptionPane.ERROR_MESSAGE);
-	    }
-	}
-	
-	public class PannelloAnteprima extends PannelloGrigliaBase {
-	    private static final long serialVersionUID = 1L;
-
-		public PannelloAnteprima(boolean[][] obstacles) {
-	        super(obstacles);
 	    }
 	}
 }

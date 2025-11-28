@@ -1,12 +1,12 @@
 package it.unibs;
 
 public enum TipoPattern {
-    DENS_BASSA,
-    DENS_ALTA,
-    DENS_MEDIA,
-    PERS,
+    DENSITÀ_BASSA,
+    DENSITÀ_ALTA,
+    DENSITÀ_MEDIA,
+    PERSONALIZZATA,
     SPIRALE,
     SCACCHI,
     RIGHE,
-    UNICO;
+    UNICO_OSTACOLO;
 }

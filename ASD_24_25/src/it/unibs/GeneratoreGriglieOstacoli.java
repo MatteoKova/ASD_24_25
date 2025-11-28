@@ -51,11 +51,11 @@ public class GeneratoreGriglieOstacoli {
 	// Genera tutte le tipologie di ostacoli rispettando la densità specificata
 	public void generaTutto() {
 		switch (cfg.tipoPattern) {
-		case DENS_BASSA, DENS_ALTA, DENS_MEDIA:
+		case DENSITÀ_BASSA, DENSITÀ_ALTA, DENSITÀ_MEDIA:
 			generaOstacoliCasuali();
 			break;
 		case SPIRALE:
-			generaSpriale();
+			generaSpirale();
 			break;
 		case SCACCHI:
 			generaScacchiera();
@@ -63,7 +63,7 @@ public class GeneratoreGriglieOstacoli {
 		case RIGHE:
 			generaRighe();
 			break;
-		case UNICO:
+		case UNICO_OSTACOLO:
 			generaUnicoOstacolo();
 			break;
 		default:
@@ -225,7 +225,7 @@ public class GeneratoreGriglieOstacoli {
 	}
 
 	// GRIGLIA CON PATTERN PREDEFINITI
-	private void generaSpriale() {
+	private void generaSpirale() {
 		// Initially fill with true
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
@@ -304,5 +304,9 @@ public class GeneratoreGriglieOstacoli {
 		for (int r = 0 / 2; r < rows-1 ; r++) {
 			mat_ostacoli[r][centerCol] = true;
 		}
+	}
+
+	public boolean[][] getMat_ostacoli() {
+		return mat_ostacoli;
 	}
 }

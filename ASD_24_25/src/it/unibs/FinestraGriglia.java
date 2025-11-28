@@ -2,12 +2,9 @@ package it.unibs;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -17,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -128,8 +124,7 @@ public class FinestraGriglia extends JFrame {
         // Listener per click del mouse sulla griglia
         pannelloGriglia.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-            	
-            	
+            		
             	// Conversione pixel → cella usando il metodo del pannello
                 Point p = pannelloGriglia.cellaDaCoordinatePixel(e.getX(), e.getY());
                 if (p == null) return; // click fuori dalla griglia
@@ -174,7 +169,6 @@ public class FinestraGriglia extends JFrame {
         });
 
         pulsanteAvvio.addActionListener(e -> {
-
             // Controllo: origine e destinazione devono essere selezionate
             if (origine == null || destinazione == null) {
                 JOptionPane.showMessageDialog(
@@ -282,7 +276,6 @@ public class FinestraGriglia extends JFrame {
 
         @Override
         protected RisultatoCammino doInBackground() throws Exception {
-
         	// Inizializzazione timer
         	analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
         	analizzatoreCammini.resetContatori();
@@ -301,8 +294,9 @@ public class FinestraGriglia extends JFrame {
         				}
         				);
         	} catch (StopException e){
-        		this.risultato= e.partialResult;
+        		this.risultato = e.partialResult;
         	}
+        	
         	long t2 = System.nanoTime();
         	
         	// snapshot per thread-safety
