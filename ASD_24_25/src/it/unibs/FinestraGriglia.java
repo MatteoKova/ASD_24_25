@@ -275,45 +275,63 @@ public class FinestraGriglia extends JFrame {
 
         @Override
         protected RisultatoCammino doInBackground() throws Exception {
-            
-            // Inizializzazione timer
-           analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
-		    analizzatoreCammini.resetContatori();
-            tempoInizio = System.currentTimeMillis();
-	        long t1 = System.nanoTime(); // Inizializzazione timer
+
+        	// Inizializzazione timer
+        	analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
+        	analizzatoreCammini.resetContatori();
+        	tempoInizio = System.currentTimeMillis();
+        	long t1 = System.nanoTime(); // Inizializzazione timer
 
 
-            // Esecuzione del calcolo del cammino minimo
-            try{
-			 this.risultato = analizzatoreCammini.camminoMin(
-					origine,
-					destinazione,
-					griglia,
-					() -> {
-						// Stop if user requested or time limit elapsed
-						return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
-					}
-					);
-				}catch (StopException e){
-				 this.risultato= e.partialResult;
-				}
-             long t2 = System.nanoTime();    
-            List<Cella> camminoCompleto = new ArrayList<>();
+        	// Esecuzione del calcolo del cammino minimo
+        	try{
+        		this.risultato = analizzatoreCammini.camminoMin(
+        				origine,
+        				destinazione,
+        				griglia,
+        				() -> {
+        					// Stop if user requested it or time limit elapsed
+        					return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
+        				}
+        				);
+        	} catch (StopException e){
+        		this.risultato= e.partialResult;
+        	}
+        	long t2 = System.nanoTime();
+        	
+        	// snapshot per thread-safety
+        	boolean[][] ostacoliSnapshot = matriceOstacoli;
 
-            List<Landmark> seq = risultato.getSeq();
+        	// lista finale
+        	List<Cella> camminoCompleto = new ArrayList<>();
+        	List<Landmark> seq = risultato.getSeq();
 
-            for (int i = 0; i < seq.size() - 1; i++) {
-                Cella a = seq.get(i).getCella();
-                Cella b = seq.get(i+1).getCella();
-                camminoCompleto.addAll(analizzatoreCammini.ricostruisciCammino(a, b));
-            }
-             
-            pannelloGriglia.aggiornaCammino(camminoCompleto);
-            
-           risultato.setTempo(t2 - t1);
-            System.out.println("Tempo: " + (t2 - t1) + " ns");
+        	for (int i = 0; i < seq.size() - 1; i++) {
+        	    Cella a = seq.get(i).getCella();
+        	    Cella b = seq.get(i+1).getCella();
+     	  
+        	    List<Cella> parte = analizzatoreCammini.ricostruisciCammino(a, b, ostacoliSnapshot, true);
+        	    
+        	    if (parte == null || parte.isEmpty()) {
+        	        // non esiste sottocammino fra questi due landmark → gestisci:
+        	        // opzioni: abort, saltare, usare segmento rettilineo ignorando ostacoli, ecc.
+        	        continue; // qui scegliamo di saltare
+        	    }
 
-            return risultato;
+        	    // unisci evitando duplicati consecutivi
+        	    if (!camminoCompleto.isEmpty() && camminoCompleto.get(camminoCompleto.size()-1).equals(parte.get(0))) {
+        	        camminoCompleto.addAll(parte.subList(1, parte.size()));
+        	    } else {
+        	        camminoCompleto.addAll(parte);
+        	    }
+        	}
+
+        	pannelloGriglia.aggiornaCammino(camminoCompleto);
+			
+        	risultato.setTempo(t2 - t1);
+        	System.out.println("Tempo: " + (t2 - t1) + " ns");
+
+        	return risultato;
         }
 
         @Override
