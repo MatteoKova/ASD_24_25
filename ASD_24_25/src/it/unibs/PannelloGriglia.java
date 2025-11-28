@@ -9,223 +9,274 @@ import java.util.List;
 
 public class PannelloGriglia extends JPanel {
     private static final long serialVersionUID = 1L;
-    public static final int OFFSET = 40;
-    
-    // Dati della griglia
+  
     private Griglia griglia;
-    private Cella origine, destinazione;
-    private int[][] matriceContesto, matriceComplemento;
-    private Set<Landmark> frontiera;
+
     private boolean[][] matriceOstacoli;
-    private List<Cella> camminoOrdinato;
-    private boolean[][] camminoMask;
+    private int[][] matriceContesto;
+    private int[][] matriceComplemento;
+    private Set<Landmark> frontiera;
+
+    private Cella origine;
+    private Cella destinazione;
+
+    private List<Cella> camminoOrdinato = new ArrayList<>();
     
     public PannelloGriglia(Griglia griglia, boolean[][] matriceOstacoli, int[][] matriceContesto,
-    						int[][] matriceComplemento, Set<Landmark> frontiera) {
-        this.griglia = griglia;
-        this.matriceOstacoli = matriceOstacoli;
-        this.matriceContesto = matriceContesto;
-        this.matriceComplemento = matriceComplemento;
-        this.frontiera = frontiera;
-        
-        setBackground(Color.WHITE);
-        // Dimensione preferita: almeno 400x400 oppure proporzionata alla griglia
-        setPreferredSize(new Dimension(Math.max(400, griglia.getColonne() * 20 + 50), Math.max(400, griglia.getRighe() * 20 + 50)
-        ));
-    }
+			int[][] matriceComplemento, Set<Landmark> frontiera) {
+		this.griglia = griglia;
+		this.matriceOstacoli = matriceOstacoli;
+		this.matriceContesto = matriceContesto;
+		this.matriceComplemento = matriceComplemento;
+		this.frontiera = frontiera;
+		
+		setBackground(Color.WHITE);
+	}
 
-    // Aggiorna i dati e ridisegna il pannello
-    public void aggiornaDati(Cella origine, Cella destinazione, int[][] matriceContesto,
-    						int[][] matriceComplemento, Set<Landmark> frontiera) {
+    
+    /* ============================================================
+       === 1) METODI PUBBLICI PER AGGIORNAMENTO DATI
+       ============================================================ */
+
+    public void aggiornaDati(Cella origine,
+                             Cella destinazione,
+                             int[][] contesto,
+                             int[][] complemento,
+                             Set<Landmark> frontiera)
+    {
         this.origine = origine;
         this.destinazione = destinazione;
-        this.matriceContesto = matriceContesto;
-        this.matriceComplemento = matriceComplemento;
+        this.matriceContesto = contesto;
+        this.matriceComplemento = complemento;
         this.frontiera = frontiera;
+        repaint();
+    }
+
+    public void aggiornaCammino(List<Cella> cammino) {
+        this.camminoOrdinato = cammino;
         repaint();
     }
     
-    // Aggiorna il cammino minimo e popola la griglia di boolean che servirà per disegnare il cammino minimo
-    public void aggiornaCammino(List<Cella> cammino) {
-        // reset
-        this.camminoMask = new boolean[griglia.getRighe()][griglia.getColonne()];
-        this.camminoOrdinato = new ArrayList<>(cammino);
+    public Point cellaDaCoordinatePixel(int px, int py) {
+        Graphics g = getGraphics();
+        if (g == null) return null;
 
-        // riempi la maschera
-        for (Cella c : cammino) {
-            camminoMask[c.getRiga()][c.getColonna()] = true;
-        }
+        InfoDisposizione infoProv = InfoDisposizione.creaProvvisorio(getWidth(), getHeight(), griglia, g);
+        if (infoProv.dimCella <= 0) return null;
 
-        repaint();
+        Font fontAssi = getFontAssi(infoProv.dimCella);
+        FontMetrics fmAssi = g.getFontMetrics(fontAssi);
+
+        InfoDisposizione info = new InfoDisposizione(getWidth(), getHeight(), griglia, fmAssi);
+
+        int col = (px - info.offsetX) / info.dimCella;
+        int row = (py - info.offsetY) / info.dimCella;
+
+        if (col < 0 || row < 0 ||
+            col >= griglia.getColonne() ||
+            row >= griglia.getRighe())
+            return null;
+
+        return new Point(col, row);
     }
-
-
-    // Calcola la dimensione di una cella in base allo spazio disponibile
-    public int getDimensioneCella() {
-        int larghezza = getWidth() - OFFSET;
-        int altezza = getHeight() - OFFSET; 
-        if (griglia.getColonne() == 0 || griglia.getRighe() == 0) return 0;
-        return Math.max(4, Math.min(larghezza / griglia.getColonne(), altezza / griglia.getRighe()));
+    
+    private Font getFontAssi(int dimCella) {
+        // proporzionale alla cella, con soglia minima per leggibilità
+        int size = Math.max(14, (int)(dimCella * 0.5));
+        return new Font("SansSerif", Font.BOLD, size);
     }
+    
+
+    /* ============================================================
+       === 3) PAINT COMPONENT
+       ============================================================ */
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        int dimCella = getDimensioneCella();
-        if (dimCella <= 0) return;
+        // layout provvisorio
+        InfoDisposizione infoProv = InfoDisposizione.creaProvvisorio(getWidth(), getHeight(), griglia, g);
+        if (infoProv.dimCella <= 0) return;
 
-        // Font per etichette assi
-        Font fontAssi = new Font("SansSerif", Font.BOLD, Math.max(12, dimCella / 2));
+        // font coerente con cella provvisoria
+        Font fontAssi = getFontAssi(infoProv.dimCella);
         g.setFont(fontAssi);
-        FontMetrics fm = g.getFontMetrics();
-        
-        // Etichette colonne (solo multipli di 5)
-        for (int x = 0; x < griglia.getColonne(); x++) {
-        	if(griglia.getColonne() > 25)
-        		if (x % 5 != 0)
-        			continue;
+        FontMetrics fmAssi = g.getFontMetrics(fontAssi);
 
-            String etichetta = String.valueOf(x);
-            int larghezzaTesto = fm.stringWidth(etichetta);
+        // layout finale con font corretto
+        InfoDisposizione info = new InfoDisposizione(getWidth(), getHeight(), griglia, fmAssi);
+        int dimCella = info.dimCella;
+        int offsetX = info.offsetX;
+        int offsetY = info.offsetY;
 
-            int posX = OFFSET + x * dimCella + (dimCella - larghezzaTesto) / 2;
-            int posY = OFFSET - 10;
-
-            g.setColor(Color.BLACK);
-            g.drawString(etichetta, posX, posY);
-
-            // Tacche verticali
-            int barX = OFFSET + x * dimCella + dimCella / 2;
-            g.drawLine(barX, OFFSET - 8, barX, OFFSET - 2);
-        }
-
-        // Etichette righe (solo multipli di 5)
-        int spazioEtichetta = 6; 
-        int lunghezzaTacca = Math.max(6, dimCella / 3);
-
+        // disegno etichette
+        drawEtichetteColonne(g, fmAssi, info);
+        drawEtichetteRighe(g, fmAssi, info);
+    
         for (int y = 0; y < griglia.getRighe(); y++) {
-        	if(griglia.getRighe() > 25)
-        		if (y % 5 != 0)
-        			continue;
+            for (int x = 0; x < griglia.getColonne(); x++) {
 
-            String etichetta = String.valueOf(y);
-            int altezzaTesto = fm.getAscent();
+                int px = offsetX + x * dimCella;
+                int py = offsetY + y * dimCella;
 
-            int posX = OFFSET - spazioEtichetta - fm.stringWidth(etichetta);
-            int posY = OFFSET + y * dimCella + (dimCella + altezzaTesto) / 2 - fm.getDescent();
-
-            g.setColor(Color.BLACK);
-            g.drawString(etichetta, posX, posY);
-
-            // Tacche orizzontali
-            int centroY = OFFSET + y * dimCella + dimCella / 2;
-            int barXStart = OFFSET - spazioEtichetta;
-            int barXEnd = Math.min(OFFSET - spazioEtichetta + lunghezzaTacca, OFFSET - 2);
-            g.drawLine(barXStart, centroY, barXEnd, centroY);
-        }
-
-        // Disegno celle
-        for (int x = 0; x < griglia.getColonne(); x++) {
-            for (int y = 0; y < griglia.getRighe(); y++) {
-                int posX = OFFSET + x * dimCella;
-                int posY = OFFSET + y * dimCella;
-
-                // Sfondo ostacoli o celle libere
+                // sfondo (ostacolo o libero)
                 if (matriceOstacoli[y][x]) {
                     g.setColor(Color.BLUE.darker());
                 } else {
                     g.setColor(Color.WHITE);
                 }
-                g.fillRect(posX, posY, dimCella, dimCella);
+                g.fillRect(px, py, dimCella, dimCella);
 
-                // Evidenzia contesto o complemento
+                // contesto / complemento
                 if (matriceContesto[y][x] == 1) {
                     g.setColor(Color.GREEN.darker());
-                    g.fillRect(posX, posY, dimCella, dimCella);
+                    g.fillRect(px, py, dimCella, dimCella);
                 } else if (matriceComplemento[y][x] == 2) {
                     g.setColor(Color.ORANGE);
-                    g.fillRect(posX, posY, dimCella, dimCella);
+                    g.fillRect(px, py, dimCella, dimCella);
                 }
 
-                // Evidenzia assi rispetto all'origine
+                // assi rispetto all'origine
                 if (origine != null && destinazione == null &&
                     (y == origine.getRiga() || x == origine.getColonna()) &&
                     !matriceOstacoli[y][x]) {
                     g.setColor(Color.YELLOW);
-                    g.fillRect(posX, posY, dimCella, dimCella);
-                }
-                
-                // Origine
-                if (origine != null && x == origine.getColonna() && y == origine.getRiga()) {
-                    g.fillRect(posX, posY, dimCella, dimCella);
-                    disegnaLetteraCella(g, "O", posX, posY, dimCella);
+                    g.fillRect(px, py, dimCella, dimCella);
                 }
 
-                // Frontiera
+                // origine
+                if (origine != null && x == origine.getColonna() && y == origine.getRiga()) {
+                    g.setColor(Color.RED);
+                    g.fillRect(px, py, dimCella, dimCella);
+                    drawLetteraCella(g, "O", px, py, dimCella);
+                }
+
+                // destinazione
+                if (destinazione != null && x == destinazione.getColonna() && y == destinazione.getRiga()) {
+                    g.setColor(Color.RED);
+                    g.fillRect(px, py, dimCella, dimCella);
+                    drawLetteraCella(g, "D", px, py, dimCella);
+                }
+
+                // frontiera
                 if (frontiera != null) {
-                    for (Landmark punto : frontiera) {
-                        if (punto.getCella().equals(new Cella(y, x))) {
+                    for (Landmark L : frontiera) {
+                        Cella c = L.getCella();
+                        if (c.getColonna() == x && c.getRiga() == y) {
                             g.setColor(Color.BLACK);
-                            int padding = 2;
-                            g.drawOval(posX + padding, posY + padding,
-                                       dimCella - 2 * padding, dimCella - 2 * padding);
+                            int pad = 2;
+                            g.drawOval(px + pad, py + pad, dimCella - 2*pad, dimCella - 2*pad);
                         }
                     }
                 }
-                
-                // Destinazione
-                if (destinazione != null && x == destinazione.getColonna() && y == destinazione.getRiga()) {
-                    g.fillRect(posX, posY, dimCella, dimCella);
-                    disegnaLetteraCella(g, "D", posX, posY, dimCella);
-                }
-                
-                
-                Graphics2D g2 = (Graphics2D) g.create();
-                disegnaCammino(g2, dimCella);
-                
-                // Bordo cella
+
+                // bordo cella
                 g.setColor(Color.LIGHT_GRAY);
-                g.drawRect(posX, posY, dimCella, dimCella);
+                g.drawRect(px, py, dimCella, dimCella);
             }
+        }
+
+        /* ------------------------------
+           3. Disegno cammino UNA SOLA VOLTA
+           ------------------------------ */
+
+        Graphics2D g2 = (Graphics2D) g;
+        drawCammino(g2, dimCella, offsetX, offsetY);
+    }
+
+
+    /* ============================================================
+       === 4) METODI DI DISEGNO
+       ============================================================ */
+    
+    private void drawEtichetteColonne(Graphics g, FontMetrics fm, InfoDisposizione info) {
+        int dimCella = info.dimCella;
+        
+        // parametri estetici
+        final int gapNumeroTacchetta = 2; // distanza tra numero e tacchetta
+        final int taccaLen = 6;           // lunghezza tacchetta
+
+        for (int x = 0; x < griglia.getColonne(); x++) {
+            if (griglia.getColonne() > 25 && x % 5 != 0) continue;
+
+            String txt = String.valueOf(x);
+            int w = fm.stringWidth(txt);
+
+            // numero: sopra la tacchetta
+            int px = info.offsetX + x * dimCella + (dimCella - w) / 2;
+            int py = info.offsetY - fm.getDescent() - (taccaLen + gapNumeroTacchetta);
+            g.drawString(txt, px, py);
+
+            // tacchetta: subito sopra la griglia
+            int cx = info.offsetX + x * dimCella + dimCella / 2;
+            int yTaccaTop = info.offsetY - taccaLen;
+            int yTaccaBottom = info.offsetY - 1;
+            g.drawLine(cx, yTaccaTop, cx, yTaccaBottom);
+        }
+    }
+    
+    private void drawEtichetteRighe(Graphics g, FontMetrics fm, InfoDisposizione info) {
+        int dimCella = info.dimCella;
+
+        // parametri estetici
+        final int gapNumeroTacchetta = 4; // distanza tra numero e tacchetta
+        final int taccaLen = 6;           // lunghezza tacchetta
+
+        for (int y = 0; y < griglia.getRighe(); y++) {
+            if (griglia.getRighe() > 25 && y % 5 != 0) continue;
+
+            String txt = String.valueOf(y);
+
+            // posizione verticale centrata nella cella
+            int cy = info.offsetY + y * dimCella + dimCella / 2;
+            int py = cy + (fm.getAscent() - fm.getDescent()) / 2;
+
+            // numero: più a sinistra
+            int pxNumero = info.offsetX - taccaLen - gapNumeroTacchetta - fm.stringWidth(txt);
+            g.drawString(txt, pxNumero, py);
+
+            // tacchetta: subito a destra del numero, prima della griglia
+            int xTaccaLeft = info.offsetX - taccaLen;
+            int xTaccaRight = info.offsetX - 2;
+            g.drawLine(xTaccaLeft, cy, xTaccaRight, cy);
         }
     }
 
-    // Disegna una lettera centrata all’interno di una cella
-    private void disegnaLetteraCella(Graphics g, String lettera,
-                                     int posX, int posY, int dimCella) {
-        int dimensioneFont = Math.max(8, (int)(dimCella * 0.6));
-        Font fontScalato = g.getFont().deriveFont((float) dimensioneFont);
-        g.setFont(fontScalato);
+    private void drawLetteraCella(Graphics g, String lettera, int px, int py, int dim) {
+        int size = Math.max(8, (int)(dim * 0.6));
+        Font f = g.getFont().deriveFont((float) size);
+        g.setFont(f);
 
         FontMetrics fm = g.getFontMetrics();
-        Rectangle2D rect = fm.getStringBounds(lettera, g);
+        int w = fm.stringWidth(lettera);
+        int h = fm.getAscent();
 
-        int larghezzaTesto = (int) rect.getWidth();
-        int altezzaTesto = (int) rect.getHeight();
+        int tx = px + (dim - w)/2;
+        int ty = py + (dim - h)/2 + fm.getAscent();
 
-        int xTesto = posX + (dimCella - larghezzaTesto) / 2;
-        int yTesto = posY + (dimCella - altezzaTesto) / 2 + fm.getAscent();
-
-        g.setColor(Color.RED);
-        g.drawString(lettera, xTesto, yTesto);
+        g.setColor(Color.WHITE);
+        g.drawString(lettera, tx, ty);
     }
-    
-    // Disegna una linea (spezzata) che individua il cammino minimo
-    private void disegnaCammino(Graphics2D g2, int dimCella) {
+
+
+    private void drawCammino(Graphics2D g2, int dim, int offsetX, int offsetY) {
         if (camminoOrdinato == null || camminoOrdinato.size() < 2) return;
 
-        g2.setStroke(new BasicStroke(Math.max(2, dimCella / 5), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2.setStroke(new BasicStroke(Math.max(2, dim/5),
+                BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2.setColor(Color.BLACK);
 
         for (int i = 0; i < camminoOrdinato.size() - 1; i++) {
+
             Cella a = camminoOrdinato.get(i);
             Cella b = camminoOrdinato.get(i + 1);
 
-            int ax = OFFSET + a.getColonna() * dimCella + dimCella / 2;
-            int ay = OFFSET + a.getRiga() * dimCella + dimCella / 2;
-            int bx = OFFSET + b.getColonna() * dimCella + dimCella / 2;
-            int by = OFFSET + b.getRiga() * dimCella + dimCella / 2;
+            int ax = offsetX + a.getColonna() * dim + dim/2;
+            int ay = offsetY + a.getRiga() * dim + dim/2;
+
+            int bx = offsetX + b.getColonna() * dim + dim/2;
+            int by = offsetY + b.getRiga() * dim + dim/2;
 
             g2.drawLine(ax, ay, bx, by);
         }

@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
@@ -115,12 +116,22 @@ public class FinestraGriglia extends JFrame {
         // Listener per click del mouse sulla griglia
         pannelloGriglia.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
+            	
+            	
+            	// Conversione pixel → cella usando il metodo del pannello
+                Point p = pannelloGriglia.cellaDaCoordinatePixel(e.getX(), e.getY());
+                if (p == null) return; // click fuori dalla griglia
+
+                int riga = p.y;
+                int colonna = p.x;
+            	
+            	/*
                 int dimensioneCella = pannelloGriglia.getDimensioneCella();
                 if (dimensioneCella <= 0) return;
 
-                int colonna = (e.getX() - PannelloGriglia.OFFSET) / dimensioneCella;
-                int riga = (e.getY() - PannelloGriglia.OFFSET) / dimensioneCella;
-
+                int colonna = e.getX() / dimensioneCella;
+                int riga = e.getY() / dimensioneCella;
+				*/
                 if (!griglia.isNeiMargini(riga, colonna) || matriceOstacoli[riga][colonna]) return;
 
                 if (origine == null) {

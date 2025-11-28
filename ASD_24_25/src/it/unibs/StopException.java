@@ -1,7 +1,8 @@
 package it.unibs;
 
-class StopException extends RuntimeException {
-    final RisultatoCammino partialResult;
+public class StopException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+	final RisultatoCammino partialResult;
     StopException(RisultatoCammino res) {
         this.partialResult = res;
     }
