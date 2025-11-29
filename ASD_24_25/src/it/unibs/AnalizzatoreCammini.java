@@ -365,19 +365,19 @@ public class AnalizzatoreCammini {
     	
         if (stopCheck.get()) 
            throw new StopException(new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)), 
-                                            istr16Contatore, contatoreFrontiera, griglia));
+                                            destinazione, istr16Contatore, contatoreFrontiera, griglia));
 
         if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==1) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(1);
         	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1)),
-        			istr16Contatore, contatoreFrontiera,griglia);
+        			destinazione, istr16Contatore, contatoreFrontiera,griglia);
         }
         else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==2) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(2);
         	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,2)),
-        			istr16Contatore, contatoreFrontiera,  griglia);
+        			destinazione, istr16Contatore, contatoreFrontiera,  griglia);
         }
         
         //Set<Landmark> frontiera = calolaFrontiera(...,griglia_tipi);
@@ -386,7 +386,7 @@ public class AnalizzatoreCammini {
 
         // CASO BASE: se frontiera è vuota => non si può espandere -> impossibile
         if (frontiera.isEmpty()) {
-            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(), istr16Contatore, contatoreFrontiera, griglia);
+            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(), destinazione, istr16Contatore, contatoreFrontiera, griglia);
         }
         
         int num_ostacoli_temporanei = aggiornaOstacoli(griglia_tipi);
@@ -422,7 +422,7 @@ public class AnalizzatoreCammini {
         }
         rimuoviOstacoli(num_ostacoli_temporanei); //elimina gli ostacoli relativi a questo livello
         stack_griglia_tipi.pop(); //tolgo la matrice di questo livello 
-        return new RisultatoCammino(lunghezzaMin, seqMin, istr16Contatore, contatoreFrontiera, griglia); //Restituisce il percorso con distanza minore tra origine e destinazione
+        return new RisultatoCammino(lunghezzaMin, seqMin, destinazione, istr16Contatore, contatoreFrontiera, griglia); //Restituisce il percorso con distanza minore tra origine e destinazione
     }
     
     /*

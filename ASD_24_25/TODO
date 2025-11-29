@@ -16,7 +16,6 @@
 -Modificare summary quando cammino non trovato/non esiste
 -Ordinare le celle della frontiera
 -Spiegare scelta id univoco, come coordinate cella (più efficente) ----RELAZIONE----
--sistemare cammino grafico
 -Refactoring generale (variabili, e nome classi)
 -Cambio nomi var tra panel e model (a mano, NON REFACTORING!!!!)
 -Valuto se cambiare punto di partenza di calcolaContesto/Complemento, nell’origine (e non più (0,0) )

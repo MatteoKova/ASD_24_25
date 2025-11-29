@@ -13,6 +13,10 @@ public class Landmark {
 		return cella;
 	}
 
+	public int getTipo() {
+		return tipo;
+	}
+
 	public String toString() {
         return "(" + cella + ", " + tipo + ")";
     }

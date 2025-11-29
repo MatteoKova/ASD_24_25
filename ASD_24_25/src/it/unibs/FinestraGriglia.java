@@ -373,11 +373,11 @@ public class FinestraGriglia extends JFrame {
         areaTesto.setEditable(false);
 
         if (stato == 0) {
-            areaTesto.setText("PROCESSO INTERROTTO: INTERVENTO DELL’UTENTE\n\nRiepilogo parziale:\n\n"); 
+            areaTesto.setText("PROCESSO INTERROTTO (INTERVENTO DELL’UTENTE)\n\nRIEPILOGO:\n"); 
         } else if (stato == 1) {
-            areaTesto.setText("PROCESSO INTERROTTO: LIMITE DI TEMPO SCADUTO\n\nRiepilogo:\n\n"); 
+            areaTesto.setText("PROCESSO INTERROTTO (LIMITE DI TEMPO SCADUTO)\n\nRIEPILOGO:\n"); 
         } else if (stato == 2) {
-            areaTesto.setText("PROCESSO COMPLETATO\n\nRiepilogo:\n\n");
+            areaTesto.setText("PROCESSO COMPLETATO\n\nRIEPILOGO:\n");
         }
         if (risultato != null) {
             areaTesto.append(risultato.stampa());

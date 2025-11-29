@@ -41,13 +41,15 @@ public class PannelloGriglia extends JPanel {
                              Cella destinazione,
                              int[][] contesto,
                              int[][] complemento,
-                             Set<Landmark> frontiera)
+                             Set<Landmark> frontiera
+                             )
     {
         this.origine = origine;
         this.destinazione = destinazione;
         this.matriceContesto = contesto;
         this.matriceComplemento = complemento;
         this.frontiera = frontiera;
+        this.camminoOrdinato = null;
         repaint();
     }
 

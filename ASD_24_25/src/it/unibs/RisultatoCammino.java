@@ -6,14 +6,16 @@ public class RisultatoCammino {
 	
 	private double lunghezza;
 	private List<Landmark> seq;
-	private  long tempoCalcolo;
+	private Cella destinazione;
+	private long tempoCalcolo;
 	private int istr17Contatore;
 	private Griglia griglia;
-	private int  contatoreFrontiera;
+	private int contatoreFrontiera;
 	
-	public RisultatoCammino(double lunghezza, List<Landmark> seq, int istr16Contatore, int contatoreFrontiera, Griglia griglia	) {
+	public RisultatoCammino(double lunghezza, List<Landmark> seq, Cella destinazione, int istr16Contatore, int contatoreFrontiera, Griglia griglia) {
 		this.lunghezza = lunghezza;
 		this.seq = seq;
+		this.destinazione = destinazione;
 		this.tempoCalcolo = 0;
 		this.istr17Contatore = istr16Contatore;
 		this.griglia = griglia;
@@ -34,20 +36,36 @@ public class RisultatoCammino {
 
 	public String stampa() {
 	    StringBuilder sb = new StringBuilder();
-		sb.append("Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
-		sb.append("Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
+		sb.append("- Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
+		sb.append("- Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
 		//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
-	    sb.append("Lunghezza cammino: ").append(lunghezza).append("\n");
-	  
-		sb.append("Tempo di calcolo: ").append(tempoCalcolo).append(" ns\n");
-		sb.append("Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n");
-		sb.append("Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n\n");
-		sb.append("Sequenza dei landmark:\n");
-	
+	    sb.append("- Lunghezza cammino: ").append(lunghezza).append("\n");
+		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ns\n");
+		sb.append("- Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n");
+		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n\n");
+		
+		/*
+		// Non mostra la destinazione qunado il calcolo viene interrotto (meh)
+		sb.append("SEQUENZA DEI LANDMARK:\n");
 	    for (Landmark landmark : seq) {
 	        sb.append(" - ").append(landmark.toString()).append("\n");
 	    }
-	
+	   	*/
+		
+	    sb.append("ORIGINE:\n").append(" - ").append(seq.get(0));
+	    
+	    sb.append("\n\nSEQUENZA DEI LANDMARK:\n");
+	    for (int i = 1; i < seq.size() - 1; i++) {
+	    	sb.append(" - ").append(seq.get(i)).append("\n");
+	    }
+	    
+	    String tipo;
+	    if (seq.size() == 1)
+	    	tipo = "?";
+	    else
+	    	tipo = Integer.toString(seq.get(seq.size() - 1).getTipo());
+	    sb.append("\nDESTINAZIONE:\n").append(" - ").append("(" + destinazione + ", " + tipo + ")");
+		
 	    return sb.toString();
 	}	
 
