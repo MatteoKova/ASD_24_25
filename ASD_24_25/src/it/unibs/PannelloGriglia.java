@@ -199,7 +199,7 @@ public class PannelloGriglia extends JPanel {
         final int taccaLen = 6;           // lunghezza tacchetta
 
         for (int x = 0; x < griglia.getColonne(); x++) {
-            if (griglia.getColonne() > 25 && x % 5 != 0) continue;
+            if ((griglia.getColonne() > 25 || griglia.getRighe() > 25) && x % 5 != 0) continue;
 
             String txt = String.valueOf(x);
             int w = fm.stringWidth(txt);
@@ -225,7 +225,7 @@ public class PannelloGriglia extends JPanel {
         final int taccaLen = 6;           // lunghezza tacchetta
 
         for (int y = 0; y < griglia.getRighe(); y++) {
-            if (griglia.getRighe() > 25 && y % 5 != 0) continue;
+            if ((griglia.getRighe() > 25 || griglia.getColonne() > 25) && y % 5 != 0) continue;
 
             String txt = String.valueOf(y);
 

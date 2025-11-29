@@ -20,4 +20,3 @@
 -Cambio nomi var tra panel e model (a mano, NON REFACTORING!!!!)
 -Valuto se cambiare punto di partenza di calcolaContesto/Complemento, nell’origine (e non più (0,0) )
 -Sistemare i parametri fissi nella classe Configurazione
--Sistemare le etichette della griglia quando ha dimensioni strano tipo 100x25 (limite)
