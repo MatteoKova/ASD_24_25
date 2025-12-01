@@ -6,15 +6,17 @@ public class RisultatoCammino {
 	
 	private double lunghezza;
 	private List<Landmark> seq;
+	private Cella origine;
 	private Cella destinazione;
 	private long tempoCalcolo;
 	private int istr17Contatore;
 	private Griglia griglia;
 	private int contatoreFrontiera;
 	
-	public RisultatoCammino(double lunghezza, List<Landmark> seq, Cella destinazione, int istr16Contatore, int contatoreFrontiera, Griglia griglia) {
+	public RisultatoCammino(double lunghezza, List<Landmark> seq, Cella origine, Cella destinazione, int istr16Contatore, int contatoreFrontiera, Griglia griglia) {
 		this.lunghezza = lunghezza;
 		this.seq = seq;
+		this.origine = origine;
 		this.destinazione = destinazione;
 		this.tempoCalcolo = 0;
 		this.istr17Contatore = istr16Contatore;
@@ -52,18 +54,25 @@ public class RisultatoCammino {
 	    }
 	   	*/
 		
-	    sb.append("ORIGINE:\n").append(" - ").append(seq.get(0));
+		
+	    sb.append("ORIGINE:\n").append(" - ").append("(" + origine + ", " + 0 + ")");
+	    
+	    String tipo = "?";
 	    
 	    sb.append("\n\nSEQUENZA DEI LANDMARK:\n");
-	    for (int i = 1; i < seq.size() - 1; i++) {
-	    	sb.append(" - ").append(seq.get(i)).append("\n");
+	    if (seq.size() != 0) { // seq.size() == 0 quando non esiste un cammino valido
+		    
+		    for (int i = 1; i < seq.size() - 1; i++) {
+		    	sb.append(" - ").append(seq.get(i)).append("\n");
+		    }
+		    
+		    if (seq.size() != 1) { // seq.size() == 1 quando il calcolo è interrotto
+		    	tipo = Integer.toString(seq.get(seq.size() - 1).getTipo());
+		    }
+	    } else {
+	    	sb.append("Non è stato trovato alcun cammino \nPerciò non è stato attraversato alcun landmark\n");
 	    }
-	    
-	    String tipo;
-	    if (seq.size() == 1)
-	    	tipo = "?";
-	    else
-	    	tipo = Integer.toString(seq.get(seq.size() - 1).getTipo());
+	
 	    sb.append("\nDESTINAZIONE:\n").append(" - ").append("(" + destinazione + ", " + tipo + ")");
 		
 	    return sb.toString();

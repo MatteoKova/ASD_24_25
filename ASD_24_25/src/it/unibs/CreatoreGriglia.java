@@ -25,7 +25,7 @@ public class CreatoreGriglia extends JFrame {
     public CreatoreGriglia() {
         setTitle("Creazione Griglia");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(800, 500);
+        setSize(1000, 400);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
@@ -84,7 +84,7 @@ public class CreatoreGriglia extends JFrame {
 
         pannelloGriglia = new JPanel();
         pannelloGriglia.setBorder(new TitledBorder("Anteprima"));
-        pannelloGriglia.setPreferredSize(new Dimension(400, 400)); // quadrato
+        //pannelloGriglia.setPreferredSize(new Dimension(400, 400)); // quadrato
         add(pannelloGriglia, BorderLayout.CENTER);
 
         // Azioni

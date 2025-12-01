@@ -80,8 +80,8 @@ public class GeneratoreGriglieOstacoli {
     		}
     	}
     }*/
-
-	/*    private void rimuoviOstacoliEccesso(double densitaAttuale) {
+/*
+	    private void rimuoviOstacoliEccesso(double densitaAttuale) {
     	double densitaTarget = cfg.density;
     	int totaleCelle = rows * cols;
     	int ostacoliDaRimuovere = (int) ((densitaAttuale - densitaTarget) * totaleCelle);
@@ -94,113 +94,152 @@ public class GeneratoreGriglieOstacoli {
     		griglia.rimuoviOstacolo(r, c);;
     		ostacoliDaRimuovere--;
     	}
-    }*/
-
+    }
+*/
+	
 	// ----------------- MAIN GENERATION LOGIC -----------------------
-	private void generaOstacoliCasuali(){
-		if (cfg.density <= 0) return;
-		double densita;
-		do{
-			generaSemplici(cfg.numSemplici);
-			generaAgglomerati(cfg.numAgglomerati);
-			generaDiagonali(cfg.numDiagonali);
-			generaBarre(cfg.numBarre);
-			generaAnelli(cfg.numAnelli);
-			densita = calcolaDensita();
-			System.out.println("density: " + densita + ", target: " + cfg.density);
-		} while (densita < cfg.density );
+	private void generaOstacoliCasuali() {
 
-		//griglia.calculateOstacoli();
-		//rimuoviOstacoliEccesso(densita);TODO: si potrebbe reinserire la funzione, a patto di creare una lista di ostacoli tra cui scegliere randomicamente}
+	    if (cfg.density <= 0) return;
 
+	    int totalCells = rows * cols;
+	    int targetCells = (int) Math.round(cfg.density * totalCells);
+
+	    // Ripartizione proporzionale in base ai numeri indicati in configurazione
+	    int totalShapes = cfg.numSemplici + cfg.numAgglomerati + cfg.numDiagonali +
+	                      cfg.numBarre + cfg.numAnelli;
+
+	    // Evita divisioni per zero
+	    if (totalShapes == 0) return;
+
+	    // Budget proporzionale di celle
+	    int budgetSemplici   = targetCells * cfg.numSemplici   / totalShapes;
+	    int budgetAgglomerati = targetCells * cfg.numAgglomerati / totalShapes;
+	    int budgetDiagonali   = targetCells * cfg.numDiagonali   / totalShapes;
+	    int budgetBarre       = targetCells * cfg.numBarre       / totalShapes;
+	    int budgetAnelli      = targetCells * cfg.numAnelli      / totalShapes;
+
+	    // Genera ciascun tipo rispettando i budget
+	    generaSemplici(budgetSemplici);
+	    generaAgglomerati(budgetAgglomerati);
+	    generaDiagonali(budgetDiagonali);
+	    generaBarre(budgetBarre);
+	    generaAnelli(budgetAnelli);
+
+	    System.out.println("Finished with density: " + calcolaDensita());
 	}
 
-
-	// TIPOLOGIE DI OSTACOLI
-
+	
+	// ----- TIPOLOGIE DI OSTACOLI -----
 
 	// Genera singole celle
-	private void generaSemplici(int n) {
-		for (int i = 0; i < n; i++) {
-			int r = rnd.nextInt(rows);
-			int c = rnd.nextInt(cols);
-			mat_ostacoli[r][c] = true;
-		}
+	private void generaSemplici(int budget) {
+	    int placed = 0;
+	    while (placed < budget) {
+	        int r = rnd.nextInt(rows);
+	        int c = rnd.nextInt(cols);
+
+	        if (!mat_ostacoli[r][c]) {
+	            mat_ostacoli[r][c] = true;
+	            placed++;
+	        }
+	    }
 	}
 
 	// Genera insiemi con 2, 3 o 4 celle
-	private void generaAgglomerati(int n) {
-		for (int i = 0; i < n; i++) {
-			int baseR = rnd.nextInt(rows);
-			int baseC = rnd.nextInt(cols);
-			int dim = 2 + rnd.nextInt(3); // da 2 a 4 celle
-			for (int j = 0; j < dim; j++) {
-				int r = baseR + rnd.nextInt(2);
-				int c = baseC + rnd.nextInt(2);
-				if(controllaCoordinate(r,c)) {
-					mat_ostacoli[r][c] = true; // se le coordinate non sono valide, non stampa cella
-				}          
-			}
-		}
+	private void generaAgglomerati(int budget) {
+	    int placed = 0;
+
+	    while (placed < budget) {
+
+	        int baseR = rnd.nextInt(rows);
+	        int baseC = rnd.nextInt(cols);
+	        int dim = 2 + rnd.nextInt(3); // 2–4 celle
+
+	        for (int j = 0; j < dim && placed < budget; j++) {
+	            int r = baseR + rnd.nextInt(2);
+	            int c = baseC + rnd.nextInt(2);
+
+	            if (controllaCoordinate(r, c) && !mat_ostacoli[r][c]) {
+	                mat_ostacoli[r][c] = true;
+	                placed++;
+	            }
+	        }
+	    }
 	}
 
 	// Genera insiemi con 2, 3 o 4 celle in diagonale
-	private void generaDiagonali(int n) {
-		for (int i = 0; i < n; i++) {
-			int r = rnd.nextInt(rows);
-			int c = rnd.nextInt(cols);
-			boolean verso = rnd.nextBoolean();
-			int len = 2 + rnd.nextInt(3);
-			for (int k = 0; k < len; k++) {
-				if (verso) // diagonale creata verso dx
-					if(controllaCoordinate(r+k,c+k)) { // se supera i limiti, controllaCoordinate() evita che venga stampato
-						mat_ostacoli[r+k][c+k] = true;
-					}
-					else // diagonale creata verso sx
-						if(controllaCoordinate(r + len, c - k)) {
-							mat_ostacoli[r+len][c-k] = true;
-						} 
-			}
-		}
-	}
+	private void generaDiagonali(int budget) {
+	    int placed = 0;
 
+	    while (placed < budget) {
+
+	        int startR = rnd.nextInt(rows);
+	        int startC = rnd.nextInt(cols);
+	        int length = 2 + rnd.nextInt(4); // lunghezza 2–5
+
+	        for (int i = 0; i < length && placed < budget; i++) {
+	            int r = startR + i;
+	            int c = startC + i;
+	            if (controllaCoordinate(r, c) && !mat_ostacoli[r][c]) {
+	                mat_ostacoli[r][c] = true;
+	                placed++;
+	            }
+	        }
+	    }
+	}
+	
 	// Genera rettangoli con 3, 4, 5, 6 o 7 celle in lunghezza e con 1 o 2 celle in spessore
-	private void generaBarre(int n) {
-		for (int i = 0; i < n; i++) {
-			boolean orizzontale = rnd.nextBoolean();
-			int lung = 3 + rnd.nextInt(5);
-			int spess = 1 + rnd.nextInt(2);
-			int r = rnd.nextInt(rows);
-			int c = rnd.nextInt(cols);
-			for (int dr = 0; dr < (orizzontale ? spess : lung); dr++)
-				for (int dc = 0; dc < (orizzontale ? lung : spess); dc++)
-					if(controllaCoordinate(r + dr, c + dc)) {
-						mat_ostacoli[r+dr][c+dc] = true;
-					}
-		}
+	private void generaBarre(int budget) {
+	    int placed = 0;
+
+	    while (placed < budget) {
+
+	        boolean horizontal = rnd.nextBoolean();
+	        int startR = rnd.nextInt(rows);
+	        int startC = rnd.nextInt(cols);
+	        int length = 3 + rnd.nextInt(5); // 3–7 celle
+
+	        for (int i = 0; i < length && placed < budget; i++) {
+
+	            int r = startR + (horizontal ? 0 : i);
+	            int c = startC + (horizontal ? i : 0);
+
+	            if (controllaCoordinate(r, c) && !mat_ostacoli[r][c]) {
+	                mat_ostacoli[r][c] = true;
+	                placed++;
+	            }
+	        }
+	    }
 	}
 
 	// Genera anelli non attraversabili che racchiudono celle attraversabili
-	private void generaAnelli(int n) {
-		for (int i = 0; i < n; i++) {
-			int r = rnd.nextInt(rows);
-			int c = rnd.nextInt(cols);
-			int size = 3 + rnd.nextInt(4);
-			for (int k = 0; k < size; k++) {
-				if(controllaCoordinate(r, c + k)) {
-					mat_ostacoli[r][c+k] = true;
-				}
-				if(controllaCoordinate(r + size - 1, c + k)) {
-					mat_ostacoli[r+size-1][c+k] = true;
-				}
-				if(controllaCoordinate(r + k, c)) {
-					mat_ostacoli[r+k][c] = true;
-				}
-				if(controllaCoordinate(r + k, c + size - 1)) {
-					mat_ostacoli[r+k][c+size-1] = true;
-				}
-			}
-		}
+	private void generaAnelli(int budget) {
+	    int placed = 0;
+
+	    while (placed < budget) {
+
+	        int baseR = rnd.nextInt(rows - 2);
+	        int baseC = rnd.nextInt(cols - 2);
+
+	        // 4 celle dell'anello minimo 2x2
+	        int[][] coords = {
+	            {baseR, baseC}, {baseR, baseC+1},
+	            {baseR+1, baseC}, {baseR+1, baseC+1}
+	        };
+
+	        for (int[] cell : coords) {
+	            if (placed >= budget) break;
+
+	            int r = cell[0];
+	            int c = cell[1];
+
+	            if (!mat_ostacoli[r][c]) {
+	                mat_ostacoli[r][c] = true;
+	                placed++;
+	            }
+	        }
+	    }
 	}
 
 	private double calcolaDensita() {
@@ -224,7 +263,8 @@ public class GeneratoreGriglieOstacoli {
 		return false;
 	}
 
-	// GRIGLIA CON PATTERN PREDEFINITI
+	// ---- GRIGLIA CON PATTERN PREDEFINITI ----
+	
 	private void generaSpirale() {
 		// Initially fill with true
 		for (int i = 0; i < rows; i++) {
