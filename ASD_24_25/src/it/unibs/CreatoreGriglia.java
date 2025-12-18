@@ -69,12 +69,12 @@ public class CreatoreGriglia extends JFrame {
         JPanel pannelloPulsanti = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 5));
         pulsanteAnteprima = new JButton("Aggiorna anteprima");
         pulsanteConferma = new JButton("Conferma");
-        pulsanteSalva = new JButton("Salva JSON");
+        //pulsanteSalva = new JButton("Salva JSON");
         pulsanteCarica = new JButton("Carica JSON");
 
         pannelloPulsanti.add(pulsanteAnteprima);
         pannelloPulsanti.add(pulsanteConferma);
-        pannelloPulsanti.add(pulsanteSalva);
+        //pannelloPulsanti.add(pulsanteSalva);
         pannelloPulsanti.add(pulsanteCarica);
 
         gbc.gridx = 0; gbc.gridy = 4; gbc.gridwidth = 2;
@@ -91,7 +91,7 @@ public class CreatoreGriglia extends JFrame {
         pulsanteAnteprima.addActionListener(e -> {
         	mostraAnteprima();
         	pulsanteConferma.setEnabled(true);
-            pulsanteSalva.setEnabled(true);
+            //pulsanteSalva.setEnabled(true);
             pulsanteCarica.setEnabled(true);
         });
         
@@ -101,7 +101,7 @@ public class CreatoreGriglia extends JFrame {
         	}
         );
         
-        pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
+        //pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
         pulsanteCarica.addActionListener(e -> caricaGrigliaJson());
 
         disattivaConferma();
@@ -115,18 +115,18 @@ public class CreatoreGriglia extends JFrame {
             @Override
             public void insertUpdate(DocumentEvent e) { 
                 pulsanteConferma.setEnabled(false); 
-                pulsanteSalva.setEnabled(false);
+                //pulsanteSalva.setEnabled(false);
                 pulsanteCarica.setEnabled(false);
             }
             @Override
             public void removeUpdate(DocumentEvent e) { 
                 pulsanteConferma.setEnabled(false);
-                pulsanteSalva.setEnabled(false);
+                //pulsanteSalva.setEnabled(false);
                 pulsanteCarica.setEnabled(false); }
             @Override
             public void changedUpdate(DocumentEvent e) { 
                 pulsanteConferma.setEnabled(false);
-                pulsanteSalva.setEnabled(false);
+                //pulsanteSalva.setEnabled(false);
                 pulsanteCarica.setEnabled(false); }
         };
 
@@ -139,7 +139,7 @@ public class CreatoreGriglia extends JFrame {
         boxDensita.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 pulsanteConferma.setEnabled(false);
-                pulsanteSalva.setEnabled(false);
+                //pulsanteSalva.setEnabled(false);
 
             }
         });
@@ -237,11 +237,10 @@ public class CreatoreGriglia extends JFrame {
     // Metodo che chiama il generatore di griglie
     private void creaGriglia2() {     
         if (grigliaBackup != null) {
-            new FinestraGriglia(grigliaBackup.getOstacoli());
+            new FinestraGriglia(grigliaBackup);
         } else {
-            boolean[][] ostacoli = generaOstacoli();
             //if (ostacoli != null) {
-            	new FinestraGriglia(ostacoli);
+            	new FinestraGriglia(grigliaBackup);
             //}   
         }
     }
@@ -275,7 +274,7 @@ public class CreatoreGriglia extends JFrame {
             return;
         }
         
-        new FinestraGriglia(ostacoli); 
+        new FinestraGriglia(grigliaBackup); 
     }
 
     // Metodo che si occupa delle griglie con ostacoli inseriti a mano dall'utente
@@ -393,7 +392,9 @@ public class CreatoreGriglia extends JFrame {
 	        pannelloGriglia.repaint();
 	
 	        pulsanteConferma.setEnabled(true);
-	        pulsanteSalva.setEnabled(true);
+	        //pulsanteSalva.setEnabled(true);
+
+            System.out.println("Griglia caricata con successo " + grigliaBackup);
 	
 	    } catch (IOException ex) {
 	        ex.printStackTrace();

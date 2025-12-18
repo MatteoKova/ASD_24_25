@@ -49,6 +49,8 @@ public class Griglia {
     this.colonne = colonne;
     this.ostacoli = ostacoli;
     this.tipologia = tipologia;
+    this.origineDefault = origineDefault;
+    this.destinazioneDefault = destinazioneDefault;
 }
     
     // Controlla se la cella è all'interno della griglia
@@ -161,4 +163,24 @@ public class Griglia {
     public void setDestinazioneDefault(Cella destinazioneDefault) {
         this.destinazioneDefault = destinazioneDefault;
     }
+
+    @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("Griglia {\n");
+    sb.append("  righe=").append(righe)
+      .append(", colonne=").append(colonne).append("\n");
+
+    sb.append("  tipologia=").append(tipologia).append("\n");
+
+    sb.append("  origineDefault=").append(origineDefault).append("\n");
+    sb.append("  destinazioneDefault=").append(destinazioneDefault).append("\n");
+
+    
+
+
+    return sb.toString();
+}
+
 }

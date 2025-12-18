@@ -1,0 +1,14 @@
+{
+  "righe" : 10,
+  "colonne" : 10,
+  "tipologia" : "PERSONALIZZATA",
+  "ostacoli" : [ [ false, false, false, false, false, false, false, false, false, false ], [ false, false, false, false, false, false, false, false, false, false ], [ false, false, false, false, false, false, false, false, false, false ], [ false, true, false, false, true, false, false, false, false, true ], [ false, false, false, false, false, false, false, false, false, true ], [ false, false, false, false, false, false, false, false, false, false ], [ false, false, false, false, false, false, false, false, false, false ], [ false, false, false, false, false, false, false, true, false, false ], [ false, false, false, false, false, false, false, false, false, true ], [ false, false, false, false, false, false, false, false, false, false ] ],
+  "origineDefault" : {
+    "riga" : 0,
+    "colonna" : 0
+  },
+  "destinazioneDefault" : {
+    "riga" : 9,
+    "colonna" : 9
+  }
+}

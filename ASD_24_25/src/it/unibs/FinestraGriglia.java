@@ -55,22 +55,26 @@ public class FinestraGriglia extends JFrame {
     private LavoratorePercorso lavoratore;
     private volatile boolean stopRichiesto = false;
 
-    public FinestraGriglia(boolean[][] matriceOstacoli) {
+    public FinestraGriglia(Griglia griglia) {
         // TEMPORANEO: View e Controller insieme
-        this.griglia = new Griglia(matriceOstacoli.length, matriceOstacoli[0].length);
-        this.griglia.setOstacoli(matriceOstacoli);
-        this.matriceOstacoli = matriceOstacoli;
+        this.griglia = griglia;
+        this.matriceOstacoli = griglia.getOstacoli();
 
         //auto-seleziona origine e destinazione se presenti
         // (se si è usata opzione di caricamentro da file)
+        System.out.println("Verifica origine/destinazione preimpostate...");
+        System.out.println(griglia.getDestinazioneDefault());
         if (griglia.getOrigineDefault() != null) {
             this.origine = griglia.getOrigineDefault();
+            System.out.println("Origine preimpostata: " + this.origine);
 
             if(griglia.getDestinazioneDefault() != null) {
             this.destinazione = griglia.getDestinazioneDefault();
+            
         }
         }
-
+        
+        
         int numeroRighe = griglia.getRighe();
         int numeroColonne = griglia.getColonne();
         
@@ -80,7 +84,7 @@ public class FinestraGriglia extends JFrame {
         Stack<int[][]> pilaTipiCammini = new Stack<>();
         pilaTipiCammini.push(matriceVuota);
 
-        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(matriceOstacoli, pilaOstacoli, pilaTipiCammini);
+        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(this.matriceOstacoli, pilaOstacoli, pilaTipiCammini);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -112,6 +116,8 @@ public class FinestraGriglia extends JFrame {
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Destinazione (D)"));
 
         add(pannelloLegenda, BorderLayout.EAST);
+
+        
 
         // Pannello controlli inferiori
         JPanel pannelloControlli = new JPanel(new FlowLayout());
@@ -264,6 +270,14 @@ public class FinestraGriglia extends JFrame {
         });
         
         pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
+       
+        if (this.origine != null && this.destinazione != null) {
+           analizzatoreCammini.calcolaComplemento(griglia, origine, matriceVuota);
+            analizzatoreCammini.calcolaContesto(griglia, origine, matriceVuota);
+            frontiera = analizzatoreCammini.calcolaFrontiera(matriceVuota, griglia);
+            pannelloGriglia.aggiornaDati(origine, destinazione, matriceVuota, matriceVuota, frontiera);
+        }
+         
     }
 
     // Metodo di utilità per creare una voce della legenda
