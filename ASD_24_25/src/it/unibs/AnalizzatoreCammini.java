@@ -60,11 +60,17 @@ dlib = sqrt(2)*delta_min + (delta_max - delta_min)
 */
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class AnalizzatoreCammini {
@@ -87,14 +93,11 @@ public class AnalizzatoreCammini {
 
 	// Calcolo della distanza libera dlib(O, D)
     public static double dlib(Cella o, Cella d) {
-    	//if (contesto.contains(d) || complemento.contains(d)) {
-    		int dx = Math.abs(d.getColonna() - o.getColonna());
-            int dy = Math.abs(d.getRiga() - o.getRiga());
-            int deltaMin = Math.min(dx, dy);
-            int deltaMax = Math.max(dx, dy);
-            return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
-    	//}
-    	//else return 0;
+		int dx = Math.abs(d.getColonna() - o.getColonna());
+        int dy = Math.abs(d.getRiga() - o.getRiga());
+        int deltaMin = Math.min(dx, dy);
+        int deltaMax = Math.max(dx, dy);
+        return Math.sqrt(2) * deltaMin + (deltaMax - deltaMin);
     }
 
     // Permette di compiere un cammino libero di tipo 1 o 2
@@ -356,27 +359,25 @@ public class AnalizzatoreCammini {
     public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, Supplier<Boolean> stopCheck) {
     	calls.incrementAndGet();
         
-    	
     	int[][] griglia_tipi = new int[griglia.getRighe()][griglia.getColonne()]; //crea una nuova matrice per memorizzare i tipi relativi ad O, inizializzandola a 0
     	calcolaContesto(griglia, origine, griglia_tipi); //è inutile che restituisca qualcosa, visto che sta modificando griglia_tipi
     	calcolaComplemento(griglia, origine, griglia_tipi);
     	
         if (stopCheck.get()) 
            throw new StopException(new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)), 
-                                            istr16Contatore , contatoreFrontiera, griglia));
+                                            origine, destinazione, istr16Contatore, contatoreFrontiera, griglia));
 
-        
         if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==1) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(1);
-        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1))
-            , istr16Contatore, contatoreFrontiera,griglia);
+        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1)),
+        			origine, destinazione, istr16Contatore, contatoreFrontiera,griglia);
         }
         else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==2) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(2);
-        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,2))
-            ,istr16Contatore , contatoreFrontiera,  griglia);
+        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,2)),
+        			origine, destinazione, istr16Contatore, contatoreFrontiera,  griglia);
         }
         
         //Set<Landmark> frontiera = calolaFrontiera(...,griglia_tipi);
@@ -385,7 +386,7 @@ public class AnalizzatoreCammini {
 
         // CASO BASE: se frontiera è vuota => non si può espandere -> impossibile
         if (frontiera.isEmpty()) {
-            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(), istr16Contatore, contatoreFrontiera, griglia);
+            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(), origine, destinazione, istr16Contatore, contatoreFrontiera, griglia);
         }
         
         int num_ostacoli_temporanei = aggiornaOstacoli(griglia_tipi);
@@ -421,7 +422,7 @@ public class AnalizzatoreCammini {
         }
         rimuoviOstacoli(num_ostacoli_temporanei); //elimina gli ostacoli relativi a questo livello
         stack_griglia_tipi.pop(); //tolgo la matrice di questo livello 
-        return new RisultatoCammino(lunghezzaMin, seqMin, istr16Contatore, contatoreFrontiera, griglia); //Restituisce il percorso con distanza minore tra origine e destinazione
+        return new RisultatoCammino(lunghezzaMin, seqMin, origine, destinazione, istr16Contatore, contatoreFrontiera, griglia); //Restituisce il percorso con distanza minore tra origine e destinazione
     }
     
     /*
@@ -479,26 +480,89 @@ public class AnalizzatoreCammini {
      * Ricostruisce il cammino cella-per-cella tra due celle consecutive
      * seguendo il percorso minimo rettilineo/diagonale che dlib assume
      */
-    public List<Cella> ricostruisciCammino(Cella a, Cella b) {
-        List<Cella> path = new ArrayList<>();
-        
-        int x = a.getColonna();
-        int y = a.getRiga();
-        int targetX = b.getColonna();
-        int targetY = b.getRiga();
+    public List<Cella> ricostruisciCammino(
+            Cella start, Cella goal,
+            boolean[][] matriceOstacoli,
+            boolean allowDiagonalCutting) {
 
-        int dx = Integer.signum(targetX - x);
-        int dy = Integer.signum(targetY - y);
+        int rows = matriceOstacoli.length;
+        int cols = matriceOstacoli[0].length;
 
-        while (x != targetX || y != targetY) {
-            path.add(new Cella(y, x));
-            if (x != targetX) x += dx;
-            if (y != targetY) y += dy;
+        // validazioni rapide
+        if (start == null || goal == null) return Collections.emptyList();
+        if (start.getRiga() == goal.getRiga() && start.getColonna() == goal.getColonna())
+            return List.of(new Cella(start.getRiga(), start.getColonna()));
+        if (!inBounds(start.getRiga(), start.getColonna(), rows, cols) ||
+            !inBounds(goal.getRiga(), goal.getColonna(), rows, cols)) return Collections.emptyList();
+        if (matriceOstacoli[start.getRiga()][start.getColonna()] ||
+            matriceOstacoli[goal.getRiga()][goal.getColonna()]) return Collections.emptyList();
+
+        // mosse (dx,dy) e costi
+        final int[] dx = { 1, 0, -1, 0, 1, 1, -1, -1 };
+        final int[] dy = { 0, 1, 0, -1, 1, -1, -1, 1 };
+        final double[] cost = { 1, 1, 1, 1, Math.sqrt(2), Math.sqrt(2), Math.sqrt(2), Math.sqrt(2) };
+
+        class Node {
+            int r,c; double g,f; Node parent;
+            Node(int r,int c,double g,double f,Node p){this.r=r;this.c=c;this.g=g;this.f=f;this.parent=p;}
         }
 
-        path.add(b);
-        return path;
+        // euristica dlib
+        final BiFunction<Integer,Integer,Double> h = (r,c) -> {
+            int dxAbs = Math.abs(c - goal.getColonna());
+            int dyAbs = Math.abs(r - goal.getRiga());
+            int dmin = Math.min(dxAbs, dyAbs), dmax = Math.max(dxAbs, dyAbs);
+            return Math.sqrt(2)*dmin + (dmax - dmin);
+        };
+
+        PriorityQueue<Node> open = new PriorityQueue<>(Comparator.comparingDouble(n->n.f));
+        boolean[][] closed = new boolean[rows][cols];
+        double[][] bestG = new double[rows][cols];
+        for (int i=0;i<rows;i++) Arrays.fill(bestG[i], Double.POSITIVE_INFINITY);
+
+        Node startNode = new Node(start.getRiga(), start.getColonna(), 0.0, h.apply(start.getRiga(), start.getColonna()), null);
+        open.add(startNode);
+        bestG[start.getRiga()][start.getColonna()] = 0.0;
+
+        while (!open.isEmpty()) {
+            Node cur = open.poll();
+            if (closed[cur.r][cur.c]) continue;
+            if (cur.r == goal.getRiga() && cur.c == goal.getColonna()) {
+                LinkedList<Cella> path = new LinkedList<>();
+                for (Node it = cur; it != null; it = it.parent) path.addFirst(new Cella(it.r, it.c));
+                return path;
+            }
+            closed[cur.r][cur.c] = true;
+
+            for (int k=0;k<dx.length;k++) {
+                int nr = cur.r + dy[k];
+                int nc = cur.c + dx[k];
+                if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+                if (matriceOstacoli[nr][nc]) continue;
+
+                // evita corner-cutting se richiesto
+                if (!allowDiagonalCutting && k >= 4) {
+                    int ortho1r = cur.r, ortho1c = cur.c + dx[k];
+                    int ortho2r = cur.r + dy[k], ortho2c = cur.c;
+                    if (matriceOstacoli[ortho1r][ortho1c] || matriceOstacoli[ortho2r][ortho2c]) continue;
+                }
+
+                double tentativeG = cur.g + cost[k];
+                if (tentativeG + 1e-9 < bestG[nr][nc]) {
+                    bestG[nr][nc] = tentativeG;
+                    double f = tentativeG + h.apply(nr,nc);
+                    open.add(new Node(nr,nc,tentativeG,f,cur));
+                }
+            }
+        }
+
+        return Collections.emptyList(); // nessun percorso
     }
+
+    private boolean inBounds(int r, int c, int rows, int cols){
+        return r>=0 && r<rows && c>=0 && c<cols;
+    }
+
 
     public void resetContatori() {
     	this.istr16Contatore = 0;

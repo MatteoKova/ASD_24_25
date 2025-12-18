@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -89,18 +90,26 @@ public class FinestraGriglia extends JFrame {
 
         pannelloGriglia = new PannelloGriglia(griglia, matriceOstacoli, matriceContesto, matriceComplemento, frontiera);
         add(pannelloGriglia, BorderLayout.CENTER);
-
+        
         // Pannello legenda laterale
         JPanel pannelloLegenda = new JPanel();
         pannelloLegenda.setLayout(new BoxLayout(pannelloLegenda, BoxLayout.Y_AXIS));
+        pannelloLegenda.setBorder(BorderFactory.createTitledBorder("Legenda"));
 
+        // Spaziatura interna
+        pannelloLegenda.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder("Legenda"),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        
+        // Voci legenda
+        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Cella libera"));
         pannelloLegenda.add(creaVoceLegenda(Color.BLUE.darker(), "Ostacolo"));
         pannelloLegenda.add(creaVoceLegenda(Color.GREEN.darker(), "Contesto"));
         pannelloLegenda.add(creaVoceLegenda(Color.YELLOW, "Asse"));
         pannelloLegenda.add(creaVoceLegenda(Color.ORANGE, "Complemento"));
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Origine (O)"));
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Destinazione (D)"));
-        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Cella libera"));
 
         add(pannelloLegenda, BorderLayout.EAST);
 
@@ -134,12 +143,14 @@ public class FinestraGriglia extends JFrame {
         // Listener per click del mouse sulla griglia
         pannelloGriglia.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
-                int dimensioneCella = pannelloGriglia.getDimensioneCella();
-                if (dimensioneCella <= 0) return;
+            		
+            	// Conversione pixel → cella usando il metodo del pannello
+                Point p = pannelloGriglia.cellaDaCoordinatePixel(e.getX(), e.getY());
+                if (p == null) return; // click fuori dalla griglia
 
-                int colonna = (e.getX() - PannelloGriglia.OFFSET) / dimensioneCella;
-                int riga = (e.getY() - PannelloGriglia.OFFSET) / dimensioneCella;
-
+                int riga = p.y;
+                int colonna = p.x;
+            	
                 if (!griglia.isNeiMargini(riga, colonna) || matriceOstacoli[riga][colonna]) return;
 
                 if (origine == null) {
@@ -177,7 +188,6 @@ public class FinestraGriglia extends JFrame {
         });
 
         pulsanteAvvio.addActionListener(e -> {
-
             // Controllo: origine e destinazione devono essere selezionate
             if (origine == null || destinazione == null) {
                 JOptionPane.showMessageDialog(
@@ -258,11 +268,13 @@ public class FinestraGriglia extends JFrame {
 
     // Metodo di utilità per creare una voce della legenda
     private JPanel creaVoceLegenda(Color colore, String testo) {
-        JPanel voce = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel box = new JLabel();
         box.setOpaque(true);
         box.setBackground(colore);
         box.setPreferredSize(new Dimension(20, 20));
+        box.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        JPanel voce = new JPanel(new FlowLayout(FlowLayout.LEFT));
         voce.add(box);
         voce.add(new JLabel(testo));
         return voce;
@@ -286,45 +298,62 @@ public class FinestraGriglia extends JFrame {
 
         @Override
         protected RisultatoCammino doInBackground() throws Exception {
-            
-            // Inizializzazione timer
-           analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
-		    analizzatoreCammini.resetContatori();
-            tempoInizio = System.currentTimeMillis();
-	        long t1 = System.nanoTime(); // Inizializzazione timer
+        	// Inizializzazione timer
+        	analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
+        	analizzatoreCammini.resetContatori();
+        	tempoInizio = System.currentTimeMillis();
+        	long t1 = System.nanoTime(); // Inizializzazione timer
 
+        	// Esecuzione del calcolo del cammino minimo
+        	try{
+        		this.risultato = analizzatoreCammini.camminoMin(
+        				origine,
+        				destinazione,
+        				griglia,
+        				() -> {
+        					// Stop if user requested it or time limit elapsed
+        					return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
+        				}
+        				);
+        	} catch (StopException e){
+        		this.risultato = e.partialResult;
+        	}
+        	
+        	long t2 = System.nanoTime();
+        	
+        	// snapshot per thread-safety
+        	boolean[][] ostacoliSnapshot = matriceOstacoli;
 
-            // Esecuzione del calcolo del cammino minimo
-            try{
-			 this.risultato = analizzatoreCammini.camminoMin(
-					origine,
-					destinazione,
-					griglia,
-					() -> {
-						// Stop if user requested or time limit elapsed
-						return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
-					}
-					);
-				}catch (StopException e){
-				 this.risultato= e.partialResult;
-				}
-             long t2 = System.nanoTime();    
-            List<Cella> camminoCompleto = new ArrayList<>();
+        	// lista finale
+        	List<Cella> camminoCompleto = new ArrayList<>();
+        	List<Landmark> seq = risultato.getSeq();
 
-            List<Landmark> seq = risultato.getSeq();
+        	for (int i = 0; i < seq.size() - 1; i++) {
+        	    Cella a = seq.get(i).getCella();
+        	    Cella b = seq.get(i+1).getCella();
+     	  
+        	    List<Cella> parte = analizzatoreCammini.ricostruisciCammino(a, b, ostacoliSnapshot, true);
+        	    
+        	    if (parte == null || parte.isEmpty()) {
+        	        // non esiste sottocammino fra questi due landmark → gestisci:
+        	        // opzioni: abort, saltare, usare segmento rettilineo ignorando ostacoli, ecc.
+        	        continue; // qui scegliamo di saltare
+        	    }
 
-            for (int i = 0; i < seq.size() - 1; i++) {
-                Cella a = seq.get(i).getCella();
-                Cella b = seq.get(i+1).getCella();
-                camminoCompleto.addAll(analizzatoreCammini.ricostruisciCammino(a, b));
-            }
-             
-            pannelloGriglia.aggiornaCammino(camminoCompleto);
-            
-           risultato.setTempo(t2 - t1);
-            System.out.println("Tempo: " + (t2 - t1) + " ns");
+        	    // unisci evitando duplicati consecutivi
+        	    if (!camminoCompleto.isEmpty() && camminoCompleto.get(camminoCompleto.size()-1).equals(parte.get(0))) {
+        	        camminoCompleto.addAll(parte.subList(1, parte.size()));
+        	    } else {
+        	        camminoCompleto.addAll(parte);
+        	    }
+        	}
 
-            return risultato;
+        	pannelloGriglia.aggiornaCammino(camminoCompleto);
+			
+        	risultato.setTempo(t2 - t1);
+        	System.out.println("Tempo: " + (t2 - t1) + " ns");
+
+        	return risultato;
         }
 
         @Override
@@ -358,19 +387,19 @@ public class FinestraGriglia extends JFrame {
 	
     // Mostra un dialogo riepilogativo al termine o all’interruzione dell’algoritmo
     private void mostraRiepilogo(RisultatoCammino risultato, int stato) {
-        JDialog dialogo = new JDialog(this, "Riepilogo", true);
-        dialogo.setSize(400, 300);
+        JDialog dialogo = new JDialog(this, "Finestra riepilogo", true);
+        dialogo.setSize(400, 400);
         dialogo.setLayout(new BorderLayout());
 
         JTextArea areaTesto = new JTextArea();
         areaTesto.setEditable(false);
 
         if (stato == 0) {
-            areaTesto.setText("PROCESSO INTERROTTO: INTERVENTO DELL’UTENTE\n\nRiepilogo parziale:\n\n"); 
+            areaTesto.setText("PROCESSO INTERROTTO (INTERVENTO DELL’UTENTE)\n\nRIEPILOGO:\n"); 
         } else if (stato == 1) {
-            areaTesto.setText("PROCESSO INTERROTTO: LIMITE DI TEMPO SCADUTO\n\nRiepilogo:\n\n"); 
+            areaTesto.setText("PROCESSO INTERROTTO (LIMITE DI TEMPO SCADUTO)\n\nRIEPILOGO:\n"); 
         } else if (stato == 2) {
-            areaTesto.setText("PROCESSO COMPLETATO\n\nRiepilogo:\n\n");
+            areaTesto.setText("PROCESSO COMPLETATO\n\nRIEPILOGO:\n");
         }
         if (risultato != null) {
             areaTesto.append(risultato.stampa());
