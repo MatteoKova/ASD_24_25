@@ -12,10 +12,10 @@ public class Griglia {
     private Cella destinazioneDefault;
     //private  List <Cella> ostacoli;
     // Costruttore
-    public Griglia(int righe, int colonne) {
+    public Griglia(int righe, int colonne , TipoPattern tipologia) {
         this.righe = righe;
         this.colonne = colonne;
-        this.tipologia = TipoPattern.PERSONALIZZATA ;// Valore di default in futuro si potrebbe implementatere
+        this.tipologia = tipologia ;// Valore di default in futuro si potrebbe implementatere
                                             // un metodo per settarlo in base al pattern scelto
                                             //in questo momneto la classe Griglia è stata sostiuita da 
                                             // una matrice di boolean in cui true = ostacolo false = libera

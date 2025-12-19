@@ -1,0 +1,14 @@
+{
+  "righe" : 20,
+  "colonne" : 20,
+  "tipologia" : "SCACCHI",
+  "ostacoli" : [ [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ], [ true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false ], [ false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true ] ],
+  "origineDefault" : {
+    "riga" : 19,
+    "colonna" : 0
+  },
+  "destinazioneDefault" : {
+    "riga" : 0,
+    "colonna" : 1
+  }
+}

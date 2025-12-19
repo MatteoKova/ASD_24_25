@@ -12,6 +12,8 @@ public class RisultatoCammino {
 	private int istr17Contatore;
 	private Griglia griglia;
 	private int contatoreFrontiera;
+	private int convergenza;// 1 se converge(trova destinazione), 0 se non-converge
+	private long crescitaMemoriaBytes;
 	
 	public RisultatoCammino(double lunghezza, List<Landmark> seq, Cella origine, Cella destinazione, int istr16Contatore, int contatoreFrontiera, Griglia griglia) {
 		this.lunghezza = lunghezza;
@@ -21,7 +23,10 @@ public class RisultatoCammino {
 		this.tempoCalcolo = 0;
 		this.istr17Contatore = istr16Contatore;
 		this.griglia = griglia;
-		this.contatoreFrontiera = contatoreFrontiera;	
+		this.contatoreFrontiera = contatoreFrontiera;
+		this.convergenza = 1; // di default converge
+		this.crescitaMemoriaBytes=0;
+
 	}
 
 	public double getLunghezza() {
@@ -41,20 +46,13 @@ public class RisultatoCammino {
 		sb.append("- Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
 		sb.append("- Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
 		//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
+		sb.append(convergenza == 1 ? "Destinazione raggiunta\n" : "Destinazione non raggiunta\n");
 	    sb.append("- Lunghezza cammino: ").append(lunghezza).append("\n");
 		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ns\n");
 		sb.append("- Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n");
 		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n\n");
-		
-		/*
-		// Non mostra la destinazione qunado il calcolo viene interrotto (meh)
-		sb.append("SEQUENZA DEI LANDMARK:\n");
-	    for (Landmark landmark : seq) {
-	        sb.append(" - ").append(landmark.toString()).append("\n");
-	    }
-	   	*/
-		
-		
+		sb.append("Crescita memoria heap: ").append(crescitaMemoriaBytes).append(" bytes\n\n");
+		sb.append("DETTAGLIO CAMMINO:\n");
 	    sb.append("ORIGINE:\n").append(" - ").append("(" + origine + ", " + 0 + ")");
 	    
 	    String tipo = "?";
@@ -93,4 +91,20 @@ public class RisultatoCammino {
 	public int getContatoreFrontiera() {
 	    return contatoreFrontiera;
 	}
+
+	public int getConvergenza() {
+	    return convergenza;
+	}
+
+	public void setConvergenza(int convergenza) {
+	    this.convergenza = convergenza;
+	}
+
+	public void setCrescitaMemoriaBytes(long crescitaMemoriaBytes) {
+    this.crescitaMemoriaBytes = crescitaMemoriaBytes;
+}
+
+public long getCrescitaMemoriaBytes() {
+    return crescitaMemoriaBytes;
+}
 }

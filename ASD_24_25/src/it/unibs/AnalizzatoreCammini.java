@@ -75,7 +75,7 @@ import java.util.function.Supplier;
 
 public class AnalizzatoreCammini {
 	public AtomicLong calls = new AtomicLong(0);
-
+    private Griglia griglia;
 	private boolean[][] mat_ostacoli;
 	private Stack<Cella> stack_ostacoli;
 	private Stack<int[][]> stack_griglia_tipi;
@@ -83,8 +83,9 @@ public class AnalizzatoreCammini {
     int istr16Contatore = 0;  //contatore esiti falsi di istruzione 16 (if < lunghezzaMin) 
     int contatoreFrontiera = 0; //contatore celle di frontiera analizzate
 
-	public AnalizzatoreCammini(boolean[][] mat_ostacoli, Stack<Cella> stack_ostacoli, Stack<int[][]> stack_griglia_tipi) {
-		this.mat_ostacoli = mat_ostacoli;
+	public AnalizzatoreCammini(Griglia griglia, Stack<Cella> stack_ostacoli, Stack<int[][]> stack_griglia_tipi) {
+        this.griglia = griglia;
+		this.mat_ostacoli = griglia.getOstacoli();
 		this.stack_ostacoli = stack_ostacoli;
 		this.stack_griglia_tipi = stack_griglia_tipi;
 		this.nr = mat_ostacoli.length;
@@ -568,4 +569,16 @@ public class AnalizzatoreCammini {
     	this.istr16Contatore = 0;
     	this.contatoreFrontiera = 0;
     }
+
+   public Griglia getGriglia() {
+       return this.griglia;
+   }
+
+   public void setGriglia(Griglia g) {
+       this.griglia = g;
+       this.mat_ostacoli = g.getOstacoli();
+       this.nr = mat_ostacoli.length;
+       this.nc = mat_ostacoli[0].length;
+   }
+
 }

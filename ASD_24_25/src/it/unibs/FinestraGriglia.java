@@ -56,6 +56,7 @@ public class FinestraGriglia extends JFrame {
     private volatile boolean stopRichiesto = false;
 
     public FinestraGriglia(Griglia griglia) {
+       
         // TEMPORANEO: View e Controller insieme
         this.griglia = griglia;
         this.matriceOstacoli = griglia.getOstacoli();
@@ -84,15 +85,16 @@ public class FinestraGriglia extends JFrame {
         Stack<int[][]> pilaTipiCammini = new Stack<>();
         pilaTipiCammini.push(matriceVuota);
 
-        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(this.matriceOstacoli, pilaOstacoli, pilaTipiCammini);
+        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(this.griglia, pilaOstacoli, pilaTipiCammini);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         matriceContesto = new int[numeroRighe][numeroColonne];
         matriceComplemento = new int[numeroRighe][numeroColonne];
-
+        
         pannelloGriglia = new PannelloGriglia(griglia, matriceOstacoli, matriceContesto, matriceComplemento, frontiera);
+         System.out.println("griglia disegnata" + griglia);
         add(pannelloGriglia, BorderLayout.CENTER);
         
         // Pannello legenda laterale

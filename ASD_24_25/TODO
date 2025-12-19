@@ -1,13 +1,5 @@
 ===SAMU==
-
-* testare calsse tester ( non credo che gli oggetti passati a analizzatore cammino siano giuisti)
-* sistemare classe griglia e sistemare i metodi in modo che possono estrarre da griglia tutte le 
-    informazioni necessarie per l'analisi del cammino e non avere info sparse in giro per il codice
-* spostare logica salvataggio griglia nella parte dei percorsi
-* sistemare caricamento griglia da file, per avere gia pronte le o e d di default( in teoria rispostando tutto
-        dentro la griglia dovrebbe essere automatico) 
-* render la tipologia di grglia attiva  veramente  ( in teoria rispostando tutto
-        dentro la griglia dovrebbe essere automatico) 
+* nella modalita grafica modifcare il riassunto aggiungendo i nuovi dati al risultato
 
 
 ==TUTTI==

@@ -1,5 +1,0 @@
-{
-  "righe" : 0,
-  "colonne" : 0,
-  "ostacoli" : [ [ false, false, false, true, false, false, false, false, false, false ], [ false, false, false, true, false, true, true, false, false, false ], [ false, false, false, false, false, false, true, false, false, false ], [ false, false, false, true, true, false, false, false, false, false ], [ false, false, false, false, false, false, false, false, false, true ], [ false, false, false, false, false, false, false, false, false, false ], [ false, false, false, false, false, false, false, false, false, true ], [ false, false, true, false, false, false, false, false, false, true ], [ false, false, false, false, false, false, false, false, false, true ], [ false, false, false, false, false, false, false, false, false, true ] ]
-}
