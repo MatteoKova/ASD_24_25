@@ -1,9 +1,9 @@
 package it.unibs;
 
 public enum TipoPattern {
-    DENSITÀ_BASSA,
-    DENSITÀ_ALTA,
-    DENSITÀ_MEDIA,
+    DENSITA_BASSA,
+    DENSITA_ALTA,
+    DENSITA_MEDIA,
     PERSONALIZZATA,
     SPIRALE,
     SCACCHI,

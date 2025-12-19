@@ -83,7 +83,7 @@ public class Main {
 							g.getRighe() + "x" + g.getColonne());
 				}
 				System.out.println("Avvio modalità CLI...");
-				GrigliaController controller = new GrigliaController(0);
+				GrigliaController controller = new GrigliaController(0, tutteLeGriglie);
 			}
 	
 			// ------------------------------
@@ -91,7 +91,8 @@ public class Main {
 			// ------------------------------
 			case "-g" -> {
 				System.out.println("Avvio modalità grafica...");
-				GrigliaController controller = new GrigliaController(1);
+				// passo null perchè in modalità grafica, è presente un'interfaccia per caricare le griglie
+				GrigliaController controller = new GrigliaController(1, null); 
 	
 			}
 	

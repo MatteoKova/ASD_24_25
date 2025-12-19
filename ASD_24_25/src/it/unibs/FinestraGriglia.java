@@ -9,6 +9,8 @@ import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,33 +48,53 @@ public class FinestraGriglia extends JFrame {
     private JButton pulsanteStop;
     private JLabel etichettaInfo;
     private PannelloGriglia pannelloGriglia;
+    private JButton pulsanteSalva;
+    
 
     // Worker per calcolo percorsi
     private LavoratorePercorso lavoratore;
     private volatile boolean stopRichiesto = false;
 
-    public FinestraGriglia(boolean[][] matriceOstacoli) {
+    public FinestraGriglia(Griglia griglia) {
+       
         // TEMPORANEO: View e Controller insieme
-        this.matriceOstacoli = matriceOstacoli;
+        this.griglia = griglia;
+        this.matriceOstacoli = griglia.getOstacoli();
 
-        int numeroRighe = matriceOstacoli.length;
-        int numeroColonne = matriceOstacoli[0].length;
-        this.griglia = new Griglia(numeroRighe, numeroColonne);
+        //auto-seleziona origine e destinazione se presenti
+        // (se si è usata opzione di caricamentro da file)
+        System.out.println("Verifica origine/destinazione preimpostate...");
+        System.out.println(griglia.getDestinazioneDefault());
+        if (griglia.getOrigineDefault() != null) {
+            this.origine = griglia.getOrigineDefault();
+            System.out.println("Origine preimpostata: " + this.origine);
+
+            if(griglia.getDestinazioneDefault() != null) {
+            this.destinazione = griglia.getDestinazioneDefault();
+            
+        }
+        }
+        
+        
+        int numeroRighe = griglia.getRighe();
+        int numeroColonne = griglia.getColonne();
+        
 
         Stack<Cella> pilaOstacoli = new Stack<>();
         int[][] matriceVuota = new int[numeroRighe][numeroColonne]; 
         Stack<int[][]> pilaTipiCammini = new Stack<>();
         pilaTipiCammini.push(matriceVuota);
 
-        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(matriceOstacoli, pilaOstacoli, pilaTipiCammini);
+        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(this.griglia, pilaOstacoli, pilaTipiCammini);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         matriceContesto = new int[numeroRighe][numeroColonne];
         matriceComplemento = new int[numeroRighe][numeroColonne];
-
+        
         pannelloGriglia = new PannelloGriglia(griglia, matriceOstacoli, matriceContesto, matriceComplemento, frontiera);
+         System.out.println("griglia disegnata" + griglia);
         add(pannelloGriglia, BorderLayout.CENTER);
         
         // Pannello legenda laterale
@@ -97,14 +119,19 @@ public class FinestraGriglia extends JFrame {
 
         add(pannelloLegenda, BorderLayout.EAST);
 
+        
+
         // Pannello controlli inferiori
         JPanel pannelloControlli = new JPanel(new FlowLayout());
         pulsanteAvvio = new JButton("Avvia valutazione");
         pulsanteStop = new JButton("STOP");
+        pulsanteSalva = new JButton("Salva JSON");
         pulsanteStop.setEnabled(false);
+        //pulsanteSalva.setEnabled(false);
 
         pannelloControlli.add(pulsanteAvvio);
         pannelloControlli.add(pulsanteStop);
+        pannelloControlli.add(pulsanteSalva);
 
         add(pannelloControlli, BorderLayout.SOUTH);
 
@@ -229,6 +256,7 @@ public class FinestraGriglia extends JFrame {
         });
 
         pulsanteStop.addActionListener(e -> {
+
             if (lavoratore != null) {
                 // Ripristina la coerenza dei dati prima di fermare l’algoritmo
                 analizzatoreCammini.ripristinaCoerenzaOstacoli();
@@ -242,7 +270,17 @@ public class FinestraGriglia extends JFrame {
                 etichettaInfo.setText("Interruzione in corso…");
             }
         });
-	}
+        
+        pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
+       
+        if (this.origine != null && this.destinazione != null) {
+           analizzatoreCammini.calcolaComplemento(griglia, origine, matriceVuota);
+            analizzatoreCammini.calcolaContesto(griglia, origine, matriceVuota);
+            frontiera = analizzatoreCammini.calcolaFrontiera(matriceVuota, griglia);
+            pannelloGriglia.aggiornaDati(origine, destinazione, matriceVuota, matriceVuota, frontiera);
+        }
+         
+    }
 
     // Metodo di utilità per creare una voce della legenda
     private JPanel creaVoceLegenda(Color colore, String testo) {
@@ -406,4 +444,50 @@ public class FinestraGriglia extends JFrame {
         dialogo.setLocationRelativeTo(this);
         dialogo.setVisible(true);
     }
+
+
+        // Metodo che salva la griglia in un file JSON
+    private void salvaGrigliaJson() {
+   if (origine == null || destinazione == null) {
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Seleziona prima Origine e Destinazione",
+                    "Errore di input",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
+
+
+    // Converto la matrice in un oggetto Griglia
+    Griglia g =griglia;
+    griglia.setOrigineDefault(origine);
+    griglia.setDestinazioneDefault(destinazione);
+    JFileChooser chooser = new JFileChooser();
+    chooser.setDialogTitle("Salva griglia come JSON");
+
+    int result = chooser.showSaveDialog(this);
+    if (result == JFileChooser.APPROVE_OPTION) {
+        File file = chooser.getSelectedFile();
+
+        // Aggiunge estensione .json se mancante
+        if (!file.getName().toLowerCase().endsWith(".json")) {
+            file = new File(file.getAbsolutePath() + ".json");
+        }
+
+        try {
+            GrigliaIO.writeGriglia(g, file);
+            JOptionPane.showMessageDialog(this,
+                    "Griglia salvata con successo in:\n" + file.getAbsolutePath(),
+                    "Salvataggio completato",
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                    "Errore durante il salvataggio del file.",
+                    "Errore",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
 }

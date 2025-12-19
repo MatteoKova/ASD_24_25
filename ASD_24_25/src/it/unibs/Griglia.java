@@ -12,15 +12,17 @@ public class Griglia {
     private Cella destinazioneDefault;
     //private  List <Cella> ostacoli;
     // Costruttore
-    public Griglia(int righe, int colonne) {
+    public Griglia(int righe, int colonne , TipoPattern tipologia) {
         this.righe = righe;
         this.colonne = colonne;
-        this.tipologia = TipoPattern.PERSONALIZZATA ;// Valore di default in futuro si potrebbe implementatere
+        this.tipologia = tipologia ;// Valore di default in futuro si potrebbe implementatere
                                             // un metodo per settarlo in base al pattern scelto
                                             //in questo momneto la classe Griglia è stata sostiuita da 
                                             // una matrice di boolean in cui true = ostacolo false = libera
                                             //quindi un po lungo andare a modificare tutto il codice per ora lascio cosi
         this.ostacoli = new boolean[righe][colonne];
+        this.origineDefault = null;
+        this.destinazioneDefault = null;
         
         
         //this.celle = new Cella[righe][colonne];
@@ -37,7 +39,9 @@ public class Griglia {
         @JsonProperty("righe") int righe,
         @JsonProperty("colonne") int colonne,
         @JsonProperty("tipologia") TipoPattern tipologia,
-        @JsonProperty("ostacoli") boolean[][] ostacoli
+        @JsonProperty("ostacoli") boolean[][] ostacoli,
+        @JsonProperty("origineDefault") Cella origineDefault,
+        @JsonProperty("destinazioneDefault") Cella destinazioneDefault
         
     ) {
 
@@ -45,6 +49,8 @@ public class Griglia {
     this.colonne = colonne;
     this.ostacoli = ostacoli;
     this.tipologia = tipologia;
+    this.origineDefault = origineDefault;
+    this.destinazioneDefault = destinazioneDefault;
 }
     
     // Controlla se la cella è all'interno della griglia
@@ -157,4 +163,24 @@ public class Griglia {
     public void setDestinazioneDefault(Cella destinazioneDefault) {
         this.destinazioneDefault = destinazioneDefault;
     }
+
+    @Override
+public String toString() {
+    StringBuilder sb = new StringBuilder();
+
+    sb.append("Griglia {\n");
+    sb.append("  righe=").append(righe)
+      .append(", colonne=").append(colonne).append("\n");
+
+    sb.append("  tipologia=").append(tipologia).append("\n");
+
+    sb.append("  origineDefault=").append(origineDefault).append("\n");
+    sb.append("  destinazioneDefault=").append(destinazioneDefault).append("\n");
+
+    
+
+
+    return sb.toString();
+}
+
 }

@@ -6,7 +6,7 @@ public class GrigliaController {
 	
 	AnalizzatoreCammini analizzatore_cammini ;
 
-	public GrigliaController(int modalita) {
+	public GrigliaController(int modalita, java.util.List<Griglia> griglie ) {
 		if (modalita == 1) // grafica
 		{		SwingUtilities.invokeLater(() -> {
 
@@ -16,7 +16,9 @@ public class GrigliaController {
 		});}
 		else if (modalita == 0) // batch
 		{
-			// codice batch
+			GriglieTester tester = new GriglieTester(griglie);
+			tester.askParameters();
+			tester.runTests();
 		}
 		//this.analizzatore_cammini = new AnalizzatoreCammini();
 

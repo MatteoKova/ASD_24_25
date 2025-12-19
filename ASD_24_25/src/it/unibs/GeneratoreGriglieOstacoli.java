@@ -51,7 +51,7 @@ public class GeneratoreGriglieOstacoli {
 	// Genera tutte le tipologie di ostacoli rispettando la densità specificata
 	public void generaTutto() {
 		switch (cfg.tipoPattern) {
-		case DENSITÀ_BASSA, DENSITÀ_ALTA, DENSITÀ_MEDIA:
+		case DENSITA_BASSA, DENSITA_ALTA, DENSITA_MEDIA:
 			generaOstacoliCasuali();
 			break;
 		case SPIRALE:
