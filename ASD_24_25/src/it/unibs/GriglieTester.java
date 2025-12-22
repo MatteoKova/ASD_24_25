@@ -1,6 +1,7 @@
 package it.unibs;
 
 
+
 import jdk.jfr.*;
 import jdk.jfr.consumer.RecordingFile;
 import java.nio.file.Path;
@@ -22,24 +23,19 @@ import java.util.stream.Collectors;
 
 public class GriglieTester {
 	private final java.util.List<Griglia> griglie;
-	private AnalizzatoreCammini analizzatore;
-	private Stack<Cella> pilaOstacoli;
-	private  int[][] matriceVuota ; 
-	private  Stack<int[][]> pilaTipiCammini;
 	private List<RisultatoCammino> risultati; 
 	private long limiteTempo = 3000; // ms
 	private int analisiSpazio = 0; // 0 = no, 1 = si   
+	private AgenteCamminoMinimo agente;
+	private ConfigurazioneAnalizzatore configAnalizzatore;
 
 	public GriglieTester(java.util.List<Griglia> griglie) {
 		this.griglie = griglie;
-		this.pilaOstacoli = new Stack<>();
-		this.matriceVuota = new int[griglie.get(0).getRighe()][griglie.get(0).getColonne()]; 
-		this.pilaTipiCammini = new Stack<>();
 		this.risultati= new java.util.ArrayList<>();
-		pilaTipiCammini.push(matriceVuota);
-		this.analizzatore = new AnalizzatoreCammini(
-				griglie.get(0), pilaOstacoli, pilaTipiCammini);
+		this.agente = new AgenteCamminoMinimo();
+		this.configAnalizzatore = new ConfigurazioneAnalizzatore();
 	}
+
 
 
 	// Metodo principale per eseguire i test su tutte le griglie
@@ -49,24 +45,7 @@ public class GriglieTester {
 		int contatore=0;
 		RisultatoCammino risultato;
 		for (Griglia g : griglie) {
-			
-			if (matriceVuota.length != g.getRighe() || matriceVuota[0].length != g.getColonne()) {
-				matriceVuota = new int[g.getRighe()][g.getColonne()];
-				pilaTipiCammini.clear();
-				pilaTipiCammini.push(matriceVuota);
-			}
-			analizzatore.setGriglia(g);
-			pilaOstacoli.clear();
-			pilaTipiCammini.clear();
-			pilaTipiCammini.push(matriceVuota);
-
-			 // Ripristina la coerenza dei dati prima di avviare l’algoritmo
-            analizzatore.ripristinaCoerenzaOstacoli();
-            analizzatore.ripristinaCoerenzaTipi();
-
-			analizzatore.resetContatori();
-		    analizzatore.calls.set(0);
-
+			agente.preparaAnalisi(g);
 			risultato= (analisiSpazio==1) ? testGrigliaconSpazio(g, contatore) :  testGriglia(g);
 			risultati.add(risultato);
 			contatore++;
@@ -122,54 +101,7 @@ public class GriglieTester {
 
 // Metodo eseguiCammino con analisi tempo e spazio(base-> prendo il picco di memoria heap usata durante l'esecuzione) 
 	private RisultatoCammino eseguiCammino(Griglia g, long limiteTempoMs) {
-
-    // Take snapshot of memory before starting and reset peak usage
-    long memoriaPrima = 0;
-    for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
-        if (pool.getType() == MemoryType.HEAP) {
-            memoriaPrima += pool.getUsage().getUsed();
-            pool.resetPeakUsage();
-        }
-    }
-
-    long inizioNs = System.nanoTime();
-    long inizioMs = System.currentTimeMillis();
-
-    RisultatoCammino risultato;
-
-    try {
-        risultato = analizzatore.camminoMin(
-                g.getOrigineDefault(),
-                g.getDestinazioneDefault(),
-                g,
-                () -> (System.currentTimeMillis() - inizioMs) >= limiteTempoMs
-        );
-    } catch (StopException e) {
-        System.out.println("Time limit exceeded for grid "
-                + g.getRighe() + "x" + g.getColonne());
-        risultato = e.partialResult;
-        risultato.setConvergenza(0); // non converge
-    }
-
-    long fineNs = System.nanoTime();
-
-    // Get peak heap usage during execution
-    long piccoHeap = 0;
-    for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
-        if (pool.getType() == MemoryType.HEAP) {
-            long usedPeak = pool.getPeakUsage().getUsed();
-            if (usedPeak > piccoHeap) piccoHeap = usedPeak;
-        }
-    }
-
-    // Memory used by this method only (subtract memory before start)
-    long memoriaUsataBytes = piccoHeap - memoriaPrima;
-
-    // Store metrics in RisultatoCammino
-    risultato.setTempo(fineNs - inizioNs);
-    risultato.setCrescitaMemoriaBytes(memoriaUsataBytes / 1024); // in KB
-
-    return risultato;
+    return agente.eseguiCammino(g, configAnalizzatore);
 }
 
 
@@ -219,7 +151,7 @@ public class GriglieTester {
 
     // Ask time limit
     System.out.print("Insert time limit for a single test (ms): ");
-    limiteTempo = scanner.nextLong();
+    configAnalizzatore.setLimiteTempoMs( scanner.nextLong());
     scanner.nextLine(); // consume newline
 
     // Ask space analysis

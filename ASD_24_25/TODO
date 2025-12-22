@@ -1,5 +1,9 @@
 ===SAMU==
 * nella modalita grafica modifcare il riassunto aggiungendo i nuovi dati al risultato
+* riprendere da ccf
+    - si potrebbe unire tutto in un unico ogetto contenuto nella griglia che  ha un int[][] e poi 0 ostacolo 1 cella libera 2 cella complemento etc
+     
+
 
 
 ==TUTTI==

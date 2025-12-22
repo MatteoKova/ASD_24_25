@@ -25,13 +25,12 @@ public class Griglia {
         this.destinazioneDefault = null;
         
         
-        //this.celle = new Cella[righe][colonne];
-        //this.ostacoli = new java.util.ArrayList<>();
-        /*for (int r = 0; r < righe; r++) {
+        
+        for (int r = 0; r < righe; r++) {
             for (int c = 0; c < colonne; c++) {
-                celle[r][c] = new Cella(r, c); // riga, colonna
+                ostacoli[r][c] = false; // riga, colonna
             }
-        }*/
+        }
     }
 
     @JsonCreator

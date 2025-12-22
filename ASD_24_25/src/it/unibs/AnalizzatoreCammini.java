@@ -63,10 +63,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.Stack;
@@ -76,20 +79,29 @@ import java.util.function.Supplier;
 public class AnalizzatoreCammini {
 	public AtomicLong calls = new AtomicLong(0);
     private Griglia griglia;
-	private boolean[][] mat_ostacoli;
-	private Stack<Cella> stack_ostacoli;
-	private Stack<int[][]> stack_griglia_tipi;
+
+	private boolean[][] mat_ostacoli; //matrice booleana che indica quali celle sono ostacoli (true) e quali libere (false)
+	private Stack<Cella> stack_ostacoli; //stack che memorizza gli ostacoli aggiunti dinamicamente, per poterli rimuovere quando si risale di un livello nella ricorsione
+	private Stack<int[][]> stack_griglia_tipi; //stack che memorizza  contesto complemento dei tipi di cammino, per poterle riprendere quando si risale di un livello nella ricorsione
+
+    private Map<Integer, RisultatoCammino> celleVisitate ; // mappa per tenere traccia delle celle visitate e del loro conteggio
+                                                            // come chiave ha l'hash delle coordinate della cella origine da cui è stato calcolato il cammino
+                                                            
+
+
 	int nr, nc;
     int istr16Contatore = 0;  //contatore esiti falsi di istruzione 16 (if < lunghezzaMin) 
-    int contatoreFrontiera = 0; //contatore celle di frontiera analizzate
+    int contatoreFrontiera = 0; //contatore celle di frontiera analizzate           
 
-	public AnalizzatoreCammini(Griglia griglia, Stack<Cella> stack_ostacoli, Stack<int[][]> stack_griglia_tipi) {
+	public AnalizzatoreCammini(Griglia griglia) {
+        //inizializza l'analizzatore con una griglia dummy, che verrà sostituita in seguito
         this.griglia = griglia;
 		this.mat_ostacoli = griglia.getOstacoli();
-		this.stack_ostacoli = stack_ostacoli;
-		this.stack_griglia_tipi = stack_griglia_tipi;
+		this.stack_ostacoli = new Stack<>();
+		this.stack_griglia_tipi = new Stack<>();
 		this.nr = mat_ostacoli.length;
 		this.nc = mat_ostacoli[0].length;
+        this.celleVisitate = null;
 	}
 
 	// Calcolo della distanza libera dlib(O, D)
@@ -182,6 +194,8 @@ public class AnalizzatoreCammini {
         return true;
     }
 
+    // Calcola il contesto di O (punti raggiungibili con cammini di tipo 1 diag->ort)
+    // assegna 1 alle celle del contesto nella matrice dei tipi
     public int[][] calcolaContesto(Griglia griglia, Cella origine, int[][] griglia_tipi) {
     	
     	for (int r = 0; r < griglia.getRighe(); r++) {
@@ -203,6 +217,8 @@ public class AnalizzatoreCammini {
     	return griglia_tipi;
     }
     
+    // Calcola il complemento di O (punti raggiungibili con cammini di tipo 2 ort->diag)
+    // assegna 2 alle celle del complemento nella matrice dei tipi
     public int[][] calcolaComplemento(Griglia griglia, Cella origine, int[][] griglia_tipi) {
     	for (int r = 0; r < griglia.getRighe(); r++) {
             for (int c = 0; c < griglia.getColonne(); c++) {
@@ -218,6 +234,44 @@ public class AnalizzatoreCammini {
     	return griglia_tipi;
     }
 
+
+    public void calcolaCCF(Griglia griglia, Cella origine, int[][] griglia_tipi) {
+         Cella cella = new Cella(0, 0);
+    	for (int r = 0; r < griglia.getRighe(); r++) {
+            for (int c = 0; c < griglia.getColonne(); c++) {
+
+                if (mat_ostacoli[r][c]) griglia_tipi[r][c]=0;
+                else{ //se la cella su cui sono non è attraversabile(perchè ostacolo o anche chiusura di punto precedente del cammino), salta
+                    cella.setRiga(r);
+                    cella.setColonna(c);
+
+                    if (camminoLibero(griglia, origine, cella, 1)) {
+                        if(controllaVicini(cella, griglia, griglia_tipi)) { //Se la cella appartiene alla chiusura dell'origine
+                            griglia_tipi[r][c]=3;
+                        } 
+                        else {
+                            griglia_tipi[r][c]=1;
+                        }
+                    }
+                    //cella analizzata deve essere di tipo 2, e non deve appartenere al conteesto di origine
+                    else if (camminoLibero(griglia, origine, cella, 2) && griglia_tipi[r][c]==0) {
+                        if(controllaVicini(cella, griglia, griglia_tipi)) { //Se la cella appartiene alla chiusura dell'origine
+                            griglia_tipi[r][c]=4;
+                        } 
+                        else {
+                            griglia_tipi[r][c]=2;
+                        }
+                    }
+                    //cella libera
+                    else {
+                        griglia_tipi[r][c]=0;
+                    }
+                };
+
+                
+            }
+        }
+    }
     // Calcola il complemento di O (punti raggiungibili SOLO con cammini di tipo 2)
     /*public static Set<Cella> calcolaComplemento(Griglia g, Cella o, Set<Cella> ostacoli) {
         Set<Cella> complemento = new HashSet<>();
@@ -357,23 +411,28 @@ public class AnalizzatoreCammini {
         return result;
     }
 
-    public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, Supplier<Boolean> stopCheck) {
-    	calls.incrementAndGet();
-        
-    	int[][] griglia_tipi = new int[griglia.getRighe()][griglia.getColonne()]; //crea una nuova matrice per memorizzare i tipi relativi ad O, inizializzandola a 0
-    	calcolaContesto(griglia, origine, griglia_tipi); //è inutile che restituisca qualcosa, visto che sta modificando griglia_tipi
-    	calcolaComplemento(griglia, origine, griglia_tipi);
+    public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Griglia griglia, ConfigurazioneAnalizzatore cfg,  Supplier<Boolean> stopCheck) {
     	
+        // Controllo interruzione forzata
         if (stopCheck.get()) 
            throw new StopException(new RisultatoCammino(Double.POSITIVE_INFINITY, List.of(new Landmark(origine, 0)), 
                                             origine, destinazione, istr16Contatore, contatoreFrontiera, griglia));
-
+        
+        calls.incrementAndGet();
+        
+    	
+        int[][] griglia_tipi = new int[griglia.getRighe()][griglia.getColonne()]; //crea una nuova matrice per memorizzare i tipi relativi ad O, inizializzandola a 0
+    	
+        calcolaContesto(griglia, origine, griglia_tipi); //è inutile che restituisca qualcosa, visto che sta modificando griglia_tipi
+    	calcolaComplemento(griglia, origine, griglia_tipi);
+    	 // CASO BASE: se destinazione è nella complemento dell'origine
         if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==1) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(1);
         	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Landmark(origine,0), new Landmark(destinazione,1)),
         			origine, destinazione, istr16Contatore, contatoreFrontiera,griglia);
         }
+        // CASO BASE: se destinazione è nel contesto dell'origine
         else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()]==2) {
         	//origine.setTipo(0);
         	//destinazione.setTipo(2);
@@ -381,6 +440,7 @@ public class AnalizzatoreCammini {
         			origine, destinazione, istr16Contatore, contatoreFrontiera,  griglia);
         }
         
+
         //Set<Landmark> frontiera = calolaFrontiera(...,griglia_tipi);
         Set<Landmark> frontiera = calcolaFrontiera(griglia_tipi, griglia); //Sarebbe da passare a list
         contatoreFrontiera += frontiera.size();
@@ -397,28 +457,52 @@ public class AnalizzatoreCammini {
         double lunghezzaMin = Double.POSITIVE_INFINITY;
         List<Landmark> seqMin = new ArrayList<>();
         double lF, lFD, lTot;
+
+        if (cfg.isRiordinaFrontiera()) {
+        	riordinaFrontiera(frontiera, destinazione);
+        }
+
+     
         
         for (Landmark landmark_frontiera : frontiera) {
-        	Cella cella_frontiera = landmark_frontiera.getCella();
+            Cella cella_frontiera = landmark_frontiera.getCella();
+            RisultatoCammino sotto_cammino=null;
+            //Controllo se ho già calcolato il cammino da cella_frontiera a destinazione in precedenza
+               if (cfg.usaMemoriaSequenze==1){
+                sotto_cammino=checkMemoria(cella_frontiera);
+                }
+            
+            lF = dlib(origine, cella_frontiera);
+            //se non l'ho calcolato, lo calcolo ora    
+        	if (sotto_cammino==null){
+        	   
         	mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = false; //imposta temporaneamente la cella di forntiera che sto considerando, come libera
-        	lF = dlib(origine, cella_frontiera);
-        	//if (lF >= lunghezzaMin) continue; //proning
-        	if (lF + dlib(cella_frontiera, destinazione) >= lunghezzaMin) continue; // pruning
+        	
+
+        	//if (lF >= lunghezzaMin) continue; la condizione forte puo essere attivata o meno a seconda della configurazione
+        	if (lF +( dlib(cella_frontiera, destinazione)*cfg.getCondForte() )>= lunghezzaMin) continue; // pruning
+            
             istr16Contatore++;
         	System.out.println("istruzione 16 eseguita: confronto " +istr16Contatore);
-            RisultatoCammino sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia,stopCheck);
+            sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia, cfg,stopCheck);
+            }
         	
-        	mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = true;
+            mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = true;
         	//stack_griglia_tipi.pop(); //rimuove la griglia dei tipi del sotto_cammino dallo stack
         	
         	lFD = sotto_cammino.getLunghezza();
+            
         	if(Double.isInfinite(lFD)) continue;
         	
         	lTot = lF + lFD;
         	if (lTot < lunghezzaMin) {
                 lunghezzaMin = lTot;
-                
                 seqMin = compatta(List.of(new Landmark(origine, 0), landmark_frontiera), sotto_cammino.getSeq());
+            }
+
+            //memorizzo il cammino calcolato
+            if (cfg.usaMemoriaSequenze==1){
+                aggiungiAMemoria(cella_frontiera, sotto_cammino);
             }
         }
         rimuoviOstacoli(num_ostacoli_temporanei); //elimina gli ostacoli relativi a questo livello
@@ -444,7 +528,8 @@ public class AnalizzatoreCammini {
     	}
     	return num_ostacoli_aggiunti;
     }
-    
+
+   
     private void rimuoviOstacoli(int num_ostacoli) {
     	Cella ostacolo;
     	for (int i = 0; i < num_ostacoli; i++) {
@@ -463,6 +548,7 @@ public class AnalizzatoreCammini {
      */
     public void ripristinaCoerenzaTipi() {
     	stack_griglia_tipi = new Stack<int[][]>();
+        //stack_griglia_tipi.clear();
     }
 
     /*
@@ -574,11 +660,69 @@ public class AnalizzatoreCammini {
        return this.griglia;
    }
 
+   // Permette di cambiare la griglia associata all'analizzatore, aggiornando
+   // di conseguenza la matrice degli ostacoli e le dimensionie dei vari stack associati
    public void setGriglia(Griglia g) {
-       this.griglia = g;
-       this.mat_ostacoli = g.getOstacoli();
-       this.nr = mat_ostacoli.length;
-       this.nc = mat_ostacoli[0].length;
+
+       griglia = g;
+       ripristinaCoerenzaOstacoli();
+        ripristinaCoerenzaTipi();
+       mat_ostacoli = g.getOstacoli();
+       nr = mat_ostacoli.length;
+     nc=mat_ostacoli[0].length;
+       stack_griglia_tipi.push(new int[nr][nc]);
+   }
+   
+
+//==metodi per ottimizzare la ricerca del cammino minimo==//
+
+
+ // Riordina la frontiera in base alla distanza dlib dalla destinazione
+    // possbibile miglioramento: usare una struct dati più efficiente(set non puo essere ordinato)
+    //possibile ottimizzazione: usare una priority piu complessa 
+    public Set<Landmark> riordinaFrontiera(Set<Landmark> frontiera, Cella destinazione) {
+    Landmark[] array = frontiera.toArray(new Landmark[0]);
+
+    // Manual sort (simple insertion sort)
+    for (int i = 1; i < array.length; i++) {
+        Landmark key = array[i];
+        double keyDist = dlib(key.getCella(), destinazione);
+        int j = i - 1;
+
+        while (j >= 0 && dlib(array[j].getCella(), destinazione) > keyDist) {
+            array[j + 1] = array[j];
+            j--;
+        }
+        array[j + 1] = key;
+    }
+
+    Set<Landmark> ordinato = new LinkedHashSet<>();
+    for (Landmark l : array) {
+        ordinato.add(l);
+    }
+
+    return ordinato;
+}
+
+    
+ //==== Memoria per i cammini calcolati ====// 
+
+   public void inizializzaMemoriaSequenze() {
+        if (celleVisitate == null) {
+        celleVisitate = new HashMap<>();
+    } else {
+        celleVisitate.clear();
+    }
    }
 
+    public void aggiungiAMemoria(Cella cella, RisultatoCammino risultatoCammino) {
+          celleVisitate.put(cella.hashCode(), risultatoCammino);
+    }
+
+    public RisultatoCammino checkMemoria(Cella cella) {
+        if (celleVisitate != null) {
+            return celleVisitate.get(cella.hashCode());
+        }
+        return null;
+    }
 }
