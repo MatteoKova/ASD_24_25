@@ -9,7 +9,7 @@ import java.util.Stack;
 
 public class AgenteCamminoMinimo {
 
-    private AnalizzatoreCammini analizzatore;
+    public AnalizzatoreCammini analizzatore;
    // private ConfigurazioneAlgoritmo configurazione; //non usata per ora
 
     public AgenteCamminoMinimo() {
@@ -84,7 +84,7 @@ public class AgenteCamminoMinimo {
         long inizioMs = System.currentTimeMillis();
 
         RisultatoCammino risultato;
-
+        
         try {
             risultato = analizzatore.camminoMin(
                     griglia.getOrigineDefault(),

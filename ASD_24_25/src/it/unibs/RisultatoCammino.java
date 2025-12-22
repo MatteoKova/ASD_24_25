@@ -51,7 +51,7 @@ public class RisultatoCammino {
 		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ns\n");
 		sb.append("- Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n");
 		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n\n");
-		sb.append("Crescita memoria heap: ").append(crescitaMemoriaBytes).append(" bytes\n\n");
+		sb.append("- Crescita memoria heap: ").append(crescitaMemoriaBytes).append(" bytes\n\n");
 		sb.append("DETTAGLIO CAMMINO:\n");
 	    sb.append("ORIGINE:\n").append(" - ").append("(" + origine + ", " + 0 + ")");
 	    

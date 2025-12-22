@@ -457,13 +457,14 @@ public class AnalizzatoreCammini {
         double lunghezzaMin = Double.POSITIVE_INFINITY;
         List<Landmark> seqMin = new ArrayList<>();
         double lF, lFD, lTot;
-
+       
+       
+       
         if (cfg.isRiordinaFrontiera()) {
+            System.out.println("Riordinando frontiera");
         	riordinaFrontiera(frontiera, destinazione);
         }
-
-     
-        
+ 
         for (Landmark landmark_frontiera : frontiera) {
             Cella cella_frontiera = landmark_frontiera.getCella();
             RisultatoCammino sotto_cammino=null;
@@ -475,7 +476,7 @@ public class AnalizzatoreCammini {
             lF = dlib(origine, cella_frontiera);
             //se non l'ho calcolato, lo calcolo ora    
         	if (sotto_cammino==null){
-        	   
+        	   System.out.println("cammino non trovato");
         	mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = false; //imposta temporaneamente la cella di forntiera che sto considerando, come libera
         	
 
@@ -485,6 +486,9 @@ public class AnalizzatoreCammini {
             istr16Contatore++;
         	System.out.println("istruzione 16 eseguita: confronto " +istr16Contatore);
             sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia, cfg,stopCheck);
+            }else{
+                System.out.println("cammino trovato");
+                System.out.println("origine"+ sotto_cammino.getSeq().get(0));
             }
         	
             mat_ostacoli[cella_frontiera.getRiga()][cella_frontiera.getColonna()] = true;
@@ -683,6 +687,7 @@ public class AnalizzatoreCammini {
     public Set<Landmark> riordinaFrontiera(Set<Landmark> frontiera, Cella destinazione) {
     Landmark[] array = frontiera.toArray(new Landmark[0]);
 
+   
     // Manual sort (simple insertion sort)
     for (int i = 1; i < array.length; i++) {
         Landmark key = array[i];
@@ -701,6 +706,8 @@ public class AnalizzatoreCammini {
         ordinato.add(l);
     }
 
+    
+
     return ordinato;
 }
 
@@ -717,6 +724,7 @@ public class AnalizzatoreCammini {
 
     public void aggiungiAMemoria(Cella cella, RisultatoCammino risultatoCammino) {
           celleVisitate.put(cella.hashCode(), risultatoCammino);
+          System.out.println("aggiunto ai cammini:"+ cella);
     }
 
     public RisultatoCammino checkMemoria(Cella cella) {

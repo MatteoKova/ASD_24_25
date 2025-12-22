@@ -44,6 +44,8 @@ public class Cella {
     // Getters
     public int getRiga() { return riga; }
     public int getColonna() { return colonna; }
+    public void setRiga(int riga) { this.riga = riga; }
+    public void setColonna(int colonna) { this.colonna = colonna; }
     //public int getTipo() { return tipo; }
  //   public boolean isAttraversabile() { return isAttraversabile; }
 

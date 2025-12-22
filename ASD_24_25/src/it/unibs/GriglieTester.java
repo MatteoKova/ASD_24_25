@@ -3,14 +3,10 @@ package it.unibs;
 
 
 import jdk.jfr.*;
-import jdk.jfr.consumer.RecordingFile;
+
 import java.nio.file.Path;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryPoolMXBean;
-import java.lang.management.MemoryType;
-import java.lang.management.MemoryUsage;
+
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,7 +14,6 @@ import java.io.PrintWriter;
 
 import java.util.List;
 import java.util.Scanner;
-import java.util.Stack;
 import java.util.stream.Collectors;
 
 public class GriglieTester {

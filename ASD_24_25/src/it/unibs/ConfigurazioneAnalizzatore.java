@@ -10,11 +10,11 @@ public class ConfigurazioneAnalizzatore {
 
     //boolean usaBitMap; // false = no, true = si. Usa BitMap per memorizzare ostacoli e tipi di cammino(da implementare)
 
-    public void configuraAnalizzatore() {
+    public ConfigurazioneAnalizzatore () {
         this.limiteTempoMs = 3000;// Valore di default
-        this.riordinaFrontiera = false; // Valore di default
-        this.condForte = 0; // Valore di default
-        this.usaMemoriaSequenze = 0; // Valore di default
+        this.riordinaFrontiera = true; // Valore di default
+        this.condForte = 1; // Valore di default
+        this.usaMemoriaSequenze = 1; // Valore di default
     }
 
     public int getUsaMemoriaSequenze() {

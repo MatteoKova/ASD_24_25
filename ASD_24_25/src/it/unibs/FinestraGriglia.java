@@ -37,8 +37,6 @@ public class FinestraGriglia extends JFrame {
     // Dati della griglia
     private boolean[][] matriceOstacoli;
     private Griglia griglia;
-    private Cella origine = null;
-    private Cella destinazione = null;
     private int[][] matriceContesto = null;
     private int[][] matriceComplemento = null;
     private Set<Landmark> frontiera = null;
@@ -54,6 +52,9 @@ public class FinestraGriglia extends JFrame {
     // Worker per calcolo percorsi
     private LavoratorePercorso lavoratore;
     private volatile boolean stopRichiesto = false;
+    private AnalizzatoreCammini analizzatoreCammini;
+    private ConfigurazioneAnalizzatore cfgAnalizzatore;
+    private AgenteCamminoMinimo agenteCamMIn;
 
     public FinestraGriglia(Griglia griglia) {
        
@@ -64,28 +65,22 @@ public class FinestraGriglia extends JFrame {
         //auto-seleziona origine e destinazione se presenti
         // (se si è usata opzione di caricamentro da file)
         System.out.println("Verifica origine/destinazione preimpostate...");
-        System.out.println(griglia.getDestinazioneDefault());
-        if (griglia.getOrigineDefault() != null) {
-            this.origine = griglia.getOrigineDefault();
-            System.out.println("Origine preimpostata: " + this.origine);
-
-            if(griglia.getDestinazioneDefault() != null) {
-            this.destinazione = griglia.getDestinazioneDefault();
-            
-        }
-        }
+       
+        
         
         
         int numeroRighe = griglia.getRighe();
         int numeroColonne = griglia.getColonne();
         
 
-        Stack<Cella> pilaOstacoli = new Stack<>();
         int[][] matriceVuota = new int[numeroRighe][numeroColonne]; 
         Stack<int[][]> pilaTipiCammini = new Stack<>();
         pilaTipiCammini.push(matriceVuota);
 
-        AnalizzatoreCammini analizzatoreCammini = new AnalizzatoreCammini(this.griglia, pilaOstacoli, pilaTipiCammini);
+         analizzatoreCammini = new AnalizzatoreCammini(this.griglia);
+         cfgAnalizzatore = new ConfigurazioneAnalizzatore();
+         agenteCamMIn=new AgenteCamminoMinimo();
+         agenteCamMIn.analizzatore=analizzatoreCammini;
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
@@ -161,43 +156,43 @@ public class FinestraGriglia extends JFrame {
             	
                 if (!griglia.isNeiMargini(riga, colonna) || matriceOstacoli[riga][colonna]) return;
 
-                if (origine == null) {
+                if (griglia.getOrigineDefault() == null) {
                     analizzatoreCammini.ripristinaCoerenzaOstacoli();
                     analizzatoreCammini.ripristinaCoerenzaTipi();
-                    origine = new Cella(riga, colonna);
-                    etichettaInfo.setText("Origine selezionata: " + origine + ". Ora scegli Destinazione");
+                    griglia.setOrigineDefault( new Cella(riga, colonna));
+                    etichettaInfo.setText("Origine selezionata: " + griglia.getOrigineDefault() + ". Ora scegli Destinazione");
                     int[][] matriceTipi = new int[numeroRighe][numeroColonne];
-                    matriceContesto = analizzatoreCammini.calcolaContesto(griglia, origine, matriceTipi);
-                    matriceComplemento = analizzatoreCammini.calcolaComplemento(griglia, origine, matriceTipi);
+                    matriceContesto = analizzatoreCammini.calcolaContesto(griglia, griglia.getOrigineDefault(), matriceTipi);
+                    matriceComplemento = analizzatoreCammini.calcolaComplemento(griglia, griglia.getOrigineDefault(), matriceTipi);
                     frontiera = analizzatoreCammini.calcolaFrontiera(matriceTipi, griglia);
 
-                } else if (destinazione == null) {
-                    destinazione = new Cella(riga, colonna);
-                    etichettaInfo.setText("Destinazione selezionata: " + destinazione);
+                } else if (griglia.getDestinazioneDefault() == null) {
+                    griglia.setDestinazioneDefault( new Cella(riga, colonna));
+                    etichettaInfo.setText("Destinazione selezionata: " + griglia.getDestinazioneDefault());
 
                 } else {
                     // Reset: nuova origine
-                    origine = new Cella(riga, colonna);
-                    destinazione = null;
+                    griglia.setOrigineDefault(new Cella(riga, colonna));
+                    griglia.setDestinazioneDefault(null); 
                     matriceContesto = null;
                     matriceComplemento = null;
                     analizzatoreCammini.ripristinaCoerenzaOstacoli();
                     analizzatoreCammini.ripristinaCoerenzaTipi();
-                    etichettaInfo.setText("Origine aggiornata: " + origine + ". Ora scegli Destinazione");
+                    etichettaInfo.setText("Origine aggiornata: " + griglia.getOrigineDefault() + ". Ora scegli Destinazione");
                     int[][] matriceTipi = new int[numeroRighe][numeroColonne];
-                    matriceContesto = analizzatoreCammini.calcolaContesto(griglia, origine, matriceTipi);
-                    matriceComplemento = analizzatoreCammini.calcolaComplemento(griglia, origine, matriceTipi);
+                    matriceContesto = analizzatoreCammini.calcolaContesto(griglia, griglia.getOrigineDefault(), matriceTipi);
+                    matriceComplemento = analizzatoreCammini.calcolaComplemento(griglia, griglia.getOrigineDefault(), matriceTipi);
                     frontiera = analizzatoreCammini.calcolaFrontiera(matriceTipi, griglia);
                 }
 
                 // Aggiorna il pannello e ridisegna
-                pannelloGriglia.aggiornaDati(origine, destinazione, matriceContesto, matriceComplemento, frontiera);
+                pannelloGriglia.aggiornaDati(griglia.getOrigineDefault(), griglia.getDestinazioneDefault(), matriceContesto, matriceComplemento, frontiera);
             }
         });
 
         pulsanteAvvio.addActionListener(e -> {
             // Controllo: origine e destinazione devono essere selezionate
-            if (origine == null || destinazione == null) {
+            if (griglia.getOrigineDefault() == null || griglia.getDestinazioneDefault() == null) {
                 JOptionPane.showMessageDialog(
                     this,
                     "Seleziona prima Origine e Destinazione",
@@ -273,11 +268,11 @@ public class FinestraGriglia extends JFrame {
         
         pulsanteSalva.addActionListener(e -> salvaGrigliaJson());
        
-        if (this.origine != null && this.destinazione != null) {
-           analizzatoreCammini.calcolaComplemento(griglia, origine, matriceVuota);
-            analizzatoreCammini.calcolaContesto(griglia, origine, matriceVuota);
+        if (griglia.getOrigineDefault() != null && this.griglia.getDestinazioneDefault() != null) {
+           analizzatoreCammini.calcolaComplemento(griglia, griglia.getOrigineDefault(), matriceVuota);
+            analizzatoreCammini.calcolaContesto(griglia, griglia.getOrigineDefault(), matriceVuota);
             frontiera = analizzatoreCammini.calcolaFrontiera(matriceVuota, griglia);
-            pannelloGriglia.aggiornaDati(origine, destinazione, matriceVuota, matriceVuota, frontiera);
+            pannelloGriglia.aggiornaDati(griglia.getOrigineDefault(), griglia.getDestinazioneDefault(), matriceVuota, matriceVuota, frontiera);
         }
          
     }
@@ -300,7 +295,7 @@ public class FinestraGriglia extends JFrame {
     private class LavoratorePercorso extends SwingWorker<RisultatoCammino, String> {
         private Griglia griglia;
         private long limiteTempo; // in millisecondi
-        private long tempoInizio;
+        private long tempoInizio, tempoTotale;
         private AnalizzatoreCammini analizzatoreCammini;
         RisultatoCammino risultato;
 
@@ -314,18 +309,28 @@ public class FinestraGriglia extends JFrame {
 
         @Override
         protected RisultatoCammino doInBackground() throws Exception {
+           /*  tempoInizio= System.currentTimeMillis();
+
+            agenteCamMIn.preparaAnalisi(griglia);
+            risultato=agenteCamMIn.eseguiCammino(griglia, cfgAnalizzatore);
+
+            tempoTotale= System.currentTimeMillis()-tempoInizio;*/
         	// Inizializzazione timer
         	analizzatoreCammini.calls.set(0); // Inizializzazione ricorsioni
         	analizzatoreCammini.resetContatori();
+            if (cfgAnalizzatore.getUsaMemoriaSequenze() == 1) {
+            analizzatoreCammini.inizializzaMemoriaSequenze();
+        }
         	tempoInizio = System.currentTimeMillis();
         	long t1 = System.nanoTime(); // Inizializzazione timer
 
         	// Esecuzione del calcolo del cammino minimo
         	try{
         		this.risultato = analizzatoreCammini.camminoMin(
-        				origine,
-        				destinazione,
+        				griglia.getOrigineDefault(),
+        				griglia.getDestinazioneDefault(),
         				griglia,
+                        cfgAnalizzatore,
         				() -> {
         					// Stop if user requested it or time limit elapsed
         					return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
@@ -337,6 +342,9 @@ public class FinestraGriglia extends JFrame {
         	
         	long t2 = System.nanoTime();
         	
+            tempoTotale=t2-t1;
+risultato.setTempo(t2 - t1);
+        	System.out.println("Tempo: " + (t2 - t1) + " ns");
         	// snapshot per thread-safety
         	boolean[][] ostacoliSnapshot = matriceOstacoli;
 
@@ -366,9 +374,7 @@ public class FinestraGriglia extends JFrame {
 
         	pannelloGriglia.aggiornaCammino(camminoCompleto);
 			
-        	risultato.setTempo(t2 - t1);
-        	System.out.println("Tempo: " + (t2 - t1) + " ns");
-
+        	
         	return risultato;
         }
 
@@ -391,7 +397,7 @@ public class FinestraGriglia extends JFrame {
             if (annullato || stopRichiesto) {
                 etichettaInfo.setText("Esecuzione interrotta da utente");
                 mostraRiepilogo(risultato, 0);
-            } else if ((System.currentTimeMillis() - tempoInizio) >= limiteTempo) {
+            } else if ((tempoTotale) >= limiteTempo) {
                 etichettaInfo.setText("Esecuzione interrotta da limite di tempo");
                 mostraRiepilogo(risultato, 1);
             } else {
@@ -448,7 +454,7 @@ public class FinestraGriglia extends JFrame {
 
         // Metodo che salva la griglia in un file JSON
     private void salvaGrigliaJson() {
-   if (origine == null || destinazione == null) {
+   if (griglia.getOrigineDefault() == null || griglia.getDestinazioneDefault() == null) {
                 JOptionPane.showMessageDialog(
                     this,
                     "Seleziona prima Origine e Destinazione",
@@ -461,8 +467,6 @@ public class FinestraGriglia extends JFrame {
 
     // Converto la matrice in un oggetto Griglia
     Griglia g =griglia;
-    griglia.setOrigineDefault(origine);
-    griglia.setDestinazioneDefault(destinazione);
     JFileChooser chooser = new JFileChooser();
     chooser.setDialogTitle("Salva griglia come JSON");
 

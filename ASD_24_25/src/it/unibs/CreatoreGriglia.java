@@ -13,7 +13,7 @@ import java.io.IOException;
 public class CreatoreGriglia extends JFrame {
     private static final long serialVersionUID = 1L;
 	private JTextField campoRighe, campoColonne, campoSeed;
-    private JButton pulsanteAnteprima, pulsanteConferma, pulsanteSalva, pulsanteCarica;
+    private JButton pulsanteAnteprima, pulsanteConferma, pulsanteCarica;
     private JComboBox<String> boxDensita;
     private JPanel pannelloGriglia;
     private PannelloGrigliaManuale pannelloManuale;
