@@ -1,7 +1,8 @@
 ===SAMU==
-* nella modalita grafica modifcare il riassunto aggiungendo i nuovi dati al risultato
-* riprendere da ccf
-    - si potrebbe unire tutto in un unico ogetto contenuto nella griglia che  ha un int[][] e poi 0 ostacolo 1 cella libera 2 cella complemento etc
+** controllare che singolo ciclo ccf calcoli i tipi delle celle nel modo giusto
+** controllare che la memoria dei risultati funzioni effettivamente
+** controlllare che spazio della memoria sia controllato effettivamente
+** implementare config via grafica e per i test 
      
 
 

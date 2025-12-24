@@ -174,12 +174,11 @@ public class CreatoreGriglia extends JFrame {
 
         
         boolean[][] ostacoli = new boolean[righe][colonne];
-        Configurazione cfg = new Configurazione();
+        Configurazione cfg = new Configurazione(seed);
         cfg.righe = righe;
         cfg.colonne = colonne;
         cfg.density = densita;
         cfg.tipoPattern = tipo;
-        if (seed != 0) cfg.seed = seed;
 
         GeneratoreGriglieOstacoli generatore = new GeneratoreGriglieOstacoli(cfg, ostacoli);
         generatore.generaTutto();

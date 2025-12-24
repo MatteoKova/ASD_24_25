@@ -7,18 +7,33 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Cella {
     private int riga, colonna;
+    private TipoCella tipo;
+    private boolean isFrontiera;
+    private boolean isLandMark;
     //private int tipo = 1;
     //private boolean isAttraversabile = true;
 
     // Costruttore con tipo di default
     
+    public Cella(int riga, int colonna){
+         this.riga = riga;
+        this.colonna = colonna;
+        this.tipo=TipoCella.LIBERA;
+        this.isFrontiera=false;
+        this.isLandMark=false;
+    }
     @JsonCreator
     public Cella(
         @JsonProperty("riga") int riga,
-        @JsonProperty("colonna") int colonna
+        @JsonProperty("colonna") int colonna,
+        @JsonProperty("tipo") TipoCella tipo
     ) {
         this.riga = riga;
         this.colonna = colonna;
+        this.tipo=tipo;
+        this.isFrontiera=false;
+        this.isLandMark=false;
+        
     }
     /*
     // Costruttore con tipo personalizzato
@@ -41,12 +56,20 @@ public class Cella {
 	    return Objects.hash(riga, colonna);
 	}
 
-    // Getters
+    // Setters and Getters
     public int getRiga() { return riga; }
     public int getColonna() { return colonna; }
     public void setRiga(int riga) { this.riga = riga; }
     public void setColonna(int colonna) { this.colonna = colonna; }
-    //public int getTipo() { return tipo; }
+    public void setCoordinate(int riga, int colonna){this.riga=riga; this.colonna=colonna;}
+
+    public TipoCella getTipo() { return tipo; }
+    public void setTipo(TipoCella tipo){this.tipo=tipo;}
+
+    public boolean isLandMark(){return this.isLandMark;}
+    public boolean isFrontiera(){return this.isFrontiera;}
+    public void setIsFrontiera(boolean isFrontiera){this.isFrontiera=isFrontiera;}
+    public void setIsLandmark(boolean isLandMark){this.isLandMark=isLandMark;}
  //   public boolean isAttraversabile() { return isAttraversabile; }
 
     // Setters

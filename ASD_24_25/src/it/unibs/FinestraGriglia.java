@@ -333,7 +333,7 @@ public class FinestraGriglia extends JFrame {
                         cfgAnalizzatore,
         				() -> {
         					// Stop if user requested it or time limit elapsed
-        					return stopRichiesto || (System.currentTimeMillis() - tempoInizio) >= limiteTempo;
+        					return (stopRichiesto || ((System.currentTimeMillis() - tempoInizio) >= cfgAnalizzatore.limiteTempoMs));
         				}
         				);
         	} catch (StopException e){
@@ -343,7 +343,7 @@ public class FinestraGriglia extends JFrame {
         	long t2 = System.nanoTime();
         	
             tempoTotale=t2-t1;
-risultato.setTempo(t2 - t1);
+            risultato.setTempo(t2 - t1);
         	System.out.println("Tempo: " + (t2 - t1) + " ns");
         	// snapshot per thread-safety
         	boolean[][] ostacoliSnapshot = matriceOstacoli;
@@ -397,7 +397,7 @@ risultato.setTempo(t2 - t1);
             if (annullato || stopRichiesto) {
                 etichettaInfo.setText("Esecuzione interrotta da utente");
                 mostraRiepilogo(risultato, 0);
-            } else if ((tempoTotale) >= limiteTempo) {
+            } else if ((tempoTotale)/1000 >= cfgAnalizzatore.getLimiteTempoMs()) {
                 etichettaInfo.setText("Esecuzione interrotta da limite di tempo");
                 mostraRiepilogo(risultato, 1);
             } else {
