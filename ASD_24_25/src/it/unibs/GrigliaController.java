@@ -4,7 +4,7 @@ import javax.swing.SwingUtilities;
 
 public class GrigliaController {
 	
-	AnalizzatoreCammini analizzatore_cammini ;
+	
 
 	public GrigliaController(int modalita, java.util.List<Griglia> griglie ) {
 		if (modalita == 1) // grafica

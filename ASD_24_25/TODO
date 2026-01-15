@@ -3,6 +3,12 @@
 ** controllare che la memoria dei risultati funzioni effettivamente
 ** controlllare che spazio della memoria sia controllato effettivamente
 ** implementare config via grafica e per i test 
+
+**implementatare l'agente in modo che possa aggiungere tutti i dati dell'analizzatore**
+**implementare salvataggi intermedi**
+
+**capire a cosa servono quei metodi ricostruisci il cammino**
+**testare tutto**
      
 
 

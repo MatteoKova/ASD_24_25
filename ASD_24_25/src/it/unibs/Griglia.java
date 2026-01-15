@@ -128,8 +128,21 @@ public class Griglia {
     public Cella[][] getCelle(){return this.celle;}
 
     public void setOstacoli(boolean[][] mat_ostacoli) {
-        this.ostacoli = mat_ostacoli;
+    this.ostacoli = mat_ostacoli;
+
+    if (this.celle == null) {
+        this.celle = new Cella[righe][colonne];
     }
+
+    for (int i = 0; i < righe; i++) {
+        for (int j = 0; j < colonne; j++) {
+            this.celle[i][j] =
+                mat_ostacoli[i][j]
+                ? new Cella(i, j, TipoCella.OSTACOLO)
+                : new Cella(i, j, TipoCella.LIBERA);
+        }
+    }
+}
 
     public boolean[][] getOstacoli() {
         return ostacoli;

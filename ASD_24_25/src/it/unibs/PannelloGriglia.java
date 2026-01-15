@@ -10,24 +10,17 @@ public class PannelloGriglia extends JPanel {
     private static final long serialVersionUID = 1L;
   
     private Griglia griglia;
-
-    private boolean[][] matriceOstacoli;
-    private int[][] matriceContesto;
-    private int[][] matriceComplemento;
-    private Set<Landmark> frontiera;
-
     private Cella origine;
     private Cella destinazione;
 
+  
+
+
     private List<Cella> camminoOrdinato = new ArrayList<>();
     
-    public PannelloGriglia(Griglia griglia, boolean[][] matriceOstacoli, int[][] matriceContesto,
-			int[][] matriceComplemento, Set<Landmark> frontiera) {
+    public PannelloGriglia(Griglia griglia) {
 		this.griglia = griglia;
-		this.matriceOstacoli = matriceOstacoli;
-		this.matriceContesto = matriceContesto;
-		this.matriceComplemento = matriceComplemento;
-		this.frontiera = frontiera;
+		
 		
 		setBackground(Color.WHITE);
 	}
@@ -37,18 +30,8 @@ public class PannelloGriglia extends JPanel {
        === 1) METODI PUBBLICI PER AGGIORNAMENTO DATI
        ============================================================ */
 
-    public void aggiornaDati(Cella origine,
-                             Cella destinazione,
-                             int[][] contesto,
-                             int[][] complemento,
-                             Set<Landmark> frontiera
-                             )
+    public void aggiornaDati()
     {
-        this.origine = origine;
-        this.destinazione = destinazione;
-        this.matriceContesto = contesto;
-        this.matriceComplemento = complemento;
-        this.frontiera = frontiera;
         this.camminoOrdinato = null;
         repaint();
     }
@@ -94,6 +77,10 @@ public class PannelloGriglia extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+
+        
+     origine= griglia.getOrigineDefault();
+    destinazione= griglia.getDestinazioneDefault();
         super.paintComponent(g);
 
         // layout provvisorio
@@ -114,7 +101,7 @@ public class PannelloGriglia extends JPanel {
         // disegno etichette
         drawEtichetteColonne(g, fmAssi, info);
         drawEtichetteRighe(g, fmAssi, info);
-    
+        Cella[][] celle=griglia.getCelle();
         for (int y = 0; y < griglia.getRighe(); y++) {
             for (int x = 0; x < griglia.getColonne(); x++) {
 
@@ -122,7 +109,7 @@ public class PannelloGriglia extends JPanel {
                 int py = offsetY + y * dimCella;
 
                 // sfondo (ostacolo o libero)
-                if (matriceOstacoli[y][x]) {
+                if (celle[y][x].getTipo()==TipoCella.OSTACOLO) {
                     g.setColor(Color.BLUE.darker());
                 } else {
                     g.setColor(Color.WHITE);
@@ -130,47 +117,45 @@ public class PannelloGriglia extends JPanel {
                 g.fillRect(px, py, dimCella, dimCella);
 
                 // contesto / complemento
-                if (matriceContesto[y][x] == 1) {
+                if (celle[y][x].getTipo()==TipoCella.CONTESTO) {
                     g.setColor(Color.GREEN.darker());
                     g.fillRect(px, py, dimCella, dimCella);
-                } else if (matriceComplemento[y][x] == 2) {
+                } else if (celle[y][x].getTipo()==TipoCella.COMPLEMENTO) {
                     g.setColor(Color.ORANGE);
                     g.fillRect(px, py, dimCella, dimCella);
                 }
 
                 // assi rispetto all'origine
-                if (origine != null && destinazione == null &&
+                if (griglia.getOrigineDefault() != null && destinazione == null &&
                     (y == origine.getRiga() || x == origine.getColonna()) &&
-                    !matriceOstacoli[y][x]) {
+                    celle[y][x].getTipo()!=TipoCella.OSTACOLO) {
                     g.setColor(Color.YELLOW);
                     g.fillRect(px, py, dimCella, dimCella);
                 }
 
                 // origine
-                if (origine != null && x == origine.getColonna() && y == origine.getRiga()) {
+                if (griglia.getOrigineDefault() != null && x == griglia.getOrigineDefault().getColonna() && y == griglia.getOrigineDefault().getRiga()) {
                     g.setColor(Color.RED);
                     g.fillRect(px, py, dimCella, dimCella);
                     drawLetteraCella(g, "O", px, py, dimCella);
                 }
 
                 // destinazione
-                if (destinazione != null && x == destinazione.getColonna() && y == destinazione.getRiga()) {
+                if (griglia.getDestinazioneDefault() != null && x == griglia.getDestinazioneDefault().getColonna() && y == griglia.getDestinazioneDefault().getRiga()) {
                     g.setColor(Color.RED);
                     g.fillRect(px, py, dimCella, dimCella);
                     drawLetteraCella(g, "D", px, py, dimCella);
                 }
 
                 // frontiera
-                if (frontiera != null) {
-                    for (Landmark L : frontiera) {
-                        Cella c = L.getCella();
-                        if (c.getColonna() == x && c.getRiga() == y) {
+               
+                       
+                        if (celle[y][x].isFrontiera()) {
                             g.setColor(Color.BLACK);
                             int pad = 2;
                             g.drawOval(px + pad, py + pad, dimCella - 2*pad, dimCella - 2*pad);
                         }
-                    }
-                }
+             
 
                 // bordo cella
                 g.setColor(Color.LIGHT_GRAY);

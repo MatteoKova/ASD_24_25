@@ -4,7 +4,7 @@ public enum TipoCella {
             OSTACOLO,
             LIBERA,
             CONTESTO,
-            COMPLEMENTO,
+            COMPLEMENTO;
         
             
 }

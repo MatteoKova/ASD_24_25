@@ -197,7 +197,7 @@ public class CreatoreGriglia extends JFrame {
             boolean[][] vuota = new boolean[righe][colonne];
 
             // Salvo la griglia vuota
-           aggiornaGrigliaBackup( new Griglia(righe, colonne, TipoPattern.PERSONALIZZATA));
+            aggiornaGrigliaBackup( new Griglia(righe, colonne, TipoPattern.PERSONALIZZATA));
             grigliaBackup.setOstacoli(vuota);
 
             // Creo subito pannello manuale
@@ -248,10 +248,19 @@ public class CreatoreGriglia extends JFrame {
     
     // METODO PROVA CHE CONTROLLA SE LA MATRICE E' FATTA SOLO DA OSTACOLI
     private void creaGriglia() {
+
+        // piccolo aggiustamento per griglie personalizzate(passaggio da griglia di booleani a griglia di Celle fatto manualmente)
+          if (grigliaBackup.getTipologia()==TipoPattern.PERSONALIZZATA) {
+           grigliaBackup.setOstacoli(grigliaBackup.getOstacoli());
+          }
+
     	if(!checkGrigliaSoloOstacoli())
             System.out.println("Griglia creata: " + grigliaBackup);
           new FinestraGriglia(grigliaBackup); 
     }
+
+ 
+
     private boolean checkGrigliaSoloOstacoli(){
         boolean[][] ostacoli;
         if (grigliaBackup != null) {

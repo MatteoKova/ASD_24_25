@@ -14,6 +14,7 @@ import java.io.PrintWriter;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class GriglieTester {
@@ -23,12 +24,15 @@ public class GriglieTester {
 	private int analisiSpazio = 0; // 0 = no, 1 = si   
 	private AgenteCamminoMinimo agente;
 	private ConfigurazioneAnalizzatore configAnalizzatore;
+	 private final AtomicBoolean stopRichiesto;
 
 	public GriglieTester(java.util.List<Griglia> griglie) {
 		this.griglie = griglie;
 		this.risultati= new java.util.ArrayList<>();
 		this.agente = new AgenteCamminoMinimo();
 		this.configAnalizzatore = new ConfigurazioneAnalizzatore();
+		stopRichiesto=new AtomicBoolean(false);
+
 	}
 
 
@@ -40,9 +44,11 @@ public class GriglieTester {
 		int contatore=0;
 		RisultatoCammino risultato;
 		for (Griglia g : griglie) {
-			agente.preparaAnalisi(g);
+		
 			risultato= (analisiSpazio==1) ? testGrigliaconSpazio(g, contatore) :  testGriglia(g);
-			risultati.add(risultato);
+			 RisultatoCammino risultatoCopia = new RisultatoCammino(risultato);
+
+			risultati.add(risultatoCopia);
 			contatore++;
 
 		}
@@ -96,7 +102,8 @@ public class GriglieTester {
 
 // Metodo eseguiCammino con analisi tempo e spazio(base-> prendo il picco di memoria heap usata durante l'esecuzione) 
 	private RisultatoCammino eseguiCammino(Griglia g, long limiteTempoMs) {
-    return agente.eseguiCammino(g, configAnalizzatore);
+    
+		return agente.eseguiCam(g, configAnalizzatore,  () ->  stopRichiesto.get());
 }
 
 
@@ -109,24 +116,27 @@ public class GriglieTester {
 		try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
 
 			// CSV HEADER
-			pw.println("righe,colonne,tipologiaG,convergenza,lunghezza,tempo_ns,istr16,frontiera,memo_usata,landmarks");
+			pw.println("righe,colonne,tipologia,d_lib,dest_ragg,convergenza,lunghezza,tempo_ms,istr16,cont_frontiera,nodi_salvati,memo_usata,landmarks");
 
 			for (RisultatoCammino r : risultati) {
 
 				String landmarks = r.getSeq().stream()
-						.map(Landmark::toString)
+						.map(Cella::toString)
 						.collect(Collectors.joining("|")); 
 				// Use | to avoid commas breaking the CSV format
 
-				pw.printf("%d,%d, %s,%d,%.3f,%d,%d,%d,%d,%s%n",
+				pw.printf("%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,%s%n",
 						r.getGriglia().getRighe(),
 						r.getGriglia().getColonne(),
 						r.getGriglia().getTipologia().toString(),
-						r.getConvergenza(), // 1 if converged, 0 otherwise 
+						r.getDlib(),
+						r.getRaggiungibile(), // 1 if reachable, 0 otherwise
+						r.getConvergenza(), // 1 if converged, 0 otherwise vedi classe RisultatoCammino
 						r.getLunghezza(), // lunghezza cammino
 						r.getTempoCalcolo(),
 						r.getIstr17Contatore(),
 						r.getContatoreFrontiera(),
+						r.getContatoreSalvataggi(),
 						r.getCrescitaMemoriaBytes(),
 						landmarks //parte abbastanza superflua
 						);
@@ -140,27 +150,47 @@ public class GriglieTester {
 	}
 
 
-	// Metodo per chiedere i parametri all'utente(limite tempo e analisi spazio)
 	public void askParameters() {
-		 Scanner scanner = new Scanner(System.in);
+    Scanner scanner = new Scanner(System.in);
 
-    // Ask time limit
-    System.out.print("Insert time limit for a single test (ms): ");
-    configAnalizzatore.setLimiteTempoMs( scanner.nextLong());
-    scanner.nextLine(); // consume newline
+    // --- Limite di tempo ---
+    System.out.print("Inserisci limite di tempo per ogni test (ms) [" + configAnalizzatore.getLimiteTempoMs() + "]: ");
+    String inputTempo = scanner.nextLine().trim();
+    if (!inputTempo.isEmpty()) {
+        try {
+            configAnalizzatore.setLimiteTempoMs(Long.parseLong(inputTempo));
+        } catch (NumberFormatException e) {
+            System.out.println("Valore non valido. Uso il limite di tempo predefinito: " + configAnalizzatore.getLimiteTempoMs() + " ms");
+        }
+    }
 
-    // Ask space analysis
-    System.out.print("Do you want space analysis? (y/n): ");
-    String answer = scanner.nextLine().trim().toLowerCase();
+    // --- Boolean options in one string ---
+    System.out.println("Inserisci opzioni boolean come stringa (usa simboli o '-' per no):");
+    System.out.println("Posizione: 1=RiordinaFrontiera, 2=CondForte, 3=MemSequenze, 4=VersioneOttimizzata, 5=AnalisiSpazio");
+    System.out.println("Simboli: R, C, M, V, S");
+    System.out.println("Esempio: RC-MV (R=si, C=si, - = no, M=si, V=si)");
+    System.out.print("Stringa opzioni: ");
+    String flags = scanner.nextLine().trim().toUpperCase();
 
-    analisiSpazio = (answer.equals("y")) ? 1 : 0;
+    // Pad string to 5 chars in case user types less
+    flags = String.format("%-5s", flags).replace(' ', '-');
 
-   
+    // Extract booleans
+    configAnalizzatore.setRiordinaFrontiera(flags.charAt(0) == 'R');
+    configAnalizzatore.setCondForte(flags.charAt(1) == 'C' ? 1 : 0);
+    configAnalizzatore.setUsaMemoriaSequenze(flags.charAt(2) == 'M' ? 1 : 0);
+    configAnalizzatore.setUsaVersioneOttimizzata(flags.charAt(3) == 'V' ? 1 : 0);
+    analisiSpazio = (flags.charAt(4) == 'S') ? 1 : 0;
 
-    scanner.close();
-	}
+    System.out.println("\nParametri impostati:");
+    System.out.println("- Limite tempo: " + configAnalizzatore.getLimiteTempoMs() + " ms");
+    System.out.println("- Riordina Frontiera: " + configAnalizzatore.isRiordinaFrontiera());
+    System.out.println("- Condizione Forte: " + configAnalizzatore.getCondForte());
+    System.out.println("- Memoria Sequenze: " + configAnalizzatore.getUsaMemoriaSequenze());
+    System.out.println("- Versione Ottimizzata: " + configAnalizzatore.getUsaVersioneOttimizzata());
+    System.out.println("- Analisi Spazio: " + (analisiSpazio == 1 ? "si" : "no"));
 }
-
+}
 
 //vecchhio metodo per l'analisi spazio
 /*

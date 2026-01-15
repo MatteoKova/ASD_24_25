@@ -7,7 +7,7 @@ public class ConfigurazioneAnalizzatore {
                                 //  migliori prima, e poter fare piu pruning dopo
     int condForte; // 0 = no, 1 = si. Attiva condizione forte dell istr 16 dell analizzatore
     int usaMemoriaSequenze; // 0 = no, 1 = si. Usa memoria per sequenze di celle gia analizzate
-    int usaUnicoCicloCCF; //0 = no, 1 si. Usa ciclo unico per calcolare Complemento-Contesto-Frontiera
+    int usaVersioneOttimizzata; //0 = no, 1 si. Usa ciclo unico per calcolare Complemento-Contesto-Frontiera
 
     //boolean usaBitMap; // false = no, true = si. Usa BitMap per memorizzare ostacoli e tipi di cammino(da implementare)
 
@@ -16,15 +16,15 @@ public class ConfigurazioneAnalizzatore {
         this.riordinaFrontiera = true; // Valore di default
         this.condForte = 1; // Valore di default
         this.usaMemoriaSequenze =0; // Valore di default
-        this.usaUnicoCicloCCF=0;
+        this.usaVersioneOttimizzata=0;
     }
 
-    public int getUsaUnicoCicloCCF (){
-        return this.usaUnicoCicloCCF;
+    public int getUsaVersioneOttimizzata (){
+        return this.usaVersioneOttimizzata;
     }
 
-    public void setUsaUnicoCicloCCF (int usaUnicoCicloCCF){
-      this.usaUnicoCicloCCF=usaUnicoCicloCCF;
+    public void setUsaVersioneOttimizzata (int usaUnicoCicloCCF){
+      this.usaVersioneOttimizzata=usaUnicoCicloCCF;
     }
 
     public int getUsaMemoriaSequenze() {
@@ -51,4 +51,15 @@ public class ConfigurazioneAnalizzatore {
     public void setLimiteTempoMs(long limiteTempoMs) {
         this.limiteTempoMs = limiteTempoMs;
     }
+
+    @Override
+public String toString() {
+    return "ConfigurazioneAnalizzatore:\n" +
+            " - limiteTempoMs = " + limiteTempoMs + "\n" +
+            " - riordinaFrontiera = " + riordinaFrontiera + "\n" +
+            " - condForte = " + condForte + "\n" +
+            " - usaMemoriaSequenze = " + usaMemoriaSequenze + "\n" +
+            " - usaUnicoCicloCCF = " + usaVersioneOttimizzata;
+}
+
 }

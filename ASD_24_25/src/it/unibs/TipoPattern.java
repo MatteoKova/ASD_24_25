@@ -8,5 +8,6 @@ public enum TipoPattern {
     SPIRALE,
     SCACCHI,
     RIGHE,
-    UNICO_OSTACOLO;
+    UNICO_OSTACOLO,
+    VUOTA;
 }
