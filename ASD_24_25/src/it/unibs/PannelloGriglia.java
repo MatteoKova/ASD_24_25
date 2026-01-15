@@ -10,24 +10,19 @@ public class PannelloGriglia extends JPanel {
     private static final long serialVersionUID = 1L;
   
     private Griglia griglia;
-
-    private boolean[][] matriceOstacoli;
-    private int[][] matriceContesto;
-    private int[][] matriceComplemento;
-    private Set<Landmark> frontiera;
-
     private Cella origine;
     private Cella destinazione;
+    private int modalitaColorazioneCammino=1; // 1=normale colora i landmark di un colore fisso,
+                                                //  0= creo un percorso da cella a cella tramire linea nera
+
+  
+
 
     private List<Cella> camminoOrdinato = new ArrayList<>();
     
-    public PannelloGriglia(Griglia griglia, boolean[][] matriceOstacoli, int[][] matriceContesto,
-			int[][] matriceComplemento, Set<Landmark> frontiera) {
+    public PannelloGriglia(Griglia griglia) {
 		this.griglia = griglia;
-		this.matriceOstacoli = matriceOstacoli;
-		this.matriceContesto = matriceContesto;
-		this.matriceComplemento = matriceComplemento;
-		this.frontiera = frontiera;
+		
 		
 		setBackground(Color.WHITE);
 	}
@@ -37,24 +32,15 @@ public class PannelloGriglia extends JPanel {
        === 1) METODI PUBBLICI PER AGGIORNAMENTO DATI
        ============================================================ */
 
-    public void aggiornaDati(Cella origine,
-                             Cella destinazione,
-                             int[][] contesto,
-                             int[][] complemento,
-                             Set<Landmark> frontiera
-                             )
+    public void aggiornaDati()
     {
-        this.origine = origine;
-        this.destinazione = destinazione;
-        this.matriceContesto = contesto;
-        this.matriceComplemento = complemento;
-        this.frontiera = frontiera;
         this.camminoOrdinato = null;
         repaint();
     }
 
-    public void aggiornaCammino(List<Cella> cammino) {
+    public void aggiornaCammino(List<Cella> cammino, int modalitaColorazioneCammino) {
         this.camminoOrdinato = cammino;
+        this.modalitaColorazioneCammino= modalitaColorazioneCammino;
         repaint();
     }
     
@@ -94,6 +80,10 @@ public class PannelloGriglia extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+
+        
+     origine= griglia.getOrigineDefault();
+    destinazione= griglia.getDestinazioneDefault();
         super.paintComponent(g);
 
         // layout provvisorio
@@ -114,7 +104,7 @@ public class PannelloGriglia extends JPanel {
         // disegno etichette
         drawEtichetteColonne(g, fmAssi, info);
         drawEtichetteRighe(g, fmAssi, info);
-    
+        Cella[][] celle=griglia.getCelle();
         for (int y = 0; y < griglia.getRighe(); y++) {
             for (int x = 0; x < griglia.getColonne(); x++) {
 
@@ -122,7 +112,7 @@ public class PannelloGriglia extends JPanel {
                 int py = offsetY + y * dimCella;
 
                 // sfondo (ostacolo o libero)
-                if (matriceOstacoli[y][x]) {
+                if (celle[y][x].getTipo()==TipoCella.OSTACOLO) {
                     g.setColor(Color.BLUE.darker());
                 } else {
                     g.setColor(Color.WHITE);
@@ -130,47 +120,45 @@ public class PannelloGriglia extends JPanel {
                 g.fillRect(px, py, dimCella, dimCella);
 
                 // contesto / complemento
-                if (matriceContesto[y][x] == 1) {
+                if (celle[y][x].getTipo()==TipoCella.CONTESTO) {
                     g.setColor(Color.GREEN.darker());
                     g.fillRect(px, py, dimCella, dimCella);
-                } else if (matriceComplemento[y][x] == 2) {
+                } else if (celle[y][x].getTipo()==TipoCella.COMPLEMENTO) {
                     g.setColor(Color.ORANGE);
                     g.fillRect(px, py, dimCella, dimCella);
                 }
 
                 // assi rispetto all'origine
-                if (origine != null && destinazione == null &&
+                if (griglia.getOrigineDefault() != null && destinazione == null &&
                     (y == origine.getRiga() || x == origine.getColonna()) &&
-                    !matriceOstacoli[y][x]) {
+                    celle[y][x].getTipo()!=TipoCella.OSTACOLO) {
                     g.setColor(Color.YELLOW);
                     g.fillRect(px, py, dimCella, dimCella);
                 }
 
                 // origine
-                if (origine != null && x == origine.getColonna() && y == origine.getRiga()) {
+                if (griglia.getOrigineDefault() != null && x == griglia.getOrigineDefault().getColonna() && y == griglia.getOrigineDefault().getRiga()) {
                     g.setColor(Color.RED);
                     g.fillRect(px, py, dimCella, dimCella);
                     drawLetteraCella(g, "O", px, py, dimCella);
                 }
 
                 // destinazione
-                if (destinazione != null && x == destinazione.getColonna() && y == destinazione.getRiga()) {
+                if (griglia.getDestinazioneDefault() != null && x == griglia.getDestinazioneDefault().getColonna() && y == griglia.getDestinazioneDefault().getRiga()) {
                     g.setColor(Color.RED);
                     g.fillRect(px, py, dimCella, dimCella);
                     drawLetteraCella(g, "D", px, py, dimCella);
                 }
 
                 // frontiera
-                if (frontiera != null) {
-                    for (Landmark L : frontiera) {
-                        Cella c = L.getCella();
-                        if (c.getColonna() == x && c.getRiga() == y) {
+               
+                       
+                        if (celle[y][x].isFrontiera()) {
                             g.setColor(Color.BLACK);
                             int pad = 2;
                             g.drawOval(px + pad, py + pad, dimCella - 2*pad, dimCella - 2*pad);
                         }
-                    }
-                }
+             
 
                 // bordo cella
                 g.setColor(Color.LIGHT_GRAY);
@@ -262,6 +250,48 @@ public class PannelloGriglia extends JPanel {
 
     private void drawCammino(Graphics2D g2, int dim, int offsetX, int offsetY) {
         if (camminoOrdinato == null || camminoOrdinato.size() < 2) return;
+        if (modalitaColorazioneCammino == 1) {
+
+        Font oldFont = g2.getFont();
+        Color oldColor = g2.getColor();
+
+        // Font size proportional to cell size
+        Font font = new Font("Arial", Font.BOLD, Math.max(12, dim / 3));
+        g2.setFont(font);
+
+        FontMetrics fm = g2.getFontMetrics();
+
+        for (int i = 1; i < camminoOrdinato.size()-1; i++) {
+            Cella c = camminoOrdinato.get(i);
+
+            int x = offsetX + c.getColonna() * dim;
+            int y = offsetY + c.getRiga() * dim;
+
+            // Fill cell in orange
+            g2.setColor(Color.CYAN);
+            g2.fillRect(x, y, dim, dim);
+
+            // Optional border for clarity
+            g2.setColor(Color.BLACK);
+            g2.drawRect(x, y, dim, dim);
+
+            // Draw index number centered
+            String text = String.valueOf(i);
+
+            int textWidth = fm.stringWidth(text);
+            int textHeight = fm.getAscent();
+
+            int textX = x + (dim - textWidth) / 2;
+            int textY = y + (dim + textHeight) / 2 - 2;
+
+            g2.drawString(text, textX, textY);
+        }
+
+        g2.setFont(oldFont);
+        g2.setColor(oldColor);
+        return;
+    }else if (modalitaColorazioneCammino == 0) {
+             
 
         g2.setStroke(new BasicStroke(Math.max(2, dim/5),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -281,4 +311,6 @@ public class PannelloGriglia extends JPanel {
             g2.drawLine(ax, ay, bx, by);
         }
     }
+        }
+       
 }

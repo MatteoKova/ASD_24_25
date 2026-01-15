@@ -13,7 +13,7 @@ import java.io.IOException;
 public class CreatoreGriglia extends JFrame {
     private static final long serialVersionUID = 1L;
 	private JTextField campoRighe, campoColonne, campoSeed;
-    private JButton pulsanteAnteprima, pulsanteConferma, pulsanteSalva, pulsanteCarica;
+    private JButton pulsanteAnteprima, pulsanteConferma, pulsanteCarica;
     private JComboBox<String> boxDensita;
     private JPanel pannelloGriglia;
     private PannelloGrigliaManuale pannelloManuale;
@@ -174,12 +174,11 @@ public class CreatoreGriglia extends JFrame {
 
         
         boolean[][] ostacoli = new boolean[righe][colonne];
-        Configurazione cfg = new Configurazione();
+        Configurazione cfg = new Configurazione(seed);
         cfg.righe = righe;
         cfg.colonne = colonne;
         cfg.density = densita;
         cfg.tipoPattern = tipo;
-        if (seed != 0) cfg.seed = seed;
 
         GeneratoreGriglieOstacoli generatore = new GeneratoreGriglieOstacoli(cfg, ostacoli);
         generatore.generaTutto();
@@ -198,7 +197,7 @@ public class CreatoreGriglia extends JFrame {
             boolean[][] vuota = new boolean[righe][colonne];
 
             // Salvo la griglia vuota
-           aggiornaGrigliaBackup( new Griglia(righe, colonne, TipoPattern.PERSONALIZZATA));
+            aggiornaGrigliaBackup( new Griglia(righe, colonne, TipoPattern.PERSONALIZZATA));
             grigliaBackup.setOstacoli(vuota);
 
             // Creo subito pannello manuale
@@ -249,10 +248,19 @@ public class CreatoreGriglia extends JFrame {
     
     // METODO PROVA CHE CONTROLLA SE LA MATRICE E' FATTA SOLO DA OSTACOLI
     private void creaGriglia() {
+
+        // piccolo aggiustamento per griglie personalizzate(passaggio da griglia di booleani a griglia di Celle fatto manualmente)
+          if (grigliaBackup.getTipologia()==TipoPattern.PERSONALIZZATA) {
+           grigliaBackup.setOstacoli(grigliaBackup.getOstacoli());
+          }
+
     	if(!checkGrigliaSoloOstacoli())
             System.out.println("Griglia creata: " + grigliaBackup);
           new FinestraGriglia(grigliaBackup); 
     }
+
+ 
+
     private boolean checkGrigliaSoloOstacoli(){
         boolean[][] ostacoli;
         if (grigliaBackup != null) {

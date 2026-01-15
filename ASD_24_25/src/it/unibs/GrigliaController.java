@@ -1,10 +1,12 @@
 package it.unibs;
 
+import java.util.Scanner;
+
 import javax.swing.SwingUtilities;
 
 public class GrigliaController {
 	
-	AnalizzatoreCammini analizzatore_cammini ;
+	
 
 	public GrigliaController(int modalita, java.util.List<Griglia> griglie ) {
 		if (modalita == 1) // grafica
@@ -15,12 +17,28 @@ public class GrigliaController {
 
 		});}
 		else if (modalita == 0) // batch
-		{
-			GriglieTester tester = new GriglieTester(griglie);
-			tester.askParameters();
-			tester.runTests();
-		}
-		//this.analizzatore_cammini = new AnalizzatoreCammini();
+{
+    GriglieTester tester = new GriglieTester(griglie);
+    Scanner scanner = new Scanner(System.in);
+
+    boolean continua = true;
+
+    while (continua)
+    {
+        tester.askParameters();
+        tester.runTests();
+
+        System.out.print("Do you want to run another batch? (y/n): ");
+        String risposta = scanner.nextLine().trim().toLowerCase();
+
+        if (!risposta.equals("y"))
+        {
+            continua = false;
+        }
+    }
+
+    tester.writeCsvReport();
+}
 
 	}
 }

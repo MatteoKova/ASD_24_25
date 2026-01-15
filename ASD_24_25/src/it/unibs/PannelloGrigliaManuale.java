@@ -15,6 +15,10 @@ public class PannelloGrigliaManuale extends PannelloGrigliaBase {
         super(new boolean[rows][cols]);
     }
 
+       public PannelloGrigliaManuale(boolean[][] obstacles) {
+        super(obstacles);
+    }
+
     private int getRow(MouseEvent e) {
         int y = e.getY() - offsetY;
         return (y < 0) ? -1 : y / cellSize;
