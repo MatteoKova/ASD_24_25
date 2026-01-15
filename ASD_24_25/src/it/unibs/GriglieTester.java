@@ -25,6 +25,7 @@ public class GriglieTester {
 	private AgenteCamminoMinimo agente;
 	private ConfigurazioneAnalizzatore configAnalizzatore;
 	 private final AtomicBoolean stopRichiesto;
+	 StringBuilder sbCSV;
 
 	public GriglieTester(java.util.List<Griglia> griglie) {
 		this.griglie = griglie;
@@ -32,6 +33,7 @@ public class GriglieTester {
 		this.agente = new AgenteCamminoMinimo();
 		this.configAnalizzatore = new ConfigurazioneAnalizzatore();
 		stopRichiesto=new AtomicBoolean(false);
+		this.sbCSV = new StringBuilder();
 
 	}
 
@@ -52,7 +54,7 @@ public class GriglieTester {
 			contatore++;
 
 		}
-		generateReport(risultati);
+		buildCsvBuffer(risultati);
 	}
 
 	// Metodo eseguiCammino normale (con analisi spazio base)
@@ -107,8 +109,61 @@ public class GriglieTester {
 }
 
 
+// Builds the CSV content (can be called multiple times)
+private StringBuilder buildCsvBuffer(List<RisultatoCammino> risultati) {
 
-	
+    
+
+    for (RisultatoCammino r : risultati) {
+
+        String landmarks = r.getSeq().stream()
+                .map(Cella::toString)
+                .collect(Collectors.joining("|"));
+
+        sbCSV.append(String.format(
+                "%s,%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,%s%n",
+				r.getModalita(),
+                r.getGriglia().getRighe(),
+                r.getGriglia().getColonne(),
+                r.getGriglia().getTipologia().toString(),
+                r.getDlib(),
+                r.getRaggiungibile(),
+                r.getConvergenza(),
+                r.getLunghezza(),
+                r.getTempoCalcolo(),
+                r.getIstr17Contatore(),
+                r.getContatoreFrontiera(),
+                r.getContatoreSalvataggi(),
+                r.getCrescitaMemoriaBytes(),
+                landmarks
+        ));
+        
+    }
+
+    return sbCSV;
+}
+
+
+// Writes the final CSV report to disk
+public void writeCsvReport() {
+
+    String fileName = "report.csv";
+
+    try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
+
+        // CSV HEADER (written once)
+        pw.println("modalita,righe,colonne,tipologia,d_lib,dest_ragg,convergenza,lunghezza,tempo_ms,istr16,cont_frontiera,nodi_salvati,memo_usata,landmarks");
+
+        pw.print(sbCSV.toString());
+
+        System.out.println("CSV report generated: " + fileName);
+
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+//tengo intanto che finisco di testare	
 // Metodo per generare il report CSV (aggregato di tutti i risultati in un file report.csv)
 	private void generateReport(List<RisultatoCammino> risultati) {
 		String fileName = "report.csv";

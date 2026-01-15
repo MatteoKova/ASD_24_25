@@ -102,6 +102,7 @@ public class FinestraGriglia extends JFrame {
         pannelloLegenda.add(creaVoceLegenda(Color.ORANGE, "Complemento"));
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Origine (O)"));
         pannelloLegenda.add(creaVoceLegenda(Color.RED, "Destinazione (D)"));
+        pannelloLegenda.add(creaVoceLegenda(Color.CYAN, "Landmarks"));
 
         add(pannelloLegenda, BorderLayout.EAST);
 
@@ -346,7 +347,8 @@ public class FinestraGriglia extends JFrame {
             List<Cella> cammino =
                 risultato.getSeq() != null ? risultato.getSeq() : new ArrayList<>();
 
-            pannelloGriglia.aggiornaCammino(agenteCamMIn.ricostruisciCammino(cammino, griglia, rootPaneCheckingEnabled));
+            //pannelloGriglia.aggiornaCammino(agenteCamMIn.ricostruisciCammino(cammino, griglia, rootPaneCheckingEnabled), 0);
+            pannelloGriglia.aggiornaCammino(cammino, 1);
             if (risultato.getConvergenza()==1){
             etichettaInfo.setText("Esecuzione completata");
             mostraRiepilogo(risultato, 2);}

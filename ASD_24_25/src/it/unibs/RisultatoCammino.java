@@ -19,8 +19,10 @@ public class RisultatoCammino {
 	private long crescitaMemoriaBytes;
 	private double dlib;
 	private int contatoreSalvataggi;
+	private String modalita;
 	
 	public RisultatoCammino(double lunghezza, List<Cella> seq) {
+		this.modalita="-";
 		this.lunghezza = lunghezza;
 		this.seq = seq;
 		this.seqLandmark = null;
@@ -90,6 +92,7 @@ public RisultatoCammino(RisultatoCammino other) {
     this.dlib = other.dlib;
     this.contatoreSalvataggi = other.contatoreSalvataggi;
 	this.raggiungibile = other.raggiungibile;
+	this.modalita = other.modalita;
 }
 
 
@@ -110,6 +113,7 @@ public RisultatoCammino(RisultatoCammino other) {
 
 	public String stampa() {
 	    StringBuilder sb = new StringBuilder();
+		sb.append(" - Modaltà di analisi:").append(modalita).append("\n");
 		sb.append("- Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
 		sb.append("- Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
 		//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
@@ -117,7 +121,7 @@ public RisultatoCammino(RisultatoCammino other) {
 		sb.append(convergenza == 1 ? "- Calcolo completo dei cammini possibili\n" : "- Calcolo parziale dei cammini possibili\n");
 		sb.append("- Distanza libera: ").append(String.format("%.2f", dlib)).append("\n");
 	    sb.append("- Lunghezza cammino: ").append(lunghezza).append("\n");
-		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ns\n");
+		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ms\n");
 		sb.append("- Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n");
 		sb.append("- Numero di salvataggi in memoria di nodi: ").append(contatoreSalvataggi).append("\n");
 		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n\n");
@@ -237,5 +241,10 @@ public void setRaggiungibile(int raggiungibile) {
 	this.raggiungibile = raggiungibile;
 }
 // setConvergenza(int) and setCrescitaMemoriaBytes(long) already exist
-
+public void setModalita(String modalita) {
+	this.modalita = modalita;
+}
+public String getModalita() {
+	return modalita;
+}
 }

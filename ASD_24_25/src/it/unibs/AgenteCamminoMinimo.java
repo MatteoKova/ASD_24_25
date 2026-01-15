@@ -125,11 +125,31 @@ public class AgenteCamminoMinimo {
 
     risultato.setContatoreFrontiera(analizCam.getContatoreFrontiera());
     risultato.setIstr17Contatore(analizCam.getIstr16Contatore());
+    risultato.setContatoreSalvataggi(analizCam.getContatorePercorsiSalvati());
     risultato.setDlib(AnalizCam.dlib(
             griglia.getOrigineDefault(),
             griglia.getDestinazioneDefault()));
-
+    stampaModalita(risultato, config);
     return risultato;
+}
+
+public void stampaModalita(RisultatoCammino risultato, ConfigurazioneAnalizzatore config) {
+    StringBuilder modalita = new StringBuilder();
+
+    // Riordina Frontiera
+    modalita.append(config.isRiordinaFrontiera() ? "R" : "-");
+
+    // Condizione Forte
+    modalita.append(config.getCondForte() == 1 ? "C" : "-");
+
+    // Memoria Sequenze
+    modalita.append(config.getUsaMemoriaSequenze() == 1 ? "M" : "-");
+
+    // Versione Ottimizzata
+    modalita.append(config.getUsaVersioneOttimizzata() == 1 ? "V" : "-");
+
+    // Scrive la stringa nel risultato
+    risultato.setModalita(modalita.toString());
 }
 
 
@@ -160,10 +180,12 @@ if (cammino.isEmpty())
                 
 
   
+
+
+
+
 /* Classe interna di utilità per il monitoraggio della memoria heap
   */
-
-
 public final class HeapMonitor {
 
     private HeapMonitor() {}

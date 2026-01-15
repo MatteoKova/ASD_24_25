@@ -334,10 +334,15 @@ public class AnalizCam {
        //terminazione anticipata
         if (stopCheck.get()) 
            throw new StopException(risultatoIntermedio);
+    
+        
+
 
          if (cfg.usaMemoriaSequenze==1){
              RisultatoCammino r=checkMemoria(origine);
                 if (r!=null){
+                    if(origine.getRiga()==3 && origine.getColonna()==11) 
+                        System.out.println(r.getSeq());
                     camminoCorrente.addAll(r.getSeq());
                     salvaRisutltatoIntermedio();
                     return r;
@@ -598,10 +603,14 @@ public void aggiungiAMemoria(Cella cella, RisultatoCammino risultatoCammino) {
     int c = cella.getColonna();  // metodo che ritorna la colonna della cella
     contatorePercorsiSalvati++;
     celleVisitateMatrice[r][c] = newR;
+    if(cella.getRiga()==3 && cella.getColonna()==11) 
+        System.out.println("Aggiunto cammino in memoria per cella (3,11): " + nuovaSeq);
 }
 
 // Controlla se esiste un cammino già memorizzato
 public RisultatoCammino checkMemoria(Cella cella) {
+     if(cella.getRiga()==3 && cella.getColonna()==11) 
+                        System.out.println("Controllo memoria per cella (3,11)");
     int r = cella.getRiga();
     int c = cella.getColonna();
     if (celleVisitateMatrice != null) {
@@ -662,6 +671,7 @@ public int getContatoreFrontiera() {
         camminoCorrente.clear();
         this.nr = nr;
         this.nc = nc;
+        this.abilitaDebug=false;
     }
 
     /**
@@ -751,7 +761,9 @@ public int getContatoreFrontiera() {
         return r>=0 && r<rows && c>=0 && c<cols;
     }
 
-
+   public int getContatorePercorsiSalvati() {
+        return contatorePercorsiSalvati;
+    }
 
  public static void printGridDebug(Cella[][] grid) {
     int rows = grid.length;

@@ -12,6 +12,8 @@ public class PannelloGriglia extends JPanel {
     private Griglia griglia;
     private Cella origine;
     private Cella destinazione;
+    private int modalitaColorazioneCammino=1; // 1=normale colora i landmark di un colore fisso,
+                                                //  0= creo un percorso da cella a cella tramire linea nera
 
   
 
@@ -36,8 +38,9 @@ public class PannelloGriglia extends JPanel {
         repaint();
     }
 
-    public void aggiornaCammino(List<Cella> cammino) {
+    public void aggiornaCammino(List<Cella> cammino, int modalitaColorazioneCammino) {
         this.camminoOrdinato = cammino;
+        this.modalitaColorazioneCammino= modalitaColorazioneCammino;
         repaint();
     }
     
@@ -247,6 +250,48 @@ public class PannelloGriglia extends JPanel {
 
     private void drawCammino(Graphics2D g2, int dim, int offsetX, int offsetY) {
         if (camminoOrdinato == null || camminoOrdinato.size() < 2) return;
+        if (modalitaColorazioneCammino == 1) {
+
+        Font oldFont = g2.getFont();
+        Color oldColor = g2.getColor();
+
+        // Font size proportional to cell size
+        Font font = new Font("Arial", Font.BOLD, Math.max(12, dim / 3));
+        g2.setFont(font);
+
+        FontMetrics fm = g2.getFontMetrics();
+
+        for (int i = 1; i < camminoOrdinato.size()-1; i++) {
+            Cella c = camminoOrdinato.get(i);
+
+            int x = offsetX + c.getColonna() * dim;
+            int y = offsetY + c.getRiga() * dim;
+
+            // Fill cell in orange
+            g2.setColor(Color.CYAN);
+            g2.fillRect(x, y, dim, dim);
+
+            // Optional border for clarity
+            g2.setColor(Color.BLACK);
+            g2.drawRect(x, y, dim, dim);
+
+            // Draw index number centered
+            String text = String.valueOf(i);
+
+            int textWidth = fm.stringWidth(text);
+            int textHeight = fm.getAscent();
+
+            int textX = x + (dim - textWidth) / 2;
+            int textY = y + (dim + textHeight) / 2 - 2;
+
+            g2.drawString(text, textX, textY);
+        }
+
+        g2.setFont(oldFont);
+        g2.setColor(oldColor);
+        return;
+    }else if (modalitaColorazioneCammino == 0) {
+             
 
         g2.setStroke(new BasicStroke(Math.max(2, dim/5),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
@@ -266,4 +311,6 @@ public class PannelloGriglia extends JPanel {
             g2.drawLine(ax, ay, bx, by);
         }
     }
+        }
+       
 }
