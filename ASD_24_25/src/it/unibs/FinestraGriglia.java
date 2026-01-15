@@ -222,7 +222,7 @@ public class FinestraGriglia extends JFrame {
     // --- Versione Ottimizzata ---
     pannelloInput.add(new JLabel("Versione Ottimizzata:"));
     JCheckBox checkVersioneOttimizzata = new JCheckBox();
-    checkVersioneOttimizzata.setSelected(cfgAnalizzatore.getUsaVersioneOttimizzata() == 1);
+    checkVersioneOttimizzata.setSelected(cfgAnalizzatore.getUsaLunghezzaGlob() == 1);
     pannelloInput.add(checkVersioneOttimizzata);
 
     pannelloDialogo.add(pannelloInput, BorderLayout.CENTER);
@@ -251,7 +251,7 @@ public class FinestraGriglia extends JFrame {
         cfgAnalizzatore.setRiordinaFrontiera(checkRiordina.isSelected());
         cfgAnalizzatore.setCondForte(checkCondForte.isSelected() ? 1 : 0);
         cfgAnalizzatore.setUsaMemoriaSequenze(checkMemSequenze.isSelected() ? 1 : 0);
-        cfgAnalizzatore.setUsaVersioneOttimizzata(checkVersioneOttimizzata.isSelected() ? 1 : 0);
+        cfgAnalizzatore.setUsaLunghezzaGlob(checkVersioneOttimizzata.isSelected() ? 1 : 0);
 
         // Reset del flag di stop
         stopRichiesto.set(false);

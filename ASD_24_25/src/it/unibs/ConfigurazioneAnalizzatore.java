@@ -7,7 +7,7 @@ public class ConfigurazioneAnalizzatore {
                                 //  migliori prima, e poter fare piu pruning dopo
     int condForte; // 0 = no, 1 = si. Attiva condizione forte dell istr 16 dell analizzatore
     int usaMemoriaSequenze; // 0 = no, 1 = si. Usa memoria per sequenze di celle gia analizzate
-    int usaVersioneOttimizzata; //0 = no, 1 si. Usa ciclo unico per calcolare Complemento-Contesto-Frontiera
+    int usaLunghezzaGlob; //0 = no, 1 si. Usa ciclo unico per calcolare Complemento-Contesto-Frontiera
 
     //boolean usaBitMap; // false = no, true = si. Usa BitMap per memorizzare ostacoli e tipi di cammino(da implementare)
 
@@ -16,15 +16,15 @@ public class ConfigurazioneAnalizzatore {
         this.riordinaFrontiera = true; // Valore di default
         this.condForte = 1; // Valore di default
         this.usaMemoriaSequenze =0; // Valore di default
-        this.usaVersioneOttimizzata=0;
+        this.usaLunghezzaGlob=0;
     }
 
-    public int getUsaVersioneOttimizzata (){
-        return this.usaVersioneOttimizzata;
+    public int getUsaLunghezzaGlob (){
+        return this.usaLunghezzaGlob;
     }
 
-    public void setUsaVersioneOttimizzata (int usaUnicoCicloCCF){
-      this.usaVersioneOttimizzata=usaUnicoCicloCCF;
+    public void setUsaLunghezzaGlob (int usaUnicoCicloCCF){
+      this.usaLunghezzaGlob=usaUnicoCicloCCF;
     }
 
     public int getUsaMemoriaSequenze() {
@@ -59,7 +59,7 @@ public String toString() {
             " - riordinaFrontiera = " + riordinaFrontiera + "\n" +
             " - condForte = " + condForte + "\n" +
             " - usaMemoriaSequenze = " + usaMemoriaSequenze + "\n" +
-            " - usaUnicoCicloCCF = " + usaVersioneOttimizzata;
+            " - usaLunghezzaGlob = " + usaLunghezzaGlob;
 }
 
 }

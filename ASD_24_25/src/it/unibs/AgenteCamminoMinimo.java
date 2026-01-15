@@ -5,7 +5,7 @@ import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryType;
 import java.util.List;
 import java.util.function.Supplier;
-import java.lang.management.*;
+
 
 
 
@@ -22,16 +22,7 @@ public class AgenteCamminoMinimo {
        
     }
 
-    /* 
-    public void configuraAlgoritmo(ConfigurazioneAlgoritmo config) {
-        this.configurazione = config;
-        // eventuali configurazioni sull'analizzatore
-    }
-    */
-
- 
-
-
+    
     public void calcolaCCF(Griglia g) {
 
         analizCam.calcolaCCF(g.getCelle(), g.getOrigineDefault());
@@ -49,7 +40,7 @@ public class AgenteCamminoMinimo {
         Supplier<Boolean> stopCheck) {
 
     System.out.println("Avvio calcolo cammino minimo con AnalizCam...");
-    System.out.println("valore del supplier: " + stopCheck.get());
+    //System.out.println("valore del supplier: " + stopCheck.get());
     System.out.println(config);
 
     analizCam.setConfig(config);
@@ -146,7 +137,7 @@ public void stampaModalita(RisultatoCammino risultato, ConfigurazioneAnalizzator
     modalita.append(config.getUsaMemoriaSequenze() == 1 ? "M" : "-");
 
     // Versione Ottimizzata
-    modalita.append(config.getUsaVersioneOttimizzata() == 1 ? "V" : "-");
+    modalita.append(config.getUsaLunghezzaGlob() == 1 ? "V" : "-");
 
     // Scrive la stringa nel risultato
     risultato.setModalita(modalita.toString());

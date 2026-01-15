@@ -11,8 +11,7 @@ public class Cella {
     private TipoCella tipo;
     @JsonProperty("frontiera") private boolean isFrontiera ;
     @JsonProperty("landMark")private boolean isLandMark;
-    //private int tipo = 1;
-    //private boolean isAttraversabile = true;
+    
 
     // Costruttore di copia deep copy per Cella
 public Cella(Cella other) {
@@ -88,16 +87,7 @@ public Cella(Cella other) {
     public boolean isFrontiera(){return this.isFrontiera;}
     public void setIsFrontiera(boolean isFrontiera){this.isFrontiera=isFrontiera;}
     public void setIsLandmark(boolean isLandMark){this.isLandMark=isLandMark;}
- //   public boolean isAttraversabile() { return isAttraversabile; }
 
-    // Setters
-/*    public void setAttraversabile(boolean isAttraversabile) {
-        this.isAttraversabile = isAttraversabile;
-    }*/
-    
-    /*public void setTipo(int tipo) {
-		this.tipo = tipo;
-	}*/
 
 	@Override
     public String toString() {

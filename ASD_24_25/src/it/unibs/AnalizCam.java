@@ -18,18 +18,10 @@ import java.util.function.Supplier;
 
 public class AnalizCam {
 
-    //private Griglia griglia;
+    
 
 	private boolean[][] mat_ostacoli; //matrice booleana che indica quali celle sono ostacoli (true) e quali libere (false)
-    /* 
-	private Stack<Cella> stack_ostacoli; //stack che memorizza gli ostacoli aggiunti dinamicamente, per poterli rimuovere quando si risale di un livello nella ricorsione
-	private Stack<int[][]> stack_griglia_tipi; //stack che memorizza  contesto complemento dei tipi di cammino, per poterle riprendere quando si risale di un livello nella ricorsione
-
-    private Map<Integer, RisultatoCammino> celleVisitate ; // mappa per tenere traccia delle celle visitate e del loro conteggio
-                                                            // come chiave ha l'hash delle coordinate della cella origine da cui è stato calcolato il cammino
-     
-      private List<Landmark> currentFrontiera; 
-                                                             */                                                  
+                                                     
     private RisultatoCammino risultatoIntermedio; //tiene in memoria il salvattaggio migliore trovato in modo che anche un interruzzione improvvisa del algo
                                                     // permette di acceder a un percorso completo
     private List<Cella> migliorCamminoTemp; //tiene in memoria il miglior cammino trovato durante l'esecuzione dell'algoritmo                                                
@@ -37,7 +29,7 @@ public class AnalizCam {
                                             // termine della ricorsione
     private ConfigurazioneAnalizzatore cfg;
 
-    private Map<Integer, RisultatoCammino> celleVisitate;                                    
+                                 
 	int nr, nc;
     int istr16Contatore = 0;  //contatore esiti falsi di istruzione 16 (if < lunghezzaMin) 
     int contatoreFrontiera = 0; //contatore celle di frontiera analizzate 
@@ -57,7 +49,7 @@ public class AnalizCam {
 		this.nc = mat_ostacoli[0].length;
         
         this.cfg = new ConfigurazioneAnalizzatore();
-              this.celleVisitate = null;
+              
               this.camminoCorrente = new ArrayList<>();
               this.migliorCamminoTemp = new ArrayList<>();
         this.risultatoIntermedio=new RisultatoCammino( Double.POSITIVE_INFINITY, migliorCamminoTemp);
@@ -341,8 +333,6 @@ public class AnalizCam {
          if (cfg.usaMemoriaSequenze==1){
              RisultatoCammino r=checkMemoria(origine);
                 if (r!=null){
-                    if(origine.getRiga()==3 && origine.getColonna()==11) 
-                        System.out.println(r.getSeq());
                     camminoCorrente.addAll(r.getSeq());
                     salvaRisutltatoIntermedio();
                     return r;
@@ -364,13 +354,13 @@ public class AnalizCam {
     	  if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()].getTipo()==TipoCella.CONTESTO) {
             camminoCorrente.add(destinazione);
             salvaRisutltatoIntermedio();
-            if (cfg.getUsaVersioneOttimizzata()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
+            if (cfg.getUsaLunghezzaGlob()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
         	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), new Cella(destinazione.getRiga(), destinazione.getColonna(), TipoCella.CONTESTO)));
         }
         else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()].getTipo()==TipoCella.COMPLEMENTO) {
             camminoCorrente.add(destinazione);
             salvaRisutltatoIntermedio();
-             if (cfg.getUsaVersioneOttimizzata()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
+             if (cfg.getUsaLunghezzaGlob()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
         	return new RisultatoCammino(dlib(origine, destinazione),  List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), new Cella(destinazione.getRiga(), destinazione.getColonna(), TipoCella.COMPLEMENTO)));
         }
         
@@ -603,14 +593,13 @@ public void aggiungiAMemoria(Cella cella, RisultatoCammino risultatoCammino) {
     int c = cella.getColonna();  // metodo che ritorna la colonna della cella
     contatorePercorsiSalvati++;
     celleVisitateMatrice[r][c] = newR;
-    if(cella.getRiga()==3 && cella.getColonna()==11) 
-        System.out.println("Aggiunto cammino in memoria per cella (3,11): " + nuovaSeq);
+     
+      
 }
 
 // Controlla se esiste un cammino già memorizzato
 public RisultatoCammino checkMemoria(Cella cella) {
-     if(cella.getRiga()==3 && cella.getColonna()==11) 
-                        System.out.println("Controllo memoria per cella (3,11)");
+     
     int r = cella.getRiga();
     int c = cella.getColonna();
     if (celleVisitateMatrice != null) {
