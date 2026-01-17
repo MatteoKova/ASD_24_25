@@ -64,7 +64,7 @@ public class CreatoreGriglia extends JFrame {
 
         // Seed
         gbc.gridx = 0; gbc.gridy = 3;
-        pannelloForm.add(new JLabel("Seed (0 = casuale):"), gbc);
+        pannelloForm.add(new JLabel("Seme (0 = casuale):"), gbc);
         campoSeed = new JTextField("0", 10);
         gbc.gridx = 1;
         pannelloForm.add(campoSeed, gbc);
@@ -151,11 +151,11 @@ public class CreatoreGriglia extends JFrame {
             righe = Integer.parseInt(campoRighe.getText().trim());
             colonne = Integer.parseInt(campoColonne.getText().trim());
             seed = Long.parseLong(campoSeed.getText().trim());
-            System.out.println("Parametri letti: righe=" + righe + ", colonne=" + colonne + ", seed=" + seed);
+            System.out.println("Parametri letti: righe=" + righe + ", colonne=" + colonne + ", seme=" + seed);
             return true;
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this,
-                "Inserisci valori numerici validi per righe, colonne e seed", "Errore di input", JOptionPane.ERROR_MESSAGE);
+                "Inserisci valori numerici validi per righe, colonne e seme", "Errore di input", JOptionPane.ERROR_MESSAGE);
             return false;
         }
     }

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -95,14 +96,16 @@ public class FinestraGriglia extends JFrame {
         ));
         
         // Voci legenda
-        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Cella libera"));
-        pannelloLegenda.add(creaVoceLegenda(Color.BLUE.darker(), "Ostacolo"));
-        pannelloLegenda.add(creaVoceLegenda(Color.GREEN.darker(), "Contesto"));
-        pannelloLegenda.add(creaVoceLegenda(Color.YELLOW, "Asse"));
-        pannelloLegenda.add(creaVoceLegenda(Color.ORANGE, "Complemento"));
-        pannelloLegenda.add(creaVoceLegenda(Color.RED, "Origine (O)"));
-        pannelloLegenda.add(creaVoceLegenda(Color.RED, "Destinazione (D)"));
-        pannelloLegenda.add(creaVoceLegenda(Color.CYAN, "Landmarks"));
+        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Frontiera", true));
+        pannelloLegenda.add(creaVoceLegenda(Color.WHITE, "Cella libera", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.CYAN, "Landmark", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.BLUE.darker(), "Ostacolo", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.GREEN.darker(), "Contesto", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.YELLOW, "Asse", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.ORANGE, "Complemento", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.RED, "Origine (O)", false));
+        pannelloLegenda.add(creaVoceLegenda(Color.RED, "Destinazione (D)", false));
+        
 
         add(pannelloLegenda, BorderLayout.EAST);
 
@@ -291,8 +294,23 @@ public class FinestraGriglia extends JFrame {
     }
 
     // Metodo di utilità per creare una voce della legenda
-    private JPanel creaVoceLegenda(Color colore, String testo) {
-        JLabel box = new JLabel();
+    private JPanel creaVoceLegenda(Color colore, String testo, boolean conCerchio) {
+        JLabel box;
+        if (conCerchio) {
+            // JLabel personalizzato che disegna un cerchio
+            box = new JLabel() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    super.paintComponent(g);
+                    int pad = 2;
+                    g.setColor(Color.BLACK);
+                    g.drawOval(pad, pad, getWidth() - 2*pad, getHeight() - 2*pad);
+                }
+            };
+        } else {
+            box = new JLabel();
+        }
+
         box.setOpaque(true);
         box.setBackground(colore);
         box.setPreferredSize(new Dimension(20, 20));
@@ -303,6 +321,7 @@ public class FinestraGriglia extends JFrame {
         voce.add(new JLabel(testo));
         return voce;
     }
+
     
     // Worker Swing per l’esecuzione del calcolo del cammino in background (=> l'utente può fermare il processo senza problemi)
     private class LavoratorePercorso
