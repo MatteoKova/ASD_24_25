@@ -38,7 +38,49 @@ public class GrigliaController {
     }
 
     tester.writeCsvReport();
+} else if (modalita == 2) {
+   GriglieTester tester = new GriglieTester(griglie);
+
+// fixed time
+long fixedTime = 60000;
+
+// list of flag combinations
+String[] flagCombinations = {
+    "-----", "R----", "-C---", "---V-", "--M--", "RC---", "R--V-", "RCM--", "R-MV-"
+};
+
+for (String flags : flagCombinations) {
+
+    // --- Set fixed time ---
+    tester.getConfigAnalizzatore().setLimiteTempoMs(fixedTime);
+
+    // --- Set boolean flags ---
+    // Pad to 5 characters just in case
+    flags = String.format("%-5s", flags).replace(' ', '-');
+
+    tester.getConfigAnalizzatore().setRiordinaFrontiera(flags.charAt(0) == 'R');
+    tester.getConfigAnalizzatore().setCondForte(flags.charAt(1) == 'C' ? 1 : 0);
+    tester.getConfigAnalizzatore().setUsaMemoriaSequenze(flags.charAt(2) == 'M' ? 1 : 0);
+    tester.getConfigAnalizzatore().setUsaLunghezzaGlob(flags.charAt(3) == 'V' ? 1 : 0);
+    tester.setAnalisiSpazio(flags.charAt(4) == 'S' ? 1 : 0);
+
+    // optional: print parameters for verification
+    System.out.println("\nRunning test with flags: " + flags);
+    System.out.println("- Limite tempo: " + tester.getConfigAnalizzatore().getLimiteTempoMs() + " ms");
+    System.out.println("- Riordina Frontiera: " + tester.getConfigAnalizzatore().isRiordinaFrontiera());
+    System.out.println("- Condizione Forte: " + tester.getConfigAnalizzatore().getCondForte());
+    System.out.println("- Memoria Sequenze: " + tester.getConfigAnalizzatore().getUsaMemoriaSequenze());
+    System.out.println("- Controllo lunghezza globale: " + tester.getConfigAnalizzatore().getUsaLunghezzaGlob());
+    System.out.println("- Analisi Spazio: " + (tester.getAnalisiSpazio() == 1 ? "si" : "no"));
+
+    // --- Run the test ---
+    tester.runTests();
 }
+
+// --- After all combinations ---
+tester.writeCsvReport();
+
+}// test
 
 	}
 }

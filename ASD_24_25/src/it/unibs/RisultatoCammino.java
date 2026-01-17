@@ -7,7 +7,6 @@ public class RisultatoCammino {
 	
 	private double lunghezza;
 	private List<Cella> seq;
-	private List<Landmark> seqLandmark;
 	private Cella origine;
 	private Cella destinazione;
 	private long tempoCalcolo;
@@ -25,7 +24,6 @@ public class RisultatoCammino {
 		this.modalita="-";
 		this.lunghezza = lunghezza;
 		this.seq = seq;
-		this.seqLandmark = null;
 		this.origine = null;
 		this.destinazione = null;
 		this.tempoCalcolo = 0;
@@ -39,25 +37,7 @@ public class RisultatoCammino {
 		this.raggiungibile=1; // di default raggiungibile
 
 	}
-	// vecchio costruttore per compatibilità
-	public RisultatoCammino(double lunghezza, List<Landmark> seq, boolean isLandmark) {
-		this.lunghezza = lunghezza;
-		this.seq = null;
-		this.seqLandmark = seq;
-		this.origine = null;
-		this.destinazione = null;
-		this.tempoCalcolo = 0;
-		this.istr17Contatore = 0;
-		this.griglia = null;
-		this.contatoreFrontiera = 0;
-		this.convergenza = 1; // di default converge
-		this.crescitaMemoriaBytes=0;
-		this.dlib=0.0;
-		this.contatoreSalvataggi=0;
-		this.raggiungibile=1; // di default raggiungibile
 
-
-	}
 
 	// Costruttore di copia deep copy
 public RisultatoCammino(RisultatoCammino other) {
@@ -74,8 +54,7 @@ public RisultatoCammino(RisultatoCammino other) {
     }
 
  
-        this.seqLandmark = null;
-    
+        
 
     // Copia degli altri campi
     this.origine = (other.origine != null) ? new Cella(other.origine) : null;
@@ -103,9 +82,7 @@ public RisultatoCammino(RisultatoCammino other) {
 	public List<Cella> getSeq() {
 		return seq;
 	}
-	public List<Landmark> getSeqLandmark() {
-		return seqLandmark; 
-	}
+	
 	 
 	public void setTempo(long tempoCalcolo) {
 		this.tempoCalcolo = tempoCalcolo;
@@ -192,9 +169,6 @@ public void setSeq(List<Cella> seq) {
     this.seq = seq;
 }
 
-public void setSeqLandmark(List<Landmark> seqLandmark) {
-    this.seqLandmark = seqLandmark;
-}
 
 public void setOrigine(Cella origine) {
     this.origine = origine;

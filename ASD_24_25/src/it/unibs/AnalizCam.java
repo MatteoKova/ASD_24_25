@@ -18,18 +18,10 @@ import java.util.function.Supplier;
 
 public class AnalizCam {
 
-    //private Griglia griglia;
+    
 
 	private boolean[][] mat_ostacoli; //matrice booleana che indica quali celle sono ostacoli (true) e quali libere (false)
-    /* 
-	private Stack<Cella> stack_ostacoli; //stack che memorizza gli ostacoli aggiunti dinamicamente, per poterli rimuovere quando si risale di un livello nella ricorsione
-	private Stack<int[][]> stack_griglia_tipi; //stack che memorizza  contesto complemento dei tipi di cammino, per poterle riprendere quando si risale di un livello nella ricorsione
-
-    private Map<Integer, RisultatoCammino> celleVisitate ; // mappa per tenere traccia delle celle visitate e del loro conteggio
-                                                            // come chiave ha l'hash delle coordinate della cella origine da cui è stato calcolato il cammino
-     
-      private List<Landmark> currentFrontiera; 
-                                                             */                                                  
+                                                     
     private RisultatoCammino risultatoIntermedio; //tiene in memoria il salvattaggio migliore trovato in modo che anche un interruzzione improvvisa del algo
                                                     // permette di acceder a un percorso completo
     private List<Cella> migliorCamminoTemp; //tiene in memoria il miglior cammino trovato durante l'esecuzione dell'algoritmo                                                
@@ -37,7 +29,7 @@ public class AnalizCam {
                                             // termine della ricorsione
     private ConfigurazioneAnalizzatore cfg;
 
-    private Map<Integer, RisultatoCammino> celleVisitate;                                    
+                                 
 	int nr, nc;
     int istr16Contatore = 0;  //contatore esiti falsi di istruzione 16 (if < lunghezzaMin) 
     int contatoreFrontiera = 0; //contatore celle di frontiera analizzate 
@@ -57,7 +49,7 @@ public class AnalizCam {
 		this.nc = mat_ostacoli[0].length;
         
         this.cfg = new ConfigurazioneAnalizzatore();
-              this.celleVisitate = null;
+              
               this.camminoCorrente = new ArrayList<>();
               this.migliorCamminoTemp = new ArrayList<>();
         this.risultatoIntermedio=new RisultatoCammino( Double.POSITIVE_INFINITY, migliorCamminoTemp);
@@ -341,8 +333,6 @@ public class AnalizCam {
          if (cfg.usaMemoriaSequenze==1){
              RisultatoCammino r=checkMemoria(origine);
                 if (r!=null){
-                    if(origine.getRiga()==3 && origine.getColonna()==11) 
-                        System.out.println(r.getSeq());
                     camminoCorrente.addAll(r.getSeq());
                     salvaRisutltatoIntermedio();
                     return r;
@@ -357,20 +347,20 @@ public class AnalizCam {
     	Cella[][] griglia_tipi = creaNuovaGrigliaTipi(mat_tipi); //crea una nuova matrice per memorizzare i tipi relativi ad O, copiando la matrice precedente a 0
     	
 
-        List<Cella> frontiera = calcolaCCF(griglia_tipi,origine); //Sarebbe da passare a list
+        List<Cella> frontiera = calcolaCCF(griglia_tipi,origine); 
             
 
             
     	  if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()].getTipo()==TipoCella.CONTESTO) {
             camminoCorrente.add(destinazione);
             salvaRisutltatoIntermedio();
-            if (cfg.getUsaVersioneOttimizzata()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
+            if (cfg.getUsaLunghezzaGlob()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
         	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), new Cella(destinazione.getRiga(), destinazione.getColonna(), TipoCella.CONTESTO)));
         }
         else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()].getTipo()==TipoCella.COMPLEMENTO) {
             camminoCorrente.add(destinazione);
             salvaRisutltatoIntermedio();
-             if (cfg.getUsaVersioneOttimizzata()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
+             if (cfg.getUsaLunghezzaGlob()==1)aggiornaLunghezzaGlob(lunghezzaCorrente+dlib(origine, destinazione));
         	return new RisultatoCammino(dlib(origine, destinazione),  List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), new Cella(destinazione.getRiga(), destinazione.getColonna(), TipoCella.COMPLEMENTO)));
         }
         
@@ -403,8 +393,9 @@ public class AnalizCam {
             lF = dlib(origine, cella_frontiera);
 
         	//if (lF >= lunghezzaMin) continue; //proning
-        	if ( (cfg.getUsaMemoriaSequenze()==1 && lunghezzaCorrente+lF + dlib(cella_frontiera, destinazione) >= lunghezzaMinGlobale-EPSILON) ||
-           (cfg.getUsaMemoriaSequenze()==0 && lF + dlib(cella_frontiera, destinazione) >= lunghezzaMin-EPSILON) ) continue; // pruning
+        	if ( (cfg.getUsaLunghezzaGlob()==1 && lunghezzaCorrente+lF + dlib(cella_frontiera, destinazione) >= lunghezzaMinGlobale-EPSILON) ||
+                (cfg.getCondForte()==1 && lF + dlib(cella_frontiera, destinazione) >= lunghezzaMin-EPSILON) ||
+                 (lF >= lunghezzaMin-EPSILON ) ) continue; // pruning
             
             istr16Contatore++;
         	
@@ -449,75 +440,6 @@ public class AnalizCam {
         return new RisultatoCammino(lunghezzaMin, seqMin); //Restituisce il percorso con distanza minore tra origine e destinazione
     }
 
-//================================================================================================
-//================================================================================================
-//========================================================================================================================================================
-//======
-public RisultatoCammino camminoMin(Cella origine, Cella destinazione, Cella[][] mat_tipi,  Supplier<Boolean> stopCheck) {
-       
-        if (stopCheck.get()) 
-           throw new StopException(risultatoIntermedio);
-
-
-    	Cella[][] griglia_tipi = creaNuovaGrigliaTipi(mat_tipi); //crea una nuova matrice per memorizzare i tipi relativi ad O, copiando la matrice precedente a 0
-    	calcolaContesto(griglia_tipi, origine); //è inutile che restituisca qualcosa, visto che sta modificando griglia_tipi
-    	calcolaComplemento(griglia_tipi, origine);
-    	 
-       
-        
-        if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()].getTipo()==TipoCella.CONTESTO) {
-        	//origine.setTipo(0);
-        	//destinazione.setTipo(1);
-        	return new RisultatoCammino(dlib(origine, destinazione), List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), new Cella(destinazione.getRiga(), destinazione.getColonna(), TipoCella.CONTESTO)));
-        }
-        else if(griglia_tipi[destinazione.getRiga()][destinazione.getColonna()].getTipo()==TipoCella.COMPLEMENTO) {
-        	//origine.setTipo(0);
-        	//destinazione.setTipo(2);
-        	return new RisultatoCammino(dlib(origine, destinazione),  List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), new Cella(destinazione.getRiga(), destinazione.getColonna(), TipoCella.COMPLEMENTO)));
-        }
-        
-        //Set<Landmark> frontiera = calolaFrontiera(...,griglia_tipi);
-        List<Cella> frontiera = calcolaFrontiera(griglia_tipi); //Sarebbe da passare a list
-        contatoreFrontiera += frontiera.size();
-
-        // CASO BASE: se frontiera è vuota => non si può espandere -> impossibile
-        if (frontiera.isEmpty()) {
-            return new RisultatoCammino(Double.POSITIVE_INFINITY, List.of());
-        }
-        
-        int num_ostacoli_temporanei = aggiornaOstacoli(griglia_tipi);
-        double lunghezzaMin = Double.POSITIVE_INFINITY;
-        List<Cella> seqMin = new ArrayList<>();
-        double lF, lFD, lTot;
-        
-        for (Cella cella_frontiera : frontiera) {
-            int rc=cella_frontiera.getRiga();
-            int cc=cella_frontiera.getColonna();
-        	griglia_tipi[rc][cc].setTipo(mat_tipi[rc][cc].getTipo()); //imposta temporaneamente la cella di forntiera che sto considerando, come libera
-        	lF = dlib(origine, cella_frontiera);
-        	//if (lF >= lunghezzaMin) continue; //proning
-        	if (lF + dlib(cella_frontiera, destinazione) >= lunghezzaMin) continue; // pruning
-           
-            istr16Contatore++;
-        	//System.out.println("istruzione 16 eseguita: confronto " +istr16Contatore);
-            RisultatoCammino sotto_cammino = camminoMin(cella_frontiera, destinazione, griglia_tipi,stopCheck);
-        	
-        	griglia_tipi[rc][cc].setTipo(TipoCella.OSTACOLO);
-        	//stack_griglia_tipi.pop(); //rimuove la griglia dei tipi del sotto_cammino dallo stack
-        	
-        	lFD = sotto_cammino.getLunghezza();
-        	if(Double.isInfinite(lFD)) continue;
-        	
-        	lTot = lF + lFD;
-        	if (lTot < lunghezzaMin) {
-                lunghezzaMin = lTot;
-                seqMin = compatta(List.of(new Cella(origine.getRiga(), origine.getColonna(), origine.getTipo()), cella_frontiera), sotto_cammino.getSeq());
-                risultatoIntermedio.setLunghezza(lTot); //aggiorna il salvataggio intermedio
-                risultatoIntermedio.setSeq(seqMin);
-            }
-        } 
-        return new RisultatoCammino(lunghezzaMin, seqMin); //Restituisce il percorso con distanza minore tra origine e destinazione
-    }
 
 
 
@@ -603,14 +525,13 @@ public void aggiungiAMemoria(Cella cella, RisultatoCammino risultatoCammino) {
     int c = cella.getColonna();  // metodo che ritorna la colonna della cella
     contatorePercorsiSalvati++;
     celleVisitateMatrice[r][c] = newR;
-    if(cella.getRiga()==3 && cella.getColonna()==11) 
-        System.out.println("Aggiunto cammino in memoria per cella (3,11): " + nuovaSeq);
+     
+      
 }
 
 // Controlla se esiste un cammino già memorizzato
 public RisultatoCammino checkMemoria(Cella cella) {
-     if(cella.getRiga()==3 && cella.getColonna()==11) 
-                        System.out.println("Controllo memoria per cella (3,11)");
+     
     int r = cella.getRiga();
     int c = cella.getColonna();
     if (celleVisitateMatrice != null) {

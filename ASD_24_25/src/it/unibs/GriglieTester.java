@@ -42,6 +42,7 @@ public class GriglieTester {
 	// Metodo principale per eseguire i test su tutte le griglie
 	//prepara l'ambiente e richiama eseguiCammino per ogni griglia
 	public void runTests() {
+        risultati.clear();
 		System.out.println("Running tests on " + griglie.size() + " grids...");
 		int contatore=0;
 		RisultatoCammino risultato;
@@ -120,8 +121,9 @@ private StringBuilder buildCsvBuffer(List<RisultatoCammino> risultati) {
                 .map(Cella::toString)
                 .collect(Collectors.joining("|"));
 
+
         sbCSV.append(String.format(
-                "%s,%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,%s%n",
+                "%s,%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,\"%s\"%n",
 				r.getModalita(),
                 r.getGriglia().getRighe(),
                 r.getGriglia().getColonne(),
@@ -163,46 +165,6 @@ public void writeCsvReport() {
     }
 }
 
-//tengo intanto che finisco di testare	
-// Metodo per generare il report CSV (aggregato di tutti i risultati in un file report.csv)
-	private void generateReport(List<RisultatoCammino> risultati) {
-		String fileName = "report.csv";
-
-		try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
-
-			// CSV HEADER
-			pw.println("righe,colonne,tipologia,d_lib,dest_ragg,convergenza,lunghezza,tempo_ms,istr16,cont_frontiera,nodi_salvati,memo_usata,landmarks");
-
-			for (RisultatoCammino r : risultati) {
-
-				String landmarks = r.getSeq().stream()
-						.map(Cella::toString)
-						.collect(Collectors.joining("|")); 
-				// Use | to avoid commas breaking the CSV format
-
-				pw.printf("%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,%s%n",
-						r.getGriglia().getRighe(),
-						r.getGriglia().getColonne(),
-						r.getGriglia().getTipologia().toString(),
-						r.getDlib(),
-						r.getRaggiungibile(), // 1 if reachable, 0 otherwise
-						r.getConvergenza(), // 1 if converged, 0 otherwise vedi classe RisultatoCammino
-						r.getLunghezza(), // lunghezza cammino
-						r.getTempoCalcolo(),
-						r.getIstr17Contatore(),
-						r.getContatoreFrontiera(),
-						r.getContatoreSalvataggi(),
-						r.getCrescitaMemoriaBytes(),
-						landmarks //parte abbastanza superflua
-						);
-			}
-
-			System.out.println("CSV report generated: " + fileName);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 
 	public void askParameters() {
@@ -221,7 +183,7 @@ public void writeCsvReport() {
 
     // --- Boolean options in one string ---
     System.out.println("Inserisci opzioni boolean come stringa (usa simboli o '-' per no):");
-    System.out.println("Posizione: 1=RiordinaFrontiera, 2=CondForte, 3=MemSequenze, 4=VersioneOttimizzata, 5=AnalisiSpazio");
+    System.out.println("Posizione: 1=RiordinaFrontiera, 2=CondForte, 3=MemSequenze, 4=ControlloLunghezzaGlob, 5=AnalisiSpazio");
     System.out.println("Simboli: R, C, M, V, S");
     System.out.println("Esempio: RC-MV (R=si, C=si, - = no, M=si, V=si)");
     System.out.print("Stringa opzioni: ");
@@ -234,7 +196,7 @@ public void writeCsvReport() {
     configAnalizzatore.setRiordinaFrontiera(flags.charAt(0) == 'R');
     configAnalizzatore.setCondForte(flags.charAt(1) == 'C' ? 1 : 0);
     configAnalizzatore.setUsaMemoriaSequenze(flags.charAt(2) == 'M' ? 1 : 0);
-    configAnalizzatore.setUsaVersioneOttimizzata(flags.charAt(3) == 'V' ? 1 : 0);
+    configAnalizzatore.setUsaLunghezzaGlob(flags.charAt(3) == 'V' ? 1 : 0);
     analisiSpazio = (flags.charAt(4) == 'S') ? 1 : 0;
 
     System.out.println("\nParametri impostati:");
@@ -242,54 +204,19 @@ public void writeCsvReport() {
     System.out.println("- Riordina Frontiera: " + configAnalizzatore.isRiordinaFrontiera());
     System.out.println("- Condizione Forte: " + configAnalizzatore.getCondForte());
     System.out.println("- Memoria Sequenze: " + configAnalizzatore.getUsaMemoriaSequenze());
-    System.out.println("- Versione Ottimizzata: " + configAnalizzatore.getUsaVersioneOttimizzata());
+    System.out.println("- Controllo lunghezza globale: " + configAnalizzatore.getUsaLunghezzaGlob());
     System.out.println("- Analisi Spazio: " + (analisiSpazio == 1 ? "si" : "no"));
 }
+
+	public ConfigurazioneAnalizzatore getConfigAnalizzatore() {
+		return configAnalizzatore;
+	}
+
+	public int getAnalisiSpazio() {
+		return analisiSpazio;
+	}
+
+	public void setAnalisiSpazio(int analisiSpazio) {
+		this.analisiSpazio = analisiSpazio;
+	}
 }
-
-//vecchhio metodo per l'analisi spazio
-/*
-	private RisultatoCammino eseguiCammino(Griglia g, long limiteTempoMs) {
-
-    MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-
-    // Reset peak before measurement
-    // Reset peak usage for all heap pools
-    for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
-        if (pool.getType() == MemoryType.HEAP) {
-            pool.resetPeakUsage();
-        }
-    }
-    long inizioNs = System.nanoTime();
-    long inizioMs = System.currentTimeMillis();
-
-    RisultatoCammino risultato;
-
-    try {
-        risultato = analizzatore.camminoMin(
-                g.getOrigineDefault(),
-                g.getDestinazioneDefault(),
-                g,
-                () -> (System.currentTimeMillis() - inizioMs) >= limiteTempoMs
-        );
-    } catch (StopException e) {
-        risultato = e.partialResult;
-        risultato.setConvergenza(0);
-    }
-
-    long fineNs = System.nanoTime();
-
- // Get peak heap usage
-    long peakBytes = 0; // in bytes
-    for (MemoryPoolMXBean pool : ManagementFactory.getMemoryPoolMXBeans()) {
-        if (pool.getType() == MemoryType.HEAP) {
-            long used = pool.getPeakUsage().getUsed();
-            if (used > peakBytes) peakBytes = used;
-        }
-    }
-    risultato.setTempo(fineNs - inizioNs);
-    risultato.setCrescitaMemoriaBytes(peakBytes/1024); // in KB
-
-    return risultato;
-}
- */
