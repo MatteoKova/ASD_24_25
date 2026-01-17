@@ -1,0 +1,41 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "java",
+            "name": "Main with Test",
+            "request": "launch",
+            "mainClass": "it.unibs.Main", 
+             "args": ["-b","ASD_24_25/benchmark"]
+            
+        },
+        {
+            "type": "java",
+            "name": "Main with realTest",
+            "request": "launch",
+            "mainClass": "it.unibs.Main", 
+             "args": ["-t","ASD_24_25/benchmark2"]
+            
+        },
+        {
+            "type": "java",
+            "name": "Main normal",
+            "request": "launch",
+            "mainClass": "it.unibs.Main",
+            "projectName": "ASD_24_25"
+            
+        },
+        {
+            "type": "java",
+            "name": "Main with GUI",
+            "request": "launch",
+            "mainClass": "it.unibs.Main", 
+             "args": ["-g"]
+            
+        }
+    ]
+}

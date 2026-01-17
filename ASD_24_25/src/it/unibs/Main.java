@@ -8,8 +8,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Main {
+	 
 	public static void main(String[] args) {
-
+        GrigliaController controller;
 
 		// Controllo argomenti minimi
 		if (args.length == 0) {
@@ -26,7 +27,7 @@ public class Main {
 			// ------------------------------
 			//      MODALITÀ BATCH (-b)
 			// ------------------------------
-			case "-b" -> {
+			case "-b", "-t" -> {
 	
 				if (args.length != 2) {
 					System.out.println("Errore: per -b serve il path della directory.");
@@ -83,8 +84,11 @@ public class Main {
 							g.getRighe() + "x" + g.getColonne());
 				}
 				System.out.println("Avvio modalità CLI...");
-				GrigliaController controller = new GrigliaController(0, tutteLeGriglie);
+				if ("-t".equals(mode))  controller = new GrigliaController(2, tutteLeGriglie);
+				else controller = new GrigliaController(0, tutteLeGriglie);
 			}
+
+			
 	
 			// ------------------------------
 			//      MODALITÀ GRAFICA (-g)
@@ -92,7 +96,7 @@ public class Main {
 			case "-g" -> {
 				System.out.println("Avvio modalità grafica...");
 				// passo null perchè in modalità grafica, è presente un'interfaccia per caricare le griglie
-				GrigliaController controller = new GrigliaController(1, null); 
+				 controller = new GrigliaController(1, null); 
 	
 			}
 	

@@ -121,8 +121,9 @@ private StringBuilder buildCsvBuffer(List<RisultatoCammino> risultati) {
                 .map(Cella::toString)
                 .collect(Collectors.joining("|"));
 
+
         sbCSV.append(String.format(
-                "%s,%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,%s%n",
+                "%s,%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,\"%s\"%n",
 				r.getModalita(),
                 r.getGriglia().getRighe(),
                 r.getGriglia().getColonne(),
@@ -164,46 +165,6 @@ public void writeCsvReport() {
     }
 }
 
-//tengo intanto che finisco di testare	
-// Metodo per generare il report CSV (aggregato di tutti i risultati in un file report.csv)
-	private void generateReport(List<RisultatoCammino> risultati) {
-		String fileName = "report.csv";
-
-		try (PrintWriter pw = new PrintWriter(new FileWriter(fileName))) {
-
-			// CSV HEADER
-			pw.println("righe,colonne,tipologia,d_lib,dest_ragg,convergenza,lunghezza,tempo_ms,istr16,cont_frontiera,nodi_salvati,memo_usata,landmarks");
-
-			for (RisultatoCammino r : risultati) {
-
-				String landmarks = r.getSeq().stream()
-						.map(Cella::toString)
-						.collect(Collectors.joining("|")); 
-				// Use | to avoid commas breaking the CSV format
-
-				pw.printf("%d,%d,%s,%.3f,%d,%d,%.3f,%d,%d,%d,%d,%d,%s%n",
-						r.getGriglia().getRighe(),
-						r.getGriglia().getColonne(),
-						r.getGriglia().getTipologia().toString(),
-						r.getDlib(),
-						r.getRaggiungibile(), // 1 if reachable, 0 otherwise
-						r.getConvergenza(), // 1 if converged, 0 otherwise vedi classe RisultatoCammino
-						r.getLunghezza(), // lunghezza cammino
-						r.getTempoCalcolo(),
-						r.getIstr17Contatore(),
-						r.getContatoreFrontiera(),
-						r.getContatoreSalvataggi(),
-						r.getCrescitaMemoriaBytes(),
-						landmarks //parte abbastanza superflua
-						);
-			}
-
-			System.out.println("CSV report generated: " + fileName);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 
 	public void askParameters() {
@@ -246,5 +207,16 @@ public void writeCsvReport() {
     System.out.println("- Controllo lunghezza globale: " + configAnalizzatore.getUsaLunghezzaGlob());
     System.out.println("- Analisi Spazio: " + (analisiSpazio == 1 ? "si" : "no"));
 }
-}
 
+	public ConfigurazioneAnalizzatore getConfigAnalizzatore() {
+		return configAnalizzatore;
+	}
+
+	public int getAnalisiSpazio() {
+		return analisiSpazio;
+	}
+
+	public void setAnalisiSpazio(int analisiSpazio) {
+		this.analisiSpazio = analisiSpazio;
+	}
+}
