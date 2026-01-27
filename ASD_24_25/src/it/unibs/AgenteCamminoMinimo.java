@@ -191,7 +191,7 @@ public final class HeapMonitor {
                 used += pool.getUsage().getUsed();
             }
         }
-        return used;
+        return used; 
     }
 
     public static long heapPeak() {
