@@ -50,7 +50,7 @@ public class Main {
 				File[] jsonFiles = directory.listFiles((d, name) -> name.endsWith(".json"));
 	
 				if (jsonFiles == null || jsonFiles.length == 0) {
-					System.out.println("Nessun file JSON trovato nella directory.");
+					System.out.println("Nessun file JSON trovato nella directory."); 
 					return;
 				}
 	
