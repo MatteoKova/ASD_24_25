@@ -15,7 +15,7 @@ public class PannelloGrigliaManuale extends PannelloGrigliaBase {
         super(new boolean[rows][cols]);
     }
 
-       public PannelloGrigliaManuale(boolean[][] obstacles) {
+    public PannelloGrigliaManuale(boolean[][] obstacles) {
         super(obstacles);
     }
 
@@ -41,7 +41,8 @@ public class PannelloGrigliaManuale extends PannelloGrigliaBase {
             public void mousePressed(MouseEvent e) {
                 int r = getRow(e);
                 int c = getCol(e);
-                if (!valid(r, c)) return;
+                if (!valid(r, c))
+                    return;
 
                 if (SwingUtilities.isLeftMouseButton(e)) {
                     obstacles[r][c] = true;
@@ -64,10 +65,13 @@ public class PannelloGrigliaManuale extends PannelloGrigliaBase {
             public void mouseDragged(MouseEvent e) {
                 int r = getRow(e);
                 int c = getCol(e);
-                if (!valid(r, c)) return;
+                if (!valid(r, c))
+                    return;
 
-                if (painting) obstacles[r][c] = true;
-                if (erasing) obstacles[r][c] = false;
+                if (painting)
+                    obstacles[r][c] = true;
+                if (erasing)
+                    obstacles[r][c] = false;
 
                 repaint();
             }

@@ -17,7 +17,7 @@ public class Configurazione {
     public double density;
     public TipoPattern tipoPattern;
 
-    public Configurazione (long inputSeed) {
+    public Configurazione(long inputSeed) {
 
         // Mix input seed with current system time
         this.seed = inputSeed ^ System.currentTimeMillis();
@@ -25,33 +25,35 @@ public class Configurazione {
 
         // Base values
         int[] values = {
-            numSemplici,
-            numAgglomerati,
-            numDiagonali,
-            numBarre,
-            numAnelli
+                numSemplici,
+                numAgglomerati,
+                numDiagonali,
+                numBarre,
+                numAnelli
         };
 
         // Add controlled randomness (-1, 0, +1)
         for (int i = 0; i < values.length; i++) {
             values[i] += rnd.nextInt(3) - 1;
-            if (values[i] < 0) values[i] = 0;
+            if (values[i] < 0)
+                values[i] = 0;
         }
 
         // Normalize to sum = 10
         normalizeToTen(values);
 
         // Reassign
-        numSemplici     = values[0];
-        numAgglomerati  = values[1];
-        numDiagonali    = values[2];
-        numBarre        = values[3];
-        numAnelli       = values[4];
+        numSemplici = values[0];
+        numAgglomerati = values[1];
+        numDiagonali = values[2];
+        numBarre = values[3];
+        numAnelli = values[4];
     }
 
     private void normalizeToTen(int[] values) {
         int sum = 0;
-        for (int v : values) sum += v;
+        for (int v : values)
+            sum += v;
 
         // Avoid division by zero
         if (sum == 0) {
@@ -79,14 +81,16 @@ public class Configurazione {
     private int maxIndex(int[] a) {
         int idx = 0;
         for (int i = 1; i < a.length; i++)
-            if (a[i] > a[idx]) idx = i;
+            if (a[i] > a[idx])
+                idx = i;
         return idx;
     }
 
     private int minIndex(int[] a) {
         int idx = 0;
         for (int i = 1; i < a.length; i++)
-            if (a[i] < a[idx]) idx = i;
+            if (a[i] < a[idx])
+                idx = i;
         return idx;
     }
 }

@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 
 public class PannelloGrigliaBase extends JPanel {
     private static final long serialVersionUID = 1L;
-    
-	protected boolean[][] obstacles;
+
+    protected boolean[][] obstacles;
     protected int rows, cols;
 
     protected int cellSize;
@@ -37,7 +37,8 @@ public class PannelloGrigliaBase extends JPanel {
 
     // Disegno griglia
     protected void drawGrid(Graphics g) {
-        if (obstacles == null) return;
+        if (obstacles == null)
+            return;
 
         computeGridLayout();
 
