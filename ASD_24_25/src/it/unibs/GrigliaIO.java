@@ -12,8 +12,8 @@ public class GrigliaIO {
 
     /**
      * Reads a JSON file that may contain:
-     *   - a single Griglia object
-     *   - a list/array of Griglia
+     * - a single Griglia object
+     * - a list/array of Griglia
      *
      * Returns a List<Griglia> in both cases.
      */
@@ -23,7 +23,8 @@ public class GrigliaIO {
 
         if (json.startsWith("[")) {
             // JSON contains an array
-            return mapper.readValue(file, new TypeReference<List<Griglia>>() {});
+            return mapper.readValue(file, new TypeReference<List<Griglia>>() {
+            });
         } else {
             // JSON contains a single object → return list with one element
             Griglia g = mapper.readValue(file, Griglia.class);
