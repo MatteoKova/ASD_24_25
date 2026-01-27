@@ -148,25 +148,11 @@ public void stampaModalita(RisultatoCammino risultato, ConfigurazioneAnalizzator
     //utile alla rappresentazione grafica
     public List<Cella> ricostruisciCammino(
             List<Cella> cammino,
-          Griglia griglia,
-            boolean allowDiagonalCutting) {
+          Griglia griglia) {
 if (cammino.isEmpty())
         return cammino;
-     boolean [][] ostacoli=griglia.getOstacoli();
-     Cella start= cammino.getFirst();
-     Cella goal= cammino.getLast();
-    
-     if (ostacoli==null){
-        ostacoli = new boolean[griglia.getRighe()][griglia.getColonne()];
-       for (int r = 0; r < griglia.getRighe(); r++) {
-    		for (int c = 0; c <  griglia.getColonne(); c++) {
-                ostacoli[r][c]=griglia.getCella(r, c).getTipo()==TipoCella.OSTACOLO;
-               
-            }
-        }
-    }
-        return analizCam.ricostruisciCammino(
-                start,goal,  ostacoli, allowDiagonalCutting);}
+
+        return analizCam.ricostruisciCamminoCompleto(griglia.getCelle(), cammino);}
     
                 
 
