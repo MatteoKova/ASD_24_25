@@ -30,8 +30,8 @@ class AnalizCamTest {
 
         griglia.setOstacoli(ostacoli);
 
-        griglia.setDestinazioneDefault(new Cella(9, 0, TipoCella.LIBERA));
-        griglia.setOrigineDefault(new Cella(0, 1, TipoCella.LIBERA));
+        griglia.setDestinazioneDefault(new Cella(9, 0, TipoCella.ATTRAVERSABILE));
+        griglia.setOrigineDefault(new Cella(0, 1, TipoCella.ATTRAVERSABILE));
         analizCam = new AnalizCam(griglia);
 
         // Configurazione standard (adatta ai tuoi default)

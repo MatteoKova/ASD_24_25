@@ -28,7 +28,7 @@ public class Cella {
     public Cella(int riga, int colonna) {
         this.riga = riga;
         this.colonna = colonna;
-        this.tipo = TipoCella.LIBERA;
+        this.tipo = TipoCella.ATTRAVERSABILE;
         this.isFrontiera = false;
         this.isLandMark = false;
     }

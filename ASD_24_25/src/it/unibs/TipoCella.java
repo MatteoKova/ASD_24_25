@@ -2,7 +2,7 @@ package it.unibs;
 
 public enum TipoCella {
     OSTACOLO,
-    LIBERA,
+    ATTRAVERSABILE,
     CONTESTO,
     COMPLEMENTO;
 

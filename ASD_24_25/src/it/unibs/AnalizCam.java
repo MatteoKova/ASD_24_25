@@ -164,7 +164,7 @@ public class AnalizCam {
     // diag->ort)
     // assegna 1 alle celle del contesto nella matrice dei tipi
     public void calcolaContesto(Cella[][] mat_tipi, Cella origine) {
-        Cella cella = new Cella(0, 0, TipoCella.LIBERA);// inizializzo a un valore di default
+        Cella cella = new Cella(0, 0, TipoCella.ATTRAVERSABILE);// inizializzo a un valore di default
         for (int r = 0; r < mat_tipi.length; r++) {
             for (int c = 0; c < mat_tipi[0].length; c++) {
                 cella = mat_tipi[r][c];
@@ -192,7 +192,7 @@ public class AnalizCam {
      */
 
     public void calcolaComplemento(Cella[][] mat_tipi, Cella origine) {
-        Cella cella = new Cella(0, 0, TipoCella.LIBERA);// inizializzo a un valore di default
+        Cella cella = new Cella(0, 0, TipoCella.ATTRAVERSABILE);// inizializzo a un valore di default
         for (int r = 0; r < mat_tipi.length; r++) {
             for (int c = 0; c < mat_tipi[0].length; c++) {
 
@@ -212,7 +212,7 @@ public class AnalizCam {
     }
 
     public List<Cella> calcolaCCF(Cella[][] mat_tipi, Cella origine) {
-        Cella cella = new Cella(0, 0, TipoCella.LIBERA);
+        Cella cella = new Cella(0, 0, TipoCella.ATTRAVERSABILE);
         List<Cella> frontiera = new ArrayList<>();
         for (int r = 0; r < mat_tipi.length; r++) {
             for (int c = 0; c < mat_tipi[0].length; c++) {
@@ -240,7 +240,7 @@ public class AnalizCam {
                     }
                     // cella libera
                     else {
-                        mat_tipi[r][c].setTipo(TipoCella.LIBERA);
+                        mat_tipi[r][c].setTipo(TipoCella.ATTRAVERSABILE);
                         mat_tipi[r][c].setIsFrontiera(false);
                     }
                 }
@@ -299,7 +299,7 @@ public class AnalizCam {
 
                 // se la cella limitrofa, non è un ostacolo, e non appartiene alla chiusura
                 // dell'origine,
-                if (griglia_tipi[ny][nx].getTipo() == TipoCella.LIBERA) {
+                if (griglia_tipi[ny][nx].getTipo() == TipoCella.ATTRAVERSABILE) {
                     return true;
                 }
             }
@@ -743,7 +743,7 @@ public class AnalizCam {
                     ch = 'X';
                 else if (c.isFrontiera())
                     ch = 'F';
-                else if (c.getTipo() == TipoCella.LIBERA)
+                else if (c.getTipo() == TipoCella.ATTRAVERSABILE)
                     ch = '*';
                 else if (c.getTipo() == TipoCella.COMPLEMENTO)
                     ch = 'M';
