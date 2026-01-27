@@ -80,7 +80,7 @@ public class Griglia {
             for (int j = 0; j < colonne; j++) {
                 this.celle[i][j] = mat_ostacoli[i][j]
                         ? new Cella(i, j, TipoCella.OSTACOLO)
-                        : new Cella(i, j, TipoCella.ATTRAVERSABILE);
+                        : new Cella(i, j, TipoCella.LIBERA);
             }
         }
     }

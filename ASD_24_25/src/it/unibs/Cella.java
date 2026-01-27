@@ -28,7 +28,7 @@ public class Cella {
     public Cella(int riga, int colonna) {
         this.riga = riga;
         this.colonna = colonna;
-        this.tipo = TipoCella.ATTRAVERSABILE;
+        this.tipo = TipoCella.LIBERA;
         this.isFrontiera = false;
         this.isLandMark = false;
     }
@@ -120,6 +120,6 @@ public class Cella {
 
     @Override
     public String toString() {
-        return "Cella(riga=" + riga + ", colonna=" + colonna + ",  tipo=" + tipo + ")";
+        return "Cella(riga=" + riga + ", colonna=" + colonna + ",  tipo=" + (tipo == TipoCella.LIBERA ? "ATTRAVERSABILE)" : tipo + ")");
     }
 }
