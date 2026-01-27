@@ -31,7 +31,7 @@ public class AnalizCam {
 
                                  
 	int nr, nc;
-    int istr16Contatore = 0;  //contatore esiti falsi di istruzione 16 (if < lunghezzaMin) 
+    int istr16Contatore = 0;  //contatore esiti falsi di istruzione 16 (if < lunghezzaMin)
     int contatoreFrontiera = 0; //contatore celle di frontiera analizzate 
     int contatorePercorsiSalvati=0; //contatore dei percorsi salvati in memoria
     double lunghezzaMinGlobale = Double.POSITIVE_INFINITY;     

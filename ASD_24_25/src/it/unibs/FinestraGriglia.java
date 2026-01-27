@@ -21,7 +21,6 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -400,11 +399,11 @@ public class FinestraGriglia extends JFrame {
         areaTesto.setEditable(false);
 
         if (stato == 0) {
-            areaTesto.setText("PROCESSO INTERROTTO (INTERVENTO DELL’UTENTE)\n\nRIEPILOGO:\n"); 
+            areaTesto.setText("ESITO:\nProcesso INTERROTTO dall'utente:\n"); 
         } else if (stato == 1) {
-            areaTesto.setText("PROCESSO INTERROTTO (LIMITE DI TEMPO SCADUTO)\n\nRIEPILOGO:\n"); 
+            areaTesto.setText("ESITO:\nProcesso INTERROTTO per limiti di tempo:\n"); 
         } else if (stato == 2) {
-            areaTesto.setText("PROCESSO COMPLETATO\n\nRIEPILOGO:\n");
+            areaTesto.setText("ESITO:\nProcesso COMPLETATO:\n");
         }
         if (risultato != null) {
             areaTesto.append(risultato.stampa());

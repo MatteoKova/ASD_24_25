@@ -105,6 +105,8 @@ public class AgenteCamminoMinimo {
     if(risultato.getLunghezza()==Double.POSITIVE_INFINITY && risultato.getConvergenza()==1) {
         risultato.setRaggiungibile(0);
     }
+    
+    if(risultato.getSeq().isEmpty()) risultato.setRaggiungibile(0);
 
     risultato.setTempo(fineMs - inizioMs);
 

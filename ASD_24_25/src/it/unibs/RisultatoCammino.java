@@ -1,7 +1,6 @@
 package it.unibs;
 
 import java.util.List;
-import java.util.Set;
 
 public class RisultatoCammino {
 	
@@ -90,21 +89,23 @@ public RisultatoCammino(RisultatoCammino other) {
 
 	public String stampa() {
 	    StringBuilder sb = new StringBuilder();
-		sb.append("- Modaltà di analisi: ").append(modalita).append("\n");
-		sb.append("- Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
-		sb.append("- Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
-		//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
-		sb.append(raggiungibile == 1 ? "- Destinazione raggiunta\n" : "- Destinazione non raggiunta\n");
+	    sb.append(raggiungibile == 1 ? "(Destinazione raggiunta)\n\n" : "(Destinazione non raggiunta)\n\n");
+	    
+	    sb.append("CARATTERISTICHE GENERALI:\n");
+	    sb.append("- Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
+	    sb.append("- Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
+	    sb.append("- Modaltà di analisi: ").append(modalita).append("\n\n");
+		
 		sb.append(convergenza == 1 ? "- Calcolo completo dei cammini possibili\n" : "- Calcolo parziale dei cammini possibili\n");
 		sb.append("- Distanza libera: ").append(dlib).append("\n");
 	    sb.append("- Lunghezza cammino: ").append(lunghezza).append("\n");
-		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ms\n");
+		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ms\n\n");
+		
 		sb.append("- Numero totale di nodi della frontiera analizzati: ").append(contatoreFrontiera).append("\n");
 		sb.append("- Numero di salvataggi in memoria di nodi: ").append(contatoreSalvataggi).append("\n");
-		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n\n");
-
+		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n");
 		sb.append("- Crescita memoria heap: ").append(crescitaMemoriaBytes).append(" bytes\n\n");
-		sb.append("DETTAGLIO CAMMINO:\n");
+		sb.append("DETTAGLI CAMMINO:\n");
 	    sb.append("ORIGINE:\n").append(" - ").append("(" + origine + ", " + 0 + ")");
 	    
 	    String tipo = "?";
