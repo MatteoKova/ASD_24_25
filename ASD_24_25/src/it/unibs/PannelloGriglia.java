@@ -250,67 +250,74 @@ public class PannelloGriglia extends JPanel {
 
     private void drawCammino(Graphics2D g2, int dim, int offsetX, int offsetY) {
         if (camminoOrdinato == null || camminoOrdinato.size() < 2) return;
-        if (modalitaColorazioneCammino == 1) {
 
-        Font oldFont = g2.getFont();
-        Color oldColor = g2.getColor();
 
-        // Font size proportional to cell size
-        Font font = new Font("Arial", Font.BOLD, Math.max(12, dim / 3));
-        g2.setFont(font);
-
-        FontMetrics fm = g2.getFontMetrics();
-
-        for (int i = 1; i < camminoOrdinato.size()-1; i++) {
-            Cella c = camminoOrdinato.get(i);
-
-            int x = offsetX + c.getColonna() * dim;
-            int y = offsetY + c.getRiga() * dim;
-
-            // Fill cell in orange
-            g2.setColor(Color.CYAN);
-            g2.fillRect(x, y, dim, dim);
-
-            // Optional border for clarity
-            g2.setColor(Color.BLACK);
-            g2.drawRect(x, y, dim, dim);
-
-            // Draw index number centered
-            String text = String.valueOf(i);
-
-            int textWidth = fm.stringWidth(text);
-            int textHeight = fm.getAscent();
-
-            int textX = x + (dim - textWidth) / 2;
-            int textY = y + (dim + textHeight) / 2 - 2;
-
-            g2.drawString(text, textX, textY);
-        }
-
-        g2.setFont(oldFont);
-        g2.setColor(oldColor);
-        return;
-    }else if (modalitaColorazioneCammino == 0) {
-             
-
-        g2.setStroke(new BasicStroke(Math.max(2, dim/5),
+        // Se la modalità è 2, disegniamo anche le linee tra le celle
+    if (modalitaColorazioneCammino == 0) {
+        g2.setStroke(new BasicStroke(Math.max(2, dim / 5),
                 BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         g2.setColor(Color.BLACK);
 
         for (int i = 0; i < camminoOrdinato.size() - 1; i++) {
-
             Cella a = camminoOrdinato.get(i);
             Cella b = camminoOrdinato.get(i + 1);
 
-            int ax = offsetX + a.getColonna() * dim + dim/2;
-            int ay = offsetY + a.getRiga() * dim + dim/2;
+            int ax = offsetX + a.getColonna() * dim + dim / 2;
+            int ay = offsetY + a.getRiga() * dim + dim / 2;
 
-            int bx = offsetX + b.getColonna() * dim + dim/2;
-            int by = offsetY + b.getRiga() * dim + dim/2;
+            int bx = offsetX + b.getColonna() * dim + dim / 2;
+            int by = offsetY + b.getRiga() * dim + dim / 2;
 
             g2.drawLine(ax, ay, bx, by);
         }
     }
-        }
+        if (modalitaColorazioneCammino == 1 || modalitaColorazioneCammino == 0) {
+
+    Font oldFont = g2.getFont();
+    Color oldColor = g2.getColor();
+
+    // Font size proportional to cell size
+    Font font = new Font("Arial", Font.BOLD, Math.max(12, dim / 3));
+    g2.setFont(font);
+    FontMetrics fm = g2.getFontMetrics();
+    int contatoreLandmark=0;
+    // Prima disegniamo le celle numerate azzurre con numeri rossi
+    for (int i = 1; i < camminoOrdinato.size() - 1; i++) {
+
+   if(modalitaColorazioneCammino == 1 || (modalitaColorazioneCammino == 0 && camminoOrdinato.get(i).isLandMark())) 
+    {Cella c = camminoOrdinato.get(i);
+      
+        int x = offsetX + c.getColonna() * dim;
+        int y = offsetY + c.getRiga() * dim;
+
+        // Riempimento cella in azzurro
+        g2.setColor(Color.CYAN);
+        g2.fillRect(x, y, dim, dim);
+
+        // Bordo nero della cella
+        g2.setColor(Color.BLACK);
+        g2.drawRect(x, y, dim, dim);
+
+        // Numero centrato in rosso
+        String text = String.valueOf(contatoreLandmark);
+        int textWidth = fm.stringWidth(text);
+        int textHeight = fm.getAscent();
+        int textX = x + (dim - textWidth) / 2;
+        int textY = y + (dim + textHeight) / 2 - 2;
+        
+
+        //aggiorno contator landmark se c'era un landmark
+        contatoreLandmark++;
+        g2.setColor(Color.RED);
+        g2.drawString(text, textX, textY);}
+    }
+
+    
+
+    g2.setFont(oldFont);
+    g2.setColor(oldColor);
+    return;
+} 
+    }
        
 }
