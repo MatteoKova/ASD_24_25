@@ -28,10 +28,10 @@ public class GrigliaController {
         tester.askParameters();
         tester.runTests();
 
-        System.out.print("Do you want to run another batch? (y/n): ");
+        System.out.print("\n\n\nVuoi eseguire una nuova analisi (con nuovi parametri)? (s/n): ");
         String risposta = scanner.nextLine().trim().toLowerCase();
 
-        if (!risposta.equals("y"))
+        if (!risposta.equals("s"))
         {
             continua = false;
         }

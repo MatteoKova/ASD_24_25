@@ -114,7 +114,7 @@ public class FinestraGriglia extends JFrame {
         // Pannello controlli inferiori
         JPanel pannelloControlli = new JPanel(new FlowLayout());
         pulsanteAvvio = new JButton("Avvia valutazione");
-        pulsanteStop = new JButton("STOP");
+        pulsanteStop = new JButton("Termina valutazione");
         pulsanteSalva = new JButton("Salva JSON");
         pulsanteStop.setEnabled(false);
         //pulsanteSalva.setEnabled(false);
@@ -371,9 +371,9 @@ public class FinestraGriglia extends JFrame {
             if (risultato.getConvergenza()==1){
             etichettaInfo.setText("Esecuzione completata");
             mostraRiepilogo(risultato, 2);}
-             else if ((risultato.getTempoCalcolo()/1000)>=cfgAnalizzatore.limiteTempoMs) {
+             else if ((risultato.getTempoCalcolo())>=cfgAnalizzatore.limiteTempoMs) {
                etichettaInfo.setText("Esecuzione interrotta");
-            mostraRiepilogo(risultato, 0); 
+            mostraRiepilogo(risultato, 1); 
             }
             else {
                etichettaInfo.setText("Esecuzione interrotta");

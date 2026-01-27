@@ -12,7 +12,7 @@ public class ConfigurazioneAnalizzatore {
     //boolean usaBitMap; // false = no, true = si. Usa BitMap per memorizzare ostacoli e tipi di cammino(da implementare)
 
     public ConfigurazioneAnalizzatore () {
-        this.limiteTempoMs = 300000;// Valore di default
+        this.limiteTempoMs = 60000;// Valore di default
         this.riordinaFrontiera = true; // Valore di default
         this.condForte = 1; // Valore di default
         this.usaMemoriaSequenze =0; // Valore di default
@@ -47,8 +47,15 @@ public class ConfigurazioneAnalizzatore {
     }
     public long getLimiteTempoMs() {
         return limiteTempoMs;
-    }
+    }/*
     public void setLimiteTempoMs(long limiteTempoMs) {
+        this.limiteTempoMs = limiteTempoMs;
+    }*/
+    
+    public void setLimiteTempoMs(long limiteTempoMs) {
+        if (limiteTempoMs <= 0) {
+            throw new IllegalArgumentException("Il limite di tempo deve essere > 0");
+        }
         this.limiteTempoMs = limiteTempoMs;
     }
 

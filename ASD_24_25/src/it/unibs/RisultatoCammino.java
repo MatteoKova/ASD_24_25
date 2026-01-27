@@ -90,16 +90,16 @@ public RisultatoCammino(RisultatoCammino other) {
 
 	public String stampa() {
 	    StringBuilder sb = new StringBuilder();
-		sb.append(" - Modaltà di analisi:").append(modalita).append("\n");
+		sb.append("- Modaltà di analisi: ").append(modalita).append("\n");
 		sb.append("- Dimensioni griglia: ").append(griglia.getRighe()).append(" x ").append(griglia.getColonne()).append("\n");
 		sb.append("- Tipologia griglia: ").append(griglia.getTipologia().toString()).append("\n");
 		//sb.append("densità ostacoli: ").append(String.format("%.2f", griglia.calcolaDensita())).append("\n");
 		sb.append(raggiungibile == 1 ? "- Destinazione raggiunta\n" : "- Destinazione non raggiunta\n");
 		sb.append(convergenza == 1 ? "- Calcolo completo dei cammini possibili\n" : "- Calcolo parziale dei cammini possibili\n");
-		sb.append("- Distanza libera: ").append(String.format("%.2f", dlib)).append("\n");
+		sb.append("- Distanza libera: ").append(dlib).append("\n");
 	    sb.append("- Lunghezza cammino: ").append(lunghezza).append("\n");
 		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ms\n");
-		sb.append("- Numero totale di nodi nella frontiera analizzati: ").append(contatoreFrontiera).append("\n");
+		sb.append("- Numero totale di nodi della frontiera analizzati: ").append(contatoreFrontiera).append("\n");
 		sb.append("- Numero di salvataggi in memoria di nodi: ").append(contatoreSalvataggi).append("\n");
 		sb.append("- Istruzioni di tipo 17 eseguite: ").append(istr17Contatore).append("\n\n");
 

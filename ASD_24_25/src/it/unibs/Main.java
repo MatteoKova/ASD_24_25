@@ -57,7 +57,7 @@ public class Main {
 				// Lettura dei JSON
 				for (File file : jsonFiles) {
 					try {
-						System.out.println("Carico: " + file.getName());
+						//System.out.println("Carico: " + file.getName());
 	
 						// Controllo se contiene array o singolo oggetto
 						if (fileContainsArray(mapper, file)) {
@@ -75,15 +75,17 @@ public class Main {
 						System.out.println("Errore nel leggere " + file.getName() + ": " + e.getMessage());
 					}
 				}
-	
+				System.out.println("==============================");
+				System.out.println("|   AVVIO MODALITA' CLI...   |");
+				System.out.println("==============================\n");
+				
 				// Output finale
-				System.out.println("\nGriglie caricate: " + tutteLeGriglie.size());
+				System.out.println("GRIGLIE CARICATE: " + tutteLeGriglie.size() + "\n");
 				for (int i = 0; i < tutteLeGriglie.size(); i++) {
 					Griglia g = tutteLeGriglie.get(i);
 					System.out.println("Griglia " + (i + 1) + ": " +
 							g.getRighe() + "x" + g.getColonne());
 				}
-				System.out.println("Avvio modalità CLI...");
 				if ("-t".equals(mode))  controller = new GrigliaController(2, tutteLeGriglie);
 				else controller = new GrigliaController(0, tutteLeGriglie);
 			}
@@ -94,7 +96,9 @@ public class Main {
 			//      MODALITÀ GRAFICA (-g)
 			// ------------------------------
 			case "-g" -> {
-				System.out.println("Avvio modalità grafica...");
+				System.out.println("==================================");
+				System.out.println("|   AVVIO MODALITA' GRAFICA...   |");
+				System.out.println("==================================\n");
 				// passo null perchè in modalità grafica, è presente un'interfaccia per caricare le griglie
 				 controller = new GrigliaController(1, null); 
 	

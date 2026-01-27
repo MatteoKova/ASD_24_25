@@ -43,7 +43,7 @@ public class GriglieTester {
 	//prepara l'ambiente e richiama eseguiCammino per ogni griglia
 	public void runTests() {
         risultati.clear();
-		System.out.println("Running tests on " + griglie.size() + " grids...");
+		System.out.print("\nEsecuzione del test su " + griglie.size() + " griglie...");
 		int contatore=0;
 		RisultatoCammino risultato;
 		for (Griglia g : griglie) {
@@ -60,14 +60,14 @@ public class GriglieTester {
 
 	// Metodo eseguiCammino normale (con analisi spazio base)
 	private RisultatoCammino testGriglia(Griglia g) {
-		System.out.println("Testing grid in normal mode" );
+		System.out.print("\nTest della griglia (" + g.getRighe() + "x" + g.getColonne() + ") con " + g.getTipologia());
 		return eseguiCammino(g, limiteTempo);
 	}
 
 	// Metodo eseguiCammino con analisi spazio (JFR) (produce file .jfr (file che mostra andamento memoria)
 	// per ogni griglia testata, bisogna aprirli con jvisualvm o jmc)
 	private RisultatoCammino testGrigliaconSpazio(Griglia g, int contatore) {
-		System.out.println("Testing grid with space analyzer mode" );
+		System.out.println("Griglia di prova con modalità analizzatore spaziale" );
 		long limiteTempo = 3000; // ms
 		 Recording recording = new Recording();
         recording.enable("jdk.ObjectAllocationInNewTLAB");   // captures object allocations
@@ -98,7 +98,7 @@ public class GriglieTester {
 			recording.close();
 		}
 
-		System.out.println("JFR recording saved to: " + recordingFile);
+		System.out.println("Registrazione JFR salvata su: " + recordingFile);
 		
 		return result;
 	}
@@ -158,7 +158,7 @@ public void writeCsvReport() {
 
         pw.print(sbCSV.toString());
 
-        System.out.println("CSV report generated: " + fileName);
+        System.out.println("Rapporto CSV generato: " + fileName);
 
     } catch (IOException e) {
         e.printStackTrace();
@@ -170,42 +170,61 @@ public void writeCsvReport() {
 	public void askParameters() {
     Scanner scanner = new Scanner(System.in);
 
-    // --- Limite di tempo ---
-    System.out.print("Inserisci limite di tempo per ogni test (ms) [" + configAnalizzatore.getLimiteTempoMs() + "]: ");
-    String inputTempo = scanner.nextLine().trim();
-    if (!inputTempo.isEmpty()) {
+    while (true) {
+        System.out.print(
+            "\nInserisci limite di tempo per ogni test (ms) [Default: " 
+            + configAnalizzatore.getLimiteTempoMs() + "]: "
+        );
+
+        String input = scanner.nextLine().trim();
+        if (input.isEmpty()) break;
+
         try {
-            configAnalizzatore.setLimiteTempoMs(Long.parseLong(inputTempo));
-        } catch (NumberFormatException e) {
-            System.out.println("Valore non valido. Uso il limite di tempo predefinito: " + configAnalizzatore.getLimiteTempoMs() + " ms");
+            configAnalizzatore.setLimiteTempoMs(Long.parseLong(input));
+            break;
+        } catch (Exception e) {
+            System.out.println("Valore non valido. Inserisci un numero > 0.");
         }
     }
 
     // --- Boolean options in one string ---
-    System.out.println("Inserisci opzioni boolean come stringa (usa simboli o '-' per no):");
-    System.out.println("Posizione: 1=RiordinaFrontiera, 2=CondForte, 3=MemSequenze, 4=ControlloLunghezzaGlob, 5=AnalisiSpazio");
-    System.out.println("Simboli: R, C, M, V, S");
-    System.out.println("Esempio: RC-MV (R=si, C=si, - = no, M=si, V=si)");
+    System.out.println("\nConfigura le modalità usando UNA stringa di 4 caratteri.");
+    System.out.println("Ogni posizione corrisponde a una modalità (ordine OBBLIGATORIO):");
+    System.out.println();
+    System.out.println("  1 2 3 4");
+    System.out.println("  R C M V");
+    System.out.println("  | | | |");
+    System.out.println("  | | | |");
+    System.out.println("  | | | +----> Controllo della lunghezza globale");
+    System.out.println("  | | +------> Memorizzazione delle sequenze");
+    System.out.println("  | +--------> Condizione forte");
+    System.out.println("  +----------> Riordinamento della frontiera");
+    System.out.println();
+    System.out.println("Usa:");
+    System.out.println("  - la LETTERA per attivare la modalità");
+    System.out.println("  - '-' per disattivarla");
+    System.out.println();
+    System.out.println("Esempio: R-MV  (R,M,V attivi; C disattiva)");
     System.out.print("Stringa opzioni: ");
     String flags = scanner.nextLine().trim().toUpperCase();
 
-    // Pad string to 5 chars in case user types less
-    flags = String.format("%-5s", flags).replace(' ', '-');
+    // Pad string to 4 chars in case user types less
+    flags = String.format("%-4s", flags).replace(' ', '-');
 
     // Extract booleans
     configAnalizzatore.setRiordinaFrontiera(flags.charAt(0) == 'R');
     configAnalizzatore.setCondForte(flags.charAt(1) == 'C' ? 1 : 0);
     configAnalizzatore.setUsaMemoriaSequenze(flags.charAt(2) == 'M' ? 1 : 0);
     configAnalizzatore.setUsaLunghezzaGlob(flags.charAt(3) == 'V' ? 1 : 0);
-    analisiSpazio = (flags.charAt(4) == 'S') ? 1 : 0;
+    //analisiSpazio = (flags.charAt(4) == 'S') ? 1 : 0;
 
     System.out.println("\nParametri impostati:");
     System.out.println("- Limite tempo: " + configAnalizzatore.getLimiteTempoMs() + " ms");
-    System.out.println("- Riordina Frontiera: " + configAnalizzatore.isRiordinaFrontiera());
-    System.out.println("- Condizione Forte: " + configAnalizzatore.getCondForte());
-    System.out.println("- Memoria Sequenze: " + configAnalizzatore.getUsaMemoriaSequenze());
-    System.out.println("- Controllo lunghezza globale: " + configAnalizzatore.getUsaLunghezzaGlob());
-    System.out.println("- Analisi Spazio: " + (analisiSpazio == 1 ? "si" : "no"));
+    System.out.println("\n- Riordinamento della frontiera: " + (configAnalizzatore.isRiordinaFrontiera() ? "sì" : "no"));
+    System.out.println("- Condizione forte: " + (configAnalizzatore.getCondForte() == 1 ? "sì" : "no"));
+    System.out.println("- Memorizzazione delle sequenze: " + (configAnalizzatore.getUsaMemoriaSequenze() == 1 ? "sì" : "no"));
+    System.out.println("- Controllo della lunghezza globale: " + (configAnalizzatore.getUsaLunghezzaGlob() == 1 ? "sì" : "no"));
+    //System.out.println("- Analisi Spazio: " + (analisiSpazio == 1 ? "si" : "no"));
 }
 
 	public ConfigurazioneAnalizzatore getConfigAnalizzatore() {

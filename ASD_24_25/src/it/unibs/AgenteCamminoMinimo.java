@@ -39,9 +39,10 @@ public class AgenteCamminoMinimo {
         ConfigurazioneAnalizzatore config,
         Supplier<Boolean> stopCheck) {
 
-    System.out.println("Avvio calcolo cammino minimo con AnalizCam...");
     //System.out.println("valore del supplier: " + stopCheck.get());
-    System.out.println(config);
+	   
+	//System.out.println("Avvio calcolo cammino minimo con AnalizCam...");
+    //System.out.println(config);
 
     analizCam.setConfig(config);
     analizCam.resetContatori(griglia.getRighe(), griglia.getColonne());
@@ -77,8 +78,7 @@ public class AgenteCamminoMinimo {
                 combinedStopCheck
         );
     } catch (StopException e) {
-        System.out.println("Time limit exceeded for grid "
-                + griglia.getRighe() + "x" + griglia.getColonne());
+        System.out.print(" --> limite di tempo superato");
         risultato = e.partialResult;
         risultato.setConvergenza(0);
     }
