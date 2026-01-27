@@ -366,12 +366,12 @@ public class FinestraGriglia extends JFrame {
             List<Cella> cammino =
                 risultato.getSeq() != null ? risultato.getSeq() : new ArrayList<>();
 
-            //pannelloGriglia.aggiornaCammino(agenteCamMIn.ricostruisciCammino(cammino, griglia, rootPaneCheckingEnabled), 0);
-            pannelloGriglia.aggiornaCammino(cammino, 1);
+            pannelloGriglia.aggiornaCammino(agenteCamMIn.ricostruisciCammino(cammino, griglia ), 0);
+            //pannelloGriglia.aggiornaCammino(cammino, 1);
             if (risultato.getConvergenza()==1){
             etichettaInfo.setText("Esecuzione completata");
             mostraRiepilogo(risultato, 2);}
-             else if ((risultato.getTempoCalcolo()/1000)>=cfgAnalizzatore.limiteTempoMs) {
+             else if ((risultato.getTempoCalcolo())>=cfgAnalizzatore.limiteTempoMs) {
                etichettaInfo.setText("Esecuzione interrotta");
             mostraRiepilogo(risultato, 0); 
             }

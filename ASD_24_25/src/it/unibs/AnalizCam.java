@@ -403,7 +403,7 @@ public class AnalizCam {
                  lunghezzaCorrente+lF, stopCheck);
         	
         	griglia_tipi[rc][cc].setTipo(TipoCella.OSTACOLO);
-        	//stack_griglia_tipi.pop(); //rimuove la griglia dei tipi del sotto_cammino dallo stack
+        	
         	
         	lFD = sotto_cammino.getLunghezza();
 
@@ -599,84 +599,115 @@ public int getContatoreFrontiera() {
      * Ricostruisce il cammino cella-per-cella tra due celle consecutive
      * seguendo il percorso minimo rettilineo/diagonale che dlib assume
      */
-    public List<Cella> ricostruisciCammino(
-            Cella start, Cella goal,
-            boolean[][] matriceOstacoli,
-            boolean allowDiagonalCutting) {
+    public List<Cella> ricostruisciCamminoCompleto(
+           
+            Cella[][] mat,
+           List<Cella> cammino) {
 
-        int rows = matriceOstacoli.length;
-        int cols = matriceOstacoli[0].length;
-
-        // validazioni rapide
-        if (start == null || goal == null) return Collections.emptyList();
-        if (start.getRiga() == goal.getRiga() && start.getColonna() == goal.getColonna())
-            return List.of(new Cella(start.getRiga(), start.getColonna()));
-        if (!inBounds(start.getRiga(), start.getColonna(), rows, cols) ||
-            !inBounds(goal.getRiga(), goal.getColonna(), rows, cols)) return Collections.emptyList();
-        if (matriceOstacoli[start.getRiga()][start.getColonna()] ||
-            matriceOstacoli[goal.getRiga()][goal.getColonna()]) return Collections.emptyList();
-
-        // mosse (dx,dy) e costi
-        final int[] dx = { 1, 0, -1, 0, 1, 1, -1, -1 };
-        final int[] dy = { 0, 1, 0, -1, 1, -1, -1, 1 };
-        final double[] cost = { 1, 1, 1, 1, Math.sqrt(2), Math.sqrt(2), Math.sqrt(2), Math.sqrt(2) };
-
-        class Node {
-            int r,c; double g,f; Node parent;
-            Node(int r,int c,double g,double f,Node p){this.r=r;this.c=c;this.g=g;this.f=f;this.parent=p;}
+        int rows = mat.length;
+        int cols = mat[0].length;
+        List<Cella> camminoCompleto = new ArrayList<>();
+        // si suppone che il caso empty list sia gia stato trattato
+        //  e che le celle contenute nel cammino abbiano senso
+            int tipo=1;
+           
+        for (int i =0; i<cammino.size()-1; i++){
+            tipo=cammino.get(i+1).getTipo()==TipoCella.CONTESTO ? 1:2;
+            camminoCompleto.addAll(costruisciCammino(mat, cammino.get(i), cammino.get(i+1), tipo));
+           if(i!=cammino.size()-2)
+            camminoCompleto.removeLast(); //rimuovo destinazione perchè verra aggiunta a prossima iter come origine
+          System.out.println("iter:" +i+" array:"+camminoCompleto);
         }
+      
+        
+        
 
-        // euristica dlib
-        final BiFunction<Integer,Integer,Double> h = (r,c) -> {
-            int dxAbs = Math.abs(c - goal.getColonna());
-            int dyAbs = Math.abs(r - goal.getRiga());
-            int dmin = Math.min(dxAbs, dyAbs), dmax = Math.max(dxAbs, dyAbs);
-            return Math.sqrt(2)*dmin + (dmax - dmin);
-        };
-
-        PriorityQueue<Node> open = new PriorityQueue<>(Comparator.comparingDouble(n->n.f));
-        boolean[][] closed = new boolean[rows][cols];
-        double[][] bestG = new double[rows][cols];
-        for (int i=0;i<rows;i++) Arrays.fill(bestG[i], Double.POSITIVE_INFINITY);
-
-        Node startNode = new Node(start.getRiga(), start.getColonna(), 0.0, h.apply(start.getRiga(), start.getColonna()), null);
-        open.add(startNode);
-        bestG[start.getRiga()][start.getColonna()] = 0.0;
-
-        while (!open.isEmpty()) {
-            Node cur = open.poll();
-            if (closed[cur.r][cur.c]) continue;
-            if (cur.r == goal.getRiga() && cur.c == goal.getColonna()) {
-                LinkedList<Cella> path = new LinkedList<>();
-                for (Node it = cur; it != null; it = it.parent) path.addFirst(new Cella(it.r, it.c));
-                return path;
-            }
-            closed[cur.r][cur.c] = true;
-
-            for (int k=0;k<dx.length;k++) {
-                int nr = cur.r + dy[k];
-                int nc = cur.c + dx[k];
-                if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
-                if (matriceOstacoli[nr][nc]) continue;
-
-                // evita corner-cutting se richiesto
-                if (!allowDiagonalCutting && k >= 4) {
-                    int ortho1r = cur.r, ortho1c = cur.c + dx[k];
-                    int ortho2r = cur.r + dy[k], ortho2c = cur.c;
-                    if (matriceOstacoli[ortho1r][ortho1c] || matriceOstacoli[ortho2r][ortho2c]) continue;
-                }
-
-                double tentativeG = cur.g + cost[k];
-                if (tentativeG + 1e-9 < bestG[nr][nc]) {
-                    bestG[nr][nc] = tentativeG;
-                    double f = tentativeG + h.apply(nr,nc);
-                    open.add(new Node(nr,nc,tentativeG,f,cur));
-                }
-            }
-        }
-
-        return Collections.emptyList(); // nessun percorso
+        return camminoCompleto; 
     }
+
+    public List<Cella> costruisciCammino(
+        Cella[][] griglia,
+        Cella origine,
+        Cella destinazione,
+        int tipo // 1 = diagonale→assiale, 2 = assiale→diagonale
+) {
+    List<Cella> path = new ArrayList<>();
+
+    int ro = origine.getRiga();
+    int co = origine.getColonna();
+    int rd = destinazione.getRiga();
+    int cd = destinazione.getColonna();
+
+    int dx = cd - co;
+    int dy = rd - ro;
+
+    int stepX = Integer.compare(dx, 0);
+    int stepY = Integer.compare(dy, 0);
+
+    int absDx = Math.abs(dx);
+    int absDy = Math.abs(dy);
+
+    int diagSteps = Math.min(absDx, absDy);
+    int remSteps = Math.abs(absDx - absDy);
+
+    path.add(origine);
+    origine.setIsLandmark(true);
+
+    Cella current = origine;
+
+    if (tipo == 1) {
+        // 1) diagonale
+        current = percorriEAccumula(griglia, path, current, stepX, stepY, diagSteps);
+
+        // 2) assiale
+        if (absDx > absDy)
+            current = percorriEAccumula(griglia, path, current, stepX, 0, remSteps);
+        else
+            current = percorriEAccumula(griglia, path, current, 0, stepY, remSteps);
+
+    } else {
+        // 1) assiale
+        if (absDx > absDy)
+            current = percorriEAccumula(griglia, path, current, stepX, 0, remSteps);
+        else
+            current = percorriEAccumula(griglia, path, current, 0, stepY, remSteps);
+
+        // 2) diagonale
+        current = percorriEAccumula(griglia, path, current, stepX, stepY, diagSteps);
+    }
+
+    return path;
+}
+
+
+private Cella percorriEAccumula(
+        Cella[][] griglia,
+        List<Cella> path,
+        Cella start,
+        int stepX,
+        int stepY,
+        int steps
+) {
+    int r = start.getRiga();
+    int c = start.getColonna();
+
+    for (int i = 0; i < steps; i++) {
+        r += stepY;
+        c += stepX;
+
+        if (r < 0 || r >= griglia.length || c < 0 || c >= griglia[0].length)
+            throw new IllegalStateException("Uscito dalla griglia");
+
+        if (griglia[r][c].getTipo() == TipoCella.OSTACOLO)
+            throw new IllegalStateException("Ostacolo incontrato");
+
+        Cella next = griglia[r][c];
+        path.add(next);
+    }
+
+    return griglia[r][c];
+}
+
 
         private boolean inBounds(int r, int c, int rows, int cols){
         return r>=0 && r<rows && c>=0 && c<cols;

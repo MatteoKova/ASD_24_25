@@ -91,6 +91,6 @@ public Cella(Cella other) {
 
 	@Override
     public String toString() {
-        return "Cella(riga=" + riga + ", colonna=" + colonna + ")";// tipo=" + tipo + ")";
+        return "Cella(riga=" + riga + ", colonna=" + colonna + ",  tipo=" + tipo + ")";
     }
 }
