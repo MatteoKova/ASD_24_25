@@ -1,4 +1,4 @@
-package test.java.test;
+package test;
 
 import it.unibs.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,7 +37,7 @@ class AnalizCamTest {
         // Configurazione standard (adatta ai tuoi default)
         ConfigurazioneAnalizzatore config = new ConfigurazioneAnalizzatore();
         config.setUsaMemoriaSequenze(0);
-        config.setLimiteTempoMs(0);
+        config.setLimiteTempoMs(60000);
         config.setCondForte(1);
         config.setRiordinaFrontiera(false);
         config.setUsaLunghezzaGlob(0);
