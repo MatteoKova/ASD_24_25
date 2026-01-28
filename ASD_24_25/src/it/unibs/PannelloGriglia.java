@@ -284,7 +284,7 @@ public class PannelloGriglia extends JPanel {
             Font font = new Font("Arial", Font.BOLD, Math.max(12, dim / 3));
             g2.setFont(font);
             FontMetrics fm = g2.getFontMetrics();
-            int contatoreLandmark = 0;
+            int contatoreLandmark = 1;
             // Prima disegniamo le celle numerate azzurre con numeri rossi
             for (int i = 1; i < camminoOrdinato.size() - 1; i++) {
 
