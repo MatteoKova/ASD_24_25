@@ -20,7 +20,7 @@ public class Griglia {
         this.tipologia = tipologia;// Valore di default in futuro si potrebbe implementatere
                                    // un metodo per settarlo in base al pattern scelto
                                    // in questo momneto la classe Griglia è stata sostiuita da
-                                   // una matrice di boolean in cui true = ostacolo false = libera
+                                   // una matrice di boolean in cui true = ostacolo false = ATTRAVERSABILE
                                    // quindi un po lungo andare a modificare tutto il codice per ora lascio cosi
         this.ostacoli = new boolean[righe][colonne];
         this.origineDefault = null;

@@ -120,6 +120,6 @@ public class Cella {
 
     @Override
     public String toString() {
-        return "Cella(riga=" + riga + ", colonna=" + colonna + ",  tipo=" + tipo + ")";
+        return "Cella(riga=" + riga + ", colonna=" + colonna + ",  tipo=" + (tipo == TipoCella.LIBERA ? "ATTRAVERSABILE)" : tipo + ")");
     }
 }
