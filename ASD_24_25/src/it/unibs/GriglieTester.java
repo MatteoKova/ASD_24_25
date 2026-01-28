@@ -40,9 +40,9 @@ public class GriglieTester {
         System.out.print("\nEsecuzione del test su " + griglie.size() + " griglie...");
         int contatore = 0;
         RisultatoCammino risultato;
-        for (Griglia g : griglie) {
-
-            risultato = (analisiSpazio == 1) ? testGrigliaconSpazio(g, contatore) : testGriglia(g);
+        for(int i = 0; i < griglie.size(); i++) {
+        	Griglia g = griglie.get(i);
+            risultato = (analisiSpazio == 1) ? testGrigliaconSpazio(g, contatore) : testGriglia(g, i+1);
             RisultatoCammino risultatoCopia = new RisultatoCammino(risultato);
 
             risultati.add(risultatoCopia);
@@ -53,8 +53,8 @@ public class GriglieTester {
     }
 
     // Metodo eseguiCammino normale (con analisi spazio base)
-    private RisultatoCammino testGriglia(Griglia g) {
-        System.out.print("\nTest della griglia (" + g.getRighe() + "x" + g.getColonne() + ") con " + g.getTipologia());
+    private RisultatoCammino testGriglia(Griglia g, int i) {
+        System.out.print("\nTest della griglia " + i + " (" + g.getRighe() + "x" + g.getColonne() + ") con " + g.getTipologia());
         return eseguiCammino(g, limiteTempo);
     }
 
