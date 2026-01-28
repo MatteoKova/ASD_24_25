@@ -104,7 +104,7 @@ public class RisultatoCammino {
 	    sb.append("- Lunghezza cammino: ").append(Math.round(lunghezza*100.0) / 100.0).append("\n");
 		sb.append("- Tempo di calcolo: ").append(tempoCalcolo).append(" ms\n\n");
 		
-	    sb.append("Origine:\n").append(" - ").append("(" + origine + ", " + 0 + ")");
+	    sb.append("Origine:\n").append(" - ").append("(" + origine +  ")");
 	    
 	    String tipo = "?";
 
@@ -123,7 +123,7 @@ public class RisultatoCammino {
 			sb.append("Non è stato trovato alcun cammino \nPerciò non è stato attraversato alcun landmark\n");
 		}
 
-		sb.append("\nDestinazione:\n").append(" - ").append("(" + destinazione + ", " + tipo + ")");
+		sb.append("\nDestinazione:\n").append(" - ").append("Cella(riga=" + destinazione.getRiga() + ", colonna=" + destinazione.getColonna() + ",  tipo=" + tipo + ")");
 
 		return sb.toString();
 	}
