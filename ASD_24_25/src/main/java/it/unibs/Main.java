@@ -105,6 +105,10 @@ public class Main {
 
 			}
 
+			case "-gen"->{
+				controller = new GrigliaController(3, null);
+			}
+
 			// ------------------------------
 			// OPZIONE SCONOSCIUTA
 			// ------------------------------

@@ -25,22 +25,24 @@ class AnalizCamTest {
         boolean[][] ostacoli = new boolean[griglia.getRighe()][griglia.getColonne()];
         config = new Configurazione(0);
         config.tipoPattern = TipoPattern.SCACCHI;
+         config.righe=griglia.getRighe();
+            config.colonne=griglia.getColonne();
         genGriglie = new GeneratoreGriglieOstacoli(config, ostacoli);
         genGriglie.generaTutto();
 
         griglia.setOstacoli(ostacoli);
 
-        griglia.setDestinazioneDefault(new Cella(9, 0, TipoCella.LIBERA));
+        griglia.setDestinazioneDefault(new Cella(2499, 0, TipoCella.LIBERA));
         griglia.setOrigineDefault(new Cella(0, 1, TipoCella.LIBERA));
         analizCam = new AnalizCam(griglia);
 
         // Configurazione standard (adatta ai tuoi default)
         ConfigurazioneAnalizzatore config = new ConfigurazioneAnalizzatore();
-        config.setUsaMemoriaSequenze(0);
+        config.setUsaMemoriaSequenze(1);
         config.setLimiteTempoMs(60000);
         config.setCondForte(1);
-        config.setRiordinaFrontiera(false);
-        config.setUsaLunghezzaGlob(0);
+        config.setRiordinaFrontiera(true);
+        config.setUsaLunghezzaGlob(1);
         analizCam.setConfig(config);
         analizCam.resetContatori(griglia.getRighe(), griglia.getColonne());
     }

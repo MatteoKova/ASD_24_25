@@ -1,10 +1,14 @@
 package it.unibs;
+import java.io.File;
+import java.io.IOException;
+
 
 import java.util.Scanner;
 
 import javax.swing.SwingUtilities;
 
 public class GrigliaController {
+    private static final String OUTPUT_DIR = "benchmark3";
 
     public GrigliaController(int modalita, java.util.List<Griglia> griglie) {
         if (modalita == 1) // grafica
@@ -78,7 +82,62 @@ public class GrigliaController {
             // --- After all combinations ---
             tester.writeCsvReport();
 
-        } // test
+        } else if(modalita==3){
+            int[][] dimensioni = {
+            {500,500},    
+        };
+            
+       generaESalvaGriglieBenchmark(dimensioni);
+
+        }
 
     }
+
+    public static void generaESalvaGriglieBenchmark(int[][] dimensioniGriglie) {
+
+        File dir = new File(OUTPUT_DIR);
+        dir.mkdirs();
+
+        for (int[] dim : dimensioniGriglie) {
+
+            int righe = dim[0];
+            int colonne = dim[1];
+
+            // 1. Crea griglia
+            Griglia griglia = new Griglia(righe, colonne, TipoPattern.SCACCHI);
+
+            boolean[][] ostacoli = new boolean[righe][colonne];
+            Configurazione config = new Configurazione(0);
+            config.tipoPattern = TipoPattern.SCACCHI;
+            config.righe=righe;
+            config.colonne=colonne;
+
+            GeneratoreGriglieOstacoli gen =
+                    new GeneratoreGriglieOstacoli(config, ostacoli);
+            gen.generaTutto();
+            
+            griglia.setOstacoli(ostacoli);
+
+            // 2. Origine e destinazione FISSE
+            Cella origine = new Cella(0, 1, TipoCella.LIBERA);
+            Cella destinazione =(righe%2==0) ? new Cella(righe - 1, 0, TipoCella.LIBERA):new Cella(righe - 1, 1, TipoCella.LIBERA);
+
+            griglia.setOrigineDefault(origine);
+            griglia.setDestinazioneDefault(destinazione);
+
+            // 3. Salvataggio automatico (riusa il tuo sistema)
+            File file = new File(
+                    OUTPUT_DIR + "/griglia_" + righe + "x" + colonne + ".json");
+
+            try {
+                GrigliaIO.writeGriglia(griglia, file);
+            } catch (IOException e) {
+                System.err.println(
+                        "Errore nel salvataggio della griglia " +
+                        righe + "x" + colonne);
+                e.printStackTrace();
+            }
+        }
+    }
 }
+

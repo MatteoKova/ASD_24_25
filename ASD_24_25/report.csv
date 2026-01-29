@@ -1,0 +1,3 @@
+modalita,righe,colonne,tipologia,d_lib,dest_ragg,convergenza,lunghezza,tempo_ms,istr16,cont_frontiera,nodi_salvati,memo_usata,landmarks
+R-MV,500,500,SCACCHI,499.410,1,0,218.000,360006,609916,3213636,25087,1058050,"Cella(riga=0, colonna=1,  tipo=ATTRAVERSABILE)|Cella(riga=154, colonna=155,  tipo=CONTESTO)|Cella(riga=155, colonna=154,  tipo=CONTESTO)"
+R-MV,500,500,SCACCHI,499.410,1,1,703.590,493169,830470,3938858,38261,894705,"Cella(riga=0, colonna=1,  tipo=ATTRAVERSABILE)|Cella(riga=249, colonna=250,  tipo=CONTESTO)|Cella(riga=499, colonna=0,  tipo=CONTESTO)"
