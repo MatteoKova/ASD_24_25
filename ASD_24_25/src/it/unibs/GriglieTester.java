@@ -22,7 +22,7 @@ public class GriglieTester {
     private ConfigurazioneAnalizzatore configAnalizzatore;
     private final AtomicBoolean stopRichiesto;
     StringBuilder sbCSV;
-
+ 
     public GriglieTester(java.util.List<Griglia> griglie) {
         this.griglie = griglie;
         this.risultati = new java.util.ArrayList<>();
