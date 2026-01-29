@@ -20,7 +20,11 @@ public class Configurazione {
     public Configurazione(long inputSeed) {
 
         // Mix input seed with current system time
-        this.seed = inputSeed ^ System.currentTimeMillis();
+    	if(inputSeed!=0)
+    		this.seed = inputSeed;
+    	else
+    		this.seed = inputSeed ^ System.currentTimeMillis();
+    	
         Random rnd = new Random(this.seed);
 
         // Base values

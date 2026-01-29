@@ -1,2 +1,0 @@
-link alla relazione: https://www.overleaf.com/project/691c8fa62e872fe0334150bd
-link al colab per generare grafi e tabelle: https://colab.research.google.com/drive/1EcXFw0vC3KG0NiHzcmLOhRfxJVPGcAnb#scrollTo=yXg_355ki1L8
