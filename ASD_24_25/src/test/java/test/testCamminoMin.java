@@ -32,17 +32,19 @@ class AnalizCamTest {
 
         griglia.setOstacoli(ostacoli);
 
-        griglia.setDestinazioneDefault(new Cella(2499, 0, TipoCella.LIBERA));
-        griglia.setOrigineDefault(new Cella(0, 1, TipoCella.LIBERA));
+      Cella origine = new Cella(0, 1, TipoCella.LIBERA);
+     Cella destinazione =(config.righe%2==0) ? new Cella(config.righe - 1, 0, TipoCella.LIBERA):new Cella(config.righe - 1, 1, TipoCella.LIBERA);
+      griglia.setDestinazioneDefault(destinazione);
+      griglia.setOrigineDefault(origine);
         analizCam = new AnalizCam(griglia);
 
         // Configurazione standard (adatta ai tuoi default)
         ConfigurazioneAnalizzatore config = new ConfigurazioneAnalizzatore();
-        config.setUsaMemoriaSequenze(1);
+        config.setUsaMemoriaSequenze(0);
         config.setLimiteTempoMs(60000);
-        config.setCondForte(1);
-        config.setRiordinaFrontiera(true);
-        config.setUsaLunghezzaGlob(1);
+        config.setCondForte(0);
+        config.setRiordinaFrontiera(false);
+        config.setUsaLunghezzaGlob(0);
         analizCam.setConfig(config);
         analizCam.resetContatori(griglia.getRighe(), griglia.getColonne());
     }
