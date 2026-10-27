@@ -2,9 +2,9 @@
 
 ## Collaboratori
 
-Matteo Kovacic - [GitHub](https://github.com/MatteoKova)
-Federico Bagnalasta - [GitHub](https://github.com/MatteoKova)
-Samuele Zambelli - [GitHub](https://github.com/sazmb)
+- Matteo Kovacic — [GitHub](https://github.com/MatteoKova)
+- Federico Bagnalasta — [GitHub](https://github.com/FedericoBagnalasta)
+- Samuele Zambelli — [GitHub](https://github.com/sazmb)
 
 ## Descrizione del progetto
 
