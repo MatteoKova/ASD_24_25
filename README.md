@@ -1,4 +1,4 @@
-# Algoritmi e Strutture Dati
+# Griglia - Algoritmi e Strutture Dati
 
 ## Collaboratori
 
