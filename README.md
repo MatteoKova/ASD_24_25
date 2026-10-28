@@ -10,7 +10,7 @@
 
 Studiare e implementare algoritmi per la generazione, la rappresentazione e la navigazione di griglie bidimensionali, con particolare attenzione alla ricerca di percorsi minimi e all'analisi delle prestazioni.
 
-## Cosa ho fatto
+## Cosa è stato fatto
 
 - realizzato un modello per la rappresentazione della griglia e delle celle;
 - gestito ostacoli, celle attraversabili e configurazioni diverse delle mappe;
